@@ -15,6 +15,14 @@ const asyncRouterMap = [{
         component: (resolve) => require(['../views/mine/mine.vue'], resolve)
     },
     {
+        path: '/forum',
+        meta: {
+            title: '知乎',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/forum/forum.vue'], resolve)
+    },
+    {
         path: '/uploadFile',
         meta: {
             title: '文件上传 - 选择文件',
