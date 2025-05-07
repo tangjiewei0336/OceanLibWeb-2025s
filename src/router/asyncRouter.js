@@ -15,12 +15,36 @@ const asyncRouterMap = [{
         component: (resolve) => require(['../views/mine/mine.vue'], resolve)
     },
     {
-        path: '/forum',
+        path: '/forum/recommend',
         meta: {
             title: '知乎',
             permission: ["USER", "ADMIN"]
         },
         component: (resolve) => require(['../views/forum/forum.vue'], resolve)
+    },
+    {
+        path: '/forum/question',
+        meta: {
+            title: '知乎直答',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/forum/question.vue'], resolve)
+    },
+    {
+        path: '/forum/ask',
+        meta: {
+            title: '知乎提问',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/forum/question.vue'], resolve)
+    },
+    {
+        path: '/forum/mine',
+        meta: {
+            title: '知乎个人',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/forum/question.vue'], resolve)
     },
     {
         path: '/uploadFile',
