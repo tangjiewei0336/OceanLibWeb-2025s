@@ -3,12 +3,6 @@
         <v-app-bar app fixed color="white" elevation="1" height="64">
             <AppHeader />
         </v-app-bar>
-
-        <div style="margin-top: 220px; margin-bottom: 50px">
-            <QuestionCard/>
-            <ContentCard/>
-        </div>
-        
         <v-bottom-navigation 
             shift 
             color="primary" 
@@ -38,10 +32,8 @@
   
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
-import QuestionCard from '../../components/forum/QuestionCard.vue';
-import ContentCard from '../../components/forum/ContentCard.vue';
 
 export default {
-    components: { AppHeader, QuestionCard, ContentCard },
+    components: { AppHeader },
 }
 </script>

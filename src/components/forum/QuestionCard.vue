@@ -1,17 +1,17 @@
 <template>
     <v-card class="d-flex align-center pa-4" flat outlined>
       <div class="flex-grow-1">
-        <div class="text-h7">这里是问题标题</div>
-        <div class="d-flex mt-2">
-          <div class="mr-4 text-caption grey--text">
-            <span>回答量: 24</span>
-          </div>
-          <div class="mr-4 text-caption grey--text">
-            <span>悬赏: 50</span>
-          </div>
-        </div>
-      </div>
-  
+		<div class="text-h7">{{ title }}</div>
+			<div class="d-flex mt-2">
+				<div class="mr-4 text-caption grey--text">
+					<span>回答量: {{ answerCount }}</span>
+				</div>
+				<div class="mr-4 text-caption grey--text">
+					<span>悬赏: {{ reward }}</span>
+				</div>
+			</div>
+		</div>
+
       <div class="d-flex">
         <v-btn 
           color="primary" 
@@ -39,12 +39,26 @@
 <script>
 export default {
 	name: 'QuestionCard',
+  props: {
+    answerCount: {
+      type: Number,
+      default: 0
+    },
+    reward: {
+      type: Number,
+      default: 0
+    },
+    title: {
+      type: String,
+      required: true
+    }
+  },
 	methods: {
 		handleView() {
-			console.log('查看操作');
+			this.$router.push('/forum/answer')
 		},
 		handleAnswer() {
-			console.log('回答操作');
+			this.$router.push('/forum/answerWrite')
 		}
 	}
 }

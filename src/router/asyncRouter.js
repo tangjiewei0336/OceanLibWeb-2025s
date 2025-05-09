@@ -31,12 +31,28 @@ const asyncRouterMap = [{
         component: (resolve) => require(['../views/forum/question.vue'], resolve)
     },
     {
+        path: '/forum/answer',
+        meta: {
+            title: '知乎直答',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/forum/answer.vue'], resolve)
+    },
+    {
+        path: '/forum/answerWrite',
+        meta: {
+            title: '知乎直答',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/forum/answerWrite.vue'], resolve)
+    },
+    {
         path: '/forum/ask',
         meta: {
             title: '知乎提问',
             permission: ["USER", "ADMIN"]
         },
-        component: (resolve) => require(['../views/forum/question.vue'], resolve)
+        component: (resolve) => require(['../views/forum/ask.vue'], resolve)
     },
     {
         path: '/forum/mine',
@@ -44,7 +60,7 @@ const asyncRouterMap = [{
             title: '知乎个人',
             permission: ["USER", "ADMIN"]
         },
-        component: (resolve) => require(['../views/forum/question.vue'], resolve)
+        component: (resolve) => require(['../views/forum/mine.vue'], resolve)
     },
     {
         path: '/uploadFile',
