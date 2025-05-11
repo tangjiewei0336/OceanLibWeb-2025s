@@ -14,6 +14,7 @@
                 v-for="(item, index) in paginatedData" 
                 :key="index"
                 :title="item.title"
+                :content="item.content"
                 :answer-count="item.answerCount"
                 :reward="item.rewardPoints"
             />
@@ -106,6 +107,7 @@ export default {
                         list: Mock.mock({
                             [`list|${this.itemsPerPage}`]: [{
                             title: '@ctitle(10,20)',
+                            content: '@ctitle(50,100)',
                             'answerCount|0-100': 1,
                             'rewardPoints|0-50': 1,
                             createTime: '@datetime'

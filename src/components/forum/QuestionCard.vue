@@ -1,58 +1,86 @@
 <template>
-    <v-card class="d-flex align-center pa-4" flat outlined>
-      <div class="flex-grow-1">
-		<div class="text-h7">{{ title }}</div>
-			<div class="d-flex mt-2">
-				<div class="mr-4 text-caption grey--text">
-					<span>回答量: {{ answerCount }}</span>
-				</div>
-				<div class="mr-4 text-caption grey--text">
-					<span>悬赏: {{ reward }}</span>
-				</div>
+	<v-card class="pa-4" flat outlined>
+		<div class="text-h7 font-weight-bold">{{ title }}</div>
+		<div class="text-body-2 mt-3" v-if="isExpanded">
+			{{ content }}
+		</div>
+		<div class="d-flex align-center justify-space-between mt-2">
+			<v-btn 
+				text 
+				color="primary" 
+				class="pl-0" 
+				@click="isExpanded = !isExpanded"
+			>
+				<v-icon left>{{ isExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+				{{ isExpanded ? '收起内容' : '展开内容' }}
+			</v-btn>
+			
+			<div>
+				<v-btn 
+					color="primary" 
+					class="mr-2" 
+					depressed
+					small
+					@click="handleView"
+				>
+					<v-icon left>mdi-eye</v-icon>
+					查看
+				</v-btn>
+				<v-btn 
+					outlined 
+					depressed
+					small
+					@click="handleAnswer"
+				>
+					<v-icon left>mdi-pencil</v-icon>
+					回答
+				</v-btn>
 			</div>
 		</div>
 
-      <div class="d-flex">
-        <v-btn 
-          color="primary" 
-          class="mr-2" 
-          depressed
-          @click="handleView"
-		  small
-        >
-          <v-icon left>mdi-eye</v-icon>
-          查看
-        </v-btn>
-        <v-btn 
-          outlined 
-          depressed
-          @click="handleAnswer"
-		  small
-        >
-          <v-icon left>mdi-pencil</v-icon>
-          回答
-        </v-btn>
-      </div>
-    </v-card>
-  </template>
+		<v-slide-y-transition>
+			<div v-show="isExpanded" class="mt-2">
+				<slot name="expanded-content"></slot>
+			</div>
+		</v-slide-y-transition>
+
+		<div class="d-flex mt-3">
+			<div class="mr-4 text-caption grey--text">
+				<span>回答量: {{ answerCount }}</span>
+			</div>
+			<div class="text-caption grey--text">
+				<span>悬赏: {{ reward }}</span>
+			</div>
+		</div>
+	</v-card>
+</template>
   
 <script>
 export default {
 	name: 'QuestionCard',
-  props: {
-    answerCount: {
-      type: Number,
-      default: 0
+	data() {
+        return {
+            isExpanded: false
+        }
     },
-    reward: {
-      type: Number,
-      default: 0
-    },
-    title: {
-      type: String,
-      required: true
-    }
-  },
+	props: {
+		answerCount: {
+			type: Number,
+			default: 0
+		},
+		reward: {
+			type: Number,
+			default: 0
+		},
+		title: {
+			type: String,
+			required: true
+		},
+		content: {
+			type: String,
+			required: true
+		}
+	},
 	methods: {
 		handleView() {
 			this.$router.push('/forum/answer')
