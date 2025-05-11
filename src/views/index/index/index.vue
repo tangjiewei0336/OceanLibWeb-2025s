@@ -160,17 +160,17 @@
           <span>文库</span>
           <v-icon>mdi-text-box-search</v-icon>
         </v-btn>
-        <v-btn link to="/wall">
+        <v-btn link to="/wall" style="height: 56px; display: flex; flex-direction: column; align-items: center;">
           <span>互助</span>
-          <v-icon>mdi-handshake</v-icon>
+          <v-icon style="font-size: 20px;">mdi-handshake</v-icon>
         </v-btn>
-        <v-btn link to="/mine">
+        <v-btn link to="/mine" style="height: 56px; display: flex; flex-direction: column; align-items: center;">
           <span>我的</span>
-          <v-icon>mdi-account-circle</v-icon>
+          <v-icon style="font-size: 20px;">mdi-account-circle</v-icon>
         </v-btn>
-        <v-btn link to="/forum/recommend">
+        <v-btn link to="/forum/recommend" style="height: 56px; display: flex; flex-direction: column; align-items: center;">
           <span>知乎</span>
-          <v-icon>mdi-forum</v-icon>
+          <v-icon style="font-size: 20px;">mdi-forum</v-icon>
         </v-btn>
       </v-bottom-navigation>
     </div>
