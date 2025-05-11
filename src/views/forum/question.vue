@@ -3,23 +3,34 @@
         <v-app-bar app fixed color="white" elevation="1" height="64">
             <AppHeader />
         </v-app-bar>
-        <div style="margin-top: 220px; margin-bottom: 50px">
+        <v-container 
+            ref="scrollContainer"
+            class="overflow-y-auto"
+            fluid
+            style="height: 1100px; margin-top: 220px;"
+            @scroll.passive="handleScroll"
+        >
             <QuestionCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
                 :title="item.title"
                 :answer-count="item.answerCount"
-                :reward="item.reward"
-                />
-                
-            <v-pagination
-                v-model="currentPage"
-                :length="totalPages"
-                :total-visible="7"
-                @input="fetchData"
-                class="mt-4"
-            ></v-pagination>
-        </div>
+                :reward="item.rewardPoints"
+            />
+            <v-progress-circular
+                v-if="isLoading"
+                indeterminate
+                color="primary"
+            />
+            <v-card-text
+                v-if="noMore"
+                class="text-center text-caption pa-2"
+            >
+                没有更多了...
+            </v-card-text>
+
+        </v-container>
+
         <v-bottom-navigation 
             shift 
             color="primary" 
@@ -50,59 +61,73 @@
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
 import QuestionCard from '../../components/forum/QuestionCard.vue';
-import axiosPlugin from '../../axios/axiosPlugin'
 import Mock from 'mockjs'
 
 export default {
     components: { AppHeader, QuestionCard },
     data() {
         return {
-            currentPage: 1,
-            itemsPerPage: 4, // 每页显示4个QuestionCard
-            totalItems: 0,   // 从API获取的总数据量
-            allData: []      // 存储所有数据
+            isLoading: false,
+            noMore: false,
+            currentPageNum: 0,
+            itemsPerPage: 4,
+            totalItem: 0,
+            allData: []
         }
     },
     computed: {
-        totalPages() {
-            return Math.ceil(this.totalItems / this.itemsPerPage)
-        },
         paginatedData() {
-            const start = (this.currentPage - 1) * this.itemsPerPage
-            const end = start + this.itemsPerPage
-            return this.allData.slice(start, end)
+            const end = this.currentPageNum * this.itemsPerPage
+            return this.allData.slice(0, end)
         }
     },
     methods: {
-        async fetchData() {
-            try {
-                console.log("try to get")
-                // const response = await axiosPlugin({
-                //     method: "get",
-                //     url: '/questions/list',
-                //     headers: {
-                //         'Content-Type': 'application/x-www-form-urlencoded',
-                //     },
-                //     data: qs.stringify({
-                //     }),
-                // })
-                const response = {
-                    data: Mock.mock({  // 添加data层级
-                        [`items|${this.itemsPerPage}`]: [{
-                        'id|+1': (this.currentPage - 1) * this.itemsPerPage + 1,
-                        title: '@ctitle(15)',
-                        'answerCount|0-100': 1,
-                        'reward|0-500': 1
-                        }],
-                        total: 50
-                    })
-                }
-                this.allData = response.data.items
-                this.totalItems = response.data.total
-            } catch (error) {
-                console.error('API请求失败:', error)
+        handleScroll() {
+            const container = this.$refs.scrollContainer;
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+                this.fetchData();
             }
         },
+        async fetchData() {
+            if (this.noMore) {
+                return
+            }
+            try {
+                // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
+                
+                const response = [200, {
+                    state: "SUCCESS",
+                    code: "1",
+                    msg: {
+                        pageNum: self.currentPageNum,
+                        pageSize: self.itemsPerPage,
+                        total: 100,
+                        isLastPage: false,
+                        list: Mock.mock({
+                            [`list|${this.itemsPerPage}`]: [{
+                            title: '@ctitle(10,20)',
+                            'answerCount|0-100': 1,
+                            'rewardPoints|0-50': 1,
+                            createTime: '@datetime'
+                            }]
+                        }).list
+                    }
+                }]
+                
+                let data = response[1].msg
+                this.allData = [...this.allData, ...data.list]
+                if (data.isLastPage) {
+                    self.totalItem = data.total
+                    this.noMore = true
+                } else {
+                    self.totalItem += self.itemsPerPage
+                }
+                this.currentPageNum += 1
+                this.isLoading = false
+            } catch (error) {
+                console.error('请求失败:', error)
+            }
+        }
     },
     created() {
         this.fetchData()
