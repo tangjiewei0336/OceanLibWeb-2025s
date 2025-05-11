@@ -15,7 +15,7 @@
 				{{ isExpanded ? '收起内容' : '展开内容' }}
 			</v-btn>
 			
-			<div>
+			<div v-if="!isAnswer">
 				<v-btn 
 					color="primary" 
 					class="mr-2" 
@@ -79,13 +79,25 @@ export default {
 		content: {
 			type: String,
 			required: true
-		}
+		},
+		isAnswer: {
+			type: Boolean,
+			default: false
+		},
 	},
 	methods: {
+		saveQuestionInfo() {
+			localStorage.setItem('forum_answerCount', this.answerCount)
+			localStorage.setItem('forum_reward', this.reward)
+			localStorage.setItem('forum_title', this.title)
+			localStorage.setItem('forum_content', this.content)
+		},
 		handleView() {
+			this.saveQuestionInfo()
 			this.$router.push('/forum/answer')
 		},
 		handleAnswer() {
+			this.saveQuestionInfo()
 			this.$router.push('/forum/answerWrite')
 		}
 	}
