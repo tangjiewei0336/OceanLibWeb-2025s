@@ -4,22 +4,13 @@
             <AppHeader />
         </v-app-bar>
         <div style="margin-top: 220px; margin-bottom: 50px">
-            <div class="text-h8">{{ question.title }}</div>
-            <v-spacer></v-spacer>
-            <v-btn 
-                icon 
-                @click="expandQuestion"
-            >
-                <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-            </v-btn>
-
-            <v-expand-transition>
-                <div v-show="expanded">
-                    <v-card-text class="pt-0">
-                    {{ question.details }}
-                    </v-card-text>
-                </div>
-            </v-expand-transition>
+            <QuestionCard 
+                :title="title"
+                :content="content"
+                :answer-count="answerCount"
+                :reward="rewardPoints"
+                :isAnswer=true
+            />
 
             <v-card-text>
                 <v-textarea
@@ -87,19 +78,18 @@
   
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
+import QuestionCard from '../../components/forum/QuestionCard.vue';
 
 export default {
-    components: { AppHeader },
+    components: { AppHeader, QuestionCard },
     data() {
         return {
-            expanded: false,
-            submitting: false,
-            question: {
-                title: "Vuetify 3.0相比2.0有哪些重大改进？",
-                details: "最近项目准备升级到Vuetify 3.0，想了解下主要的新特性和可能的升级注意事项..."
-            },
-            answerContent: '',
-            files: []
+            title:localStorage.getItem('forum_title'),
+            content:localStorage.getItem('forum_content'),
+            answerCount:localStorage.getItem('forum_answerCount'),
+            rewardPoints:localStorage.getItem('forum_reward'),
+            answerContent:"",
+            files:[]
         }
     },
     methods: {
