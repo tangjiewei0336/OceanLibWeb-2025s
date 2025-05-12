@@ -5,8 +5,10 @@
         </v-app-bar>
 
         <div style="margin-top: 220px; margin-bottom: 50px">
-            <QuestionCard/>
-            <ContentCard/>
+            <ContentCard
+            title="THE WORLD!"
+            :paraList="[20, 10, 20, 0, 5]"
+            />
         </div>
         
         <v-bottom-navigation 
@@ -38,10 +40,9 @@
   
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
-import QuestionCard from '../../components/forum/QuestionCard.vue';
 import ContentCard from '../../components/forum/ContentCard.vue';
 
 export default {
-    components: { AppHeader, QuestionCard, ContentCard },
+    components: { AppHeader, ContentCard },
 }
 </script>
