@@ -20,63 +20,98 @@
 			</v-btn>
 		</div>
   
-      <v-card-actions class="px-2 pt-0">
-        <v-btn 
-          text 
-          small
-          @click="vote('up')"
-        >
-          <v-icon left>mdi-thumb-up</v-icon>
-          {{ this.paraList[0] }}
-        </v-btn>
-        
-        <v-btn 
-          text 
-          small
-          @click="vote('down')"
-        >
-          <v-icon left>mdi-thumb-down</v-icon>
-          {{ this.paraList[1] }}
-        </v-btn>
-        
-        <v-btn 
-          text 
-          small
-          @click="showComments"
-        >
-          <v-icon left>mdi-comment</v-icon>
-          {{ this.paraList[2] }}
-        </v-btn>
-        
-        <v-btn 
-          text 
-          small
-          @click="like"
-        >
-          <v-icon left>mdi-heart</v-icon>
-          {{ this.paraList[3] }}
-        </v-btn>
-        
-        <v-btn 
-          icon 
-          small
-          @click="showReward"
-        >
-          <v-icon>mdi-hand-coin</v-icon>
-		  {{ this.paraList[4] }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+		<v-card-actions class="px-2 pt-0">
+			<v-btn 
+				text 
+				small
+				@click="vote('up')"
+			>
+				<v-icon left>mdi-thumb-up</v-icon>
+				{{ this.paraList[0] }}
+			</v-btn>
+			
+			<v-btn 
+				text 
+				small
+				@click="vote('down')"
+			>
+			<v-icon left>mdi-thumb-down</v-icon>
+				{{ this.paraList[1] }}
+			</v-btn>
+			
+			<v-btn 
+				text 
+				small
+				@click="unFoldComment = !unFoldComment"
+			>
+				<v-icon left>mdi-comment</v-icon>
+				{{ this.paraList[2] }}
+			</v-btn>
+			
+			<v-btn 
+				text 
+				small
+				@click="like"
+			>
+				<v-icon left>mdi-heart</v-icon>
+				{{ this.paraList[3] }}
+			</v-btn>
+			
+			<v-btn 
+				icon 
+				small
+				@click="showReward"
+			>
+				<v-icon>mdi-hand-coin</v-icon>
+				{{ this.paraList[4] }}
+			</v-btn>
+		</v-card-actions>
+
+		<div v-if="unFoldComment">
+			<v-row no-gutters align="center">
+				<v-col cols="9">
+					<v-textarea
+						v-model="newComment"
+						label="理性发言，友善互动"
+						auto-grow
+						outlined
+						dense
+						row-height="15"
+						no-resize
+						class="mr-2"
+						hide-details
+                	></v-textarea>
+				</v-col>
+				<v-col cols="auto">
+					<v-btn 
+						color="primary" 
+						@click="addComment"
+						small
+						depressed
+					>
+						发布
+					</v-btn>
+				</v-col>
+			</v-row>
+			<CommentCard/>
+		</div>
+
+	</v-card>
+
   </template>
   
 <script>
-// import { marked } from 'marked';
-// import hljs from 'highlight.js';
-  export default {
+
+import CommentCard from './CommentCard.vue';
+
+export default {
     name: 'ContentCard',
+	components: { CommentCard },
     data() {
 		return {
 			isExpanded: false,
+			unFoldComment: false,
+			newComment: '',
 		}
     },
 	props: {
