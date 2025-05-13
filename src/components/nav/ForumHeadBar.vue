@@ -29,10 +29,11 @@
                     </v-badge>
                     <span>提问</span>
                 </v-btn>
-				<v-btn text class="nav-item" to="/forum/mine" active-class="active-link">
-					<v-icon left>mdi-account</v-icon>
-					<span>我的</span>
-				</v-btn>
+				
+				<v-btn text class="nav-item" to="/forum/hot" active-class="active-link">
+                    <v-icon left>mdi-fire</v-icon>
+                    <span>热榜</span>
+                </v-btn>
 			</v-row>
 		</v-container>
 
@@ -42,7 +43,7 @@
         </v-dialog>
 
     </v-app-bar>
-  </template>
+</template>
   
 <script>
 import AskCard from '../forum/AskCard.vue';
