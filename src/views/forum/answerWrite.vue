@@ -9,7 +9,7 @@
                 :content="content"
                 :answer-count="answerCount"
                 :reward="rewardPoints"
-                :isAnswer=true
+                :isAnswerWriting=true
             />
 
             <v-card-text>

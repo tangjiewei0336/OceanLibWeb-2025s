@@ -15,17 +15,30 @@
 				{{ isExpanded ? '收起内容' : '展开内容' }}
 			</v-btn>
 			
-			<div v-if="!isAnswer">
+			<div v-if="!isAnswerWriting">
 				<v-btn 
 					color="primary" 
 					class="mr-2" 
 					depressed
 					small
 					@click="handleView"
+					v-if="!isAnswer"
 				>
 					<v-icon left>mdi-eye</v-icon>
 					查看
 				</v-btn>
+
+				<v-btn 
+					color="primary" 
+					class="mr-2" 
+					depressed
+					small
+					v-if="isAnswer"
+				>
+					<v-icon left>mdi-thumb-up</v-icon>
+					好问题
+				</v-btn>
+
 				<v-btn 
 					outlined 
 					depressed
@@ -64,6 +77,10 @@ export default {
         }
     },
 	props: {
+		id: {
+			type: String,
+			required: true
+		},
 		answerCount: {
 			type: Number,
 			default: 0
@@ -80,6 +97,10 @@ export default {
 			type: String,
 			required: true
 		},
+		isAnswerWriting: {
+			type: Boolean,
+			default: false
+		},
 		isAnswer: {
 			type: Boolean,
 			default: false
@@ -87,6 +108,7 @@ export default {
 	},
 	methods: {
 		saveQuestionInfo() {
+			localStorage.setItem('forum_qid', this.id)
 			localStorage.setItem('forum_answerCount', this.answerCount)
 			localStorage.setItem('forum_reward', this.reward)
 			localStorage.setItem('forum_title', this.title)
