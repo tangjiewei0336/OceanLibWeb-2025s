@@ -13,6 +13,7 @@
             <QuestionCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
+                :id="item.id"
                 :title="item.title"
                 :content="item.content"
                 :answer-count="item.answerCount"
@@ -100,12 +101,13 @@ export default {
                     state: "SUCCESS",
                     code: "1",
                     msg: {
-                        pageNum: self.currentPageNum,
-                        pageSize: self.itemsPerPage,
+                        pageNum: this.currentPageNum,
+                        pageSize: this.itemsPerPage,
                         total: 100,
                         isLastPage: false,
                         list: Mock.mock({
                             [`list|${this.itemsPerPage}`]: [{
+                            'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
                             title: '@ctitle(10,20)',
                             content: '@ctitle(50,100)',
                             'answerCount|0-100': 1,
@@ -119,10 +121,10 @@ export default {
                 let data = response[1].msg
                 this.allData = [...this.allData, ...data.list]
                 if (data.isLastPage) {
-                    self.totalItem = data.total
+                    this.totalItem = data.total
                     this.noMore = true
                 } else {
-                    self.totalItem += self.itemsPerPage
+                    this.totalItem += this.itemsPerPage
                 }
                 this.currentPageNum += 1
                 this.isLoading = false

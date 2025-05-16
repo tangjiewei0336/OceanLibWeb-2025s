@@ -3,19 +3,45 @@
         <v-app-bar app fixed color="white" elevation="1" height="64">
             <AppHeader />
         </v-app-bar>
-        <div style="margin-top: 220px; margin-bottom: 50px">
-            <div class="text-h8">{{ question.title }}</div>
-            <v-spacer></v-spacer>
-            <v-btn 
-                icon 
-                @click="expandQuestion"
+
+
+        <v-container 
+            ref="scrollContainer"
+            class="overflow-y-auto"
+            fluid
+            style="height: 1100px; margin-top: 220px;"
+            @scroll.passive="handleScroll"
+        >
+            <QuestionCard
+                :id="this.qid"
+                :title="this.qtitle"
+                :content="this.qcontent"
+                :answer-count="this.qanswerCount"
+                :reward="this.qreward"
+                :isAnswer="true"
+            />
+            <ContentCard 
+                v-for="(item, index) in paginatedData" 
+                :key="index"
+                :uid="item.userId"
+                :content="item.content"
+                :paraList="[item.likeCount, 0, item.commentCount, 0, 0]"
+                :noTitle="true"
+            />
+            <v-progress-circular
+                v-if="isLoading"
+                indeterminate
+                color="primary"
+            />
+            <v-card-text
+                v-if="noMore"
+                class="text-center text-caption pa-2"
             >
-                <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-            </v-btn>
-            <ContentCard/>
-            <ContentCard/>
-            <ContentCard/>
-        </div>
+                没有更多了...
+            </v-card-text>
+
+        </v-container>
+
         <v-bottom-navigation 
             shift 
             color="primary" 
@@ -46,48 +72,85 @@
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
 import ContentCard from '../../components/forum/ContentCard.vue';
+import QuestionCard from '../../components/forum/QuestionCard.vue'
+import Mock from 'mockjs'
 
 export default {
-    components: { AppHeader, ContentCard },
+    components: { AppHeader, ContentCard, QuestionCard },
     data() {
         return {
-            expanded: false,
-            submitting: false,
-            question: {
-                title: "Vuetify 3.0相比2.0有哪些重大改进？",
-                details: "最近项目准备升级到Vuetify 3.0，想了解下主要的新特性和可能的升级注意事项..."
-            },
-            answerContent: '',
-            files: []
+            isLoading: false,
+            noMore: false,
+            currentPageNum: 0,
+            itemsPerPage: 4,
+            totalItem: 0,
+            allData: [],
+            
+            qid: "",
+            qanswerCount: 0,
+            qreward: 0,
+            qtitle: "",
+            qcontent: "",
+        }
+    },
+    computed: {
+        paginatedData() {
+            const end = this.currentPageNum * this.itemsPerPage
+            console.log(end)
+            return this.allData.slice(0, end)
         }
     },
     methods: {
-        expandQuestion() {
-            this.expanded = !this.expanded
+        handleScroll() {
+            const container = this.$refs.scrollContainer;
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+                this.fetchData();
+            }
         },
-        submitAnswer() {
-            this.submitting = true
-            // 模拟API请求
-            setTimeout(() => {
-                console.log('提交内容:', {
-                    answer: this.answerContent,
-                    files: this.files
-                })
-                this.submitting = false
-                this.$emit('answered')
-            }, 1500)
+        initQuestion() {
+            this.qid = localStorage.getItem('forum_qid')
+            this.qanswerCount = localStorage.getItem('forum_answerCount')
+            this.qreward = localStorage.getItem('forum_reward')
+            this.qtitle = localStorage.getItem('forum_title')
+            this.qcontent = localStorage.getItem('forum_content')
         },
-        clearForm() {
-            this.answerContent = ''
-            this.files = []
-        },
-        handleEnter(e) {
-            if (e.ctrlKey || e.shiftKey) {
-                this.answerContent += '\n'
-            } else {
-                this.submitAnswer()
+        async fetchData() {
+            if (this.noMore) {
+                return
+            }
+            try {
+                // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
+
+                const response = [200, {
+                    state: "SUCCESS",
+                    code: "1",
+                    msg: Mock.mock({
+                    [`list|${this.itemsPerPage}`]: [{
+                        'id|+1': this.currentPageNum * this.itemsPerPage + 1,
+                        questionId: '@guid()',
+                        userId: '@ctitle(3,6)',
+                        content: '@cparagraph(1,3)',
+                        createTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+                        updateTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
+                        'isDeleted|1': [true, false],
+                        'likeCount|0-1000': 1,
+                        'commentCount|0-50': 1
+                    }]
+                    }).list
+                }];
+                let data = response[1].msg
+                this.allData = [...this.allData, ...data]
+
+                this.currentPageNum += 1
+                this.isLoading = false
+            } catch (error) {
+                console.error('请求失败:', error)
             }
         }
+    },
+    created() {
+        this.initQuestion()
+        this.fetchData()
     }
 }
 </script>
