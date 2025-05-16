@@ -30,7 +30,7 @@
       <editor-content :editor="editor" />
       <div class="editor-toolbar">
         <v-btn icon @click="openImageDialog" class="editor-btn">
-          <v-icon small>mdi-image</v-icon>
+          <v-icon>mdi-image</v-icon>
         </v-btn>
       </div>
     </div>
