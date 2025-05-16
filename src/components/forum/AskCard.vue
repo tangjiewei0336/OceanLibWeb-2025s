@@ -6,63 +6,51 @@
         <v-icon>mdi-close</v-icon>
       </v-btn>
       <span class="ask-card-title">提问</span>
-      <v-btn text color="primary" @click="publish" class="publish-btn">
+      <v-btn color="primary" @click="publish" class="publish-btn" 
+        :disabled="!title.trim()" 
+        >
         发布
       </v-btn>
     </div>
-    <!-- <div id="app">
-      <quill-editor
-        v-model="content"
-        :options="editorOptions"
-        style="height: 300px"
-      />
-      <div>
-        <h3>内容预览：</h3>
-        <div v-html="content"></div>
-      </div>
-    </div> -->
-
 
     <!-- 标题输入 -->
     <input
-        v-model="title"
-        class="title-input"
-        placeholder="输入问题标题，并以问号结尾（必填）"
-        @blur="checkTitle"
-        @input="onTitleInput"
-        ref="titleInput"
+      v-model="title"
+      class="title-input"
+      placeholder="输入问题标题，并以问号结尾（必填）"
+      @blur="checkTitle"
+      @input="onTitleInput"
+      ref="titleInput"
     />
 
     <!-- 分割线 -->
     <hr class="divider" />
 
-    <!-- 富文本编辑器 -->
     <div class="editor-container">
-      <div ref="editorContent"></div>
+      <editor-content :editor="editor" />
       <div class="editor-toolbar">
         <v-btn icon @click="openImageDialog" class="editor-btn">
-            <v-icon small>mdi-image</v-icon>
+          <v-icon small>mdi-image</v-icon>
         </v-btn>
       </div>
     </div>
-
 
     <!-- 图片上传对话框 -->
     <v-dialog v-model="imageDialog" max-width="600px">
       <v-card>
         <v-card-title class="headline">上传图片</v-card-title>
         <v-card-text>
-            <v-file-input
-                v-model="imageFile"
-                label="选择图片"
-                accept="image/*"
-                />
-                <!-- @change="uploadImage" -->
+          <v-file-input
+            v-model="imageFile"
+            label="选择图片"
+            accept="image/*"
+          />
         </v-card-text>
         <v-card-actions>
-            <v-btn text @click="imageDialog = false">取消</v-btn>
-            <!-- <v-btn color="primary" @click="imageDialog = false">上传</v-btn> -->
-            <v-btn color="primary" @click="confirmUpload">上传</v-btn>
+          <v-spacer />
+          <v-btn text @click="imageDialog = false">取消</v-btn>
+          <!-- <v-btn color="primary" @click="imageDialog = false">上传</v-btn> -->
+          <v-btn color="primary" @click="confirmUpload">上传</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -70,122 +58,126 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import { Editor } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import Image from '@tiptap/extension-image';
+import { Editor, EditorContent } from '@tiptap/vue-2'
+import StarterKit from '@tiptap/starter-kit'
+import Placeholder from '@tiptap/extension-placeholder'
+import Image from '@tiptap/extension-image'
 
 export default {
   name: 'AskCard',
   emits: ['close'],
-  setup() {
-    // const content = ref('');
-    // const editorOptions = {
-    //   placeholder: '请输入内容...',
-    //   theme: 'snow',
-    // };
-
-      const title = ref('');
-      const editorContent = ref(null);
-      const editor = ref(null);
-      const imageDialog = ref(false);
-      const imageFile = ref(null);
-      const titleInput = ref(null);
-
-      onMounted(() => {
-        editorContent.value.setAttribute("contenteditable", "true");
-        editor.value = new Editor({
-          element: editorContent.value,
-          extensions: [
-              StarterKit,
-              Image,
-              Placeholder.configure({
-                placeholder: '请输入您的问题描述...',
-              })
-          ],
-          content: '',
-          editable: true,
-        });
-      });
-
-      const checkTitle = () => {
-        if (title.value && !title.value.trim().endsWith("？") && !title.value.trim().endsWith("?")) {
-          title.value = title.value.trim() + "？";
-        }
-      };
-
-      const onTitleInput = () => {
-        if (title.value.trim().endsWith('?')) {
-          setTimeout(() => {
-            editor.value.chain().focus().run();
-          }, 100);
-        }
-      };
-
-      const openImageDialog = () => {
-        imageDialog.value = true;
-      };
-
-      // const uploadImage = () => {
-      //   if (imageFile.value) {
-      //     const reader = new FileReader();
-      //     reader.onload = (e) => {
-      //         const imageUrl = e.target.result;
-      //         editor.value.chain().focus().setImage({ src: imageUrl, alt: '上传图片' }).run();
-      //         imageFile.value = null;
-      //         // editor.value.commands.setImage({ src: imageUrl, alt: '上传图片' });
-      //     };
-      //     reader.readAsDataURL(imageFile.value);
-      //   }
-      // };
-      const confirmUpload = () => {
-        if (!imageFile.value) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target.result;
-          editor.value.chain().focus().setImage({ 
-            src: imageUrl, alt: '上传图片'
-           }).run();
-          imageFile.value = null;
-          // 关闭对话框
-          imageDialog.value = false;
-        };
-        reader.readAsDataURL(imageFile.value);
-        console.log("上传成功")
-      };
-
-      const publish = () => {
-        const content = editor.value.getHTML();
-        if (!title.value) {
-          alert('请填写标题');
-          return;
-        }
-        // TODO: 调用发布 API
-        console.log('发布内容：', { title: title.value, content });
-        alert('发布成功！');
-      };
-
-      return {
-          title,
-          editorContent,
-          checkTitle,
-          onTitleInput,
-          openImageDialog,
-          imageDialog,
-          imageFile,
-          confirmUpload,
-          editor,
-          titleInput,
-          publish,
-      //     content,
-      // editorOptions,
-      };
+  components: {
+    EditorContent,
   },
-};
+  data() {
+    return {
+      title: '',
+      editor: null,
+      imageDialog: false,
+      imageFile: null,
+    }
+  },
+  mounted() {
+    this.editor = new Editor({
+      extensions: [
+        StarterKit,
+        Image,
+        Placeholder.configure({
+          placeholder: '详细说明问题，以获取专业解答（选填）',
+        }),
+      ],
+      content: '',
+    })
+  },
+  beforeUnmount() {
+    if (this.editor) {
+      this.editor.destroy()
+      this.editor = null
+    }
+  },
+  methods: {
+    checkTitle() {
+      if (
+        this.title &&
+        !this.title.trim().endsWith('？') &&
+        !this.title.trim().endsWith('?')
+      ) {
+        this.title = this.title.trim() + '？'
+      }
+    },
+    onTitleInput() {
+      if (this.title.trim().endsWith('?')) {
+        setTimeout(() => {
+          this.editor.chain().focus().run()
+        }, 100)
+      }
+    },
+    openImageDialog() {
+      this.imageDialog = true
+    },
+    confirmUpload() {
+      if (!this.imageFile) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target.result;
+
+        const imgElement = document.createElement('img');
+        imgElement.src = imageUrl;
+
+        imgElement.onload = () => {
+          // 获取编辑器内容区域的宽度作为最大宽度
+          const editorContent = this.$el.querySelector('.editor-container');
+          const maxWidth = editorContent ? editorContent.clientWidth : window.innerWidth * 0.9;
+
+          let width = imgElement.width;
+          let height = imgElement.height;
+
+          if (width > maxWidth) {
+            const ratio = maxWidth / width;
+            width = maxWidth;
+            height = height * ratio;
+          }
+
+          // 插入图片到编辑器
+          this.editor.chain().focus().setImage({ src: imageUrl }).run();
+
+          // 延时确保图片插入到 DOM 后设置宽高
+          setTimeout(() => {
+            const insertedImages = document.querySelectorAll('.ProseMirror img');
+            const lastImage = insertedImages[insertedImages.length - 1];
+            if (lastImage) {
+              lastImage.style.width = `${width}px`;
+              lastImage.style.height = `${height}px`;
+              lastImage.style.maxWidth = '100%'; // 防止超出边界
+              lastImage.style.height = 'auto';   // 保持纵横比
+            }
+          }, 50);
+
+          // 清除文件和关闭对话框
+          this.imageFile = null;
+          this.imageDialog = false;
+          console.log('上传成功');
+        };
+      };
+      reader.readAsDataURL(this.imageFile);
+    },
+
+    publish() {
+      const content = this.editor.getHTML()
+      if (!this.title) {
+        alert('请填写标题')
+        return
+      }
+      // TODO: 调用发布 API
+      console.log('发布内容：', { title: this.title, content })
+      alert('发布成功！')
+    },
+  },
+}
 </script>
 
-<style scoped>
+<style>
 .ask-card {
   max-width: 100%;
   margin: 10px auto;
@@ -200,33 +192,44 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 56px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
+  height: 50px;
+  /* border-bottom: 1px solid #e0e0e0; */
+  /* background-color: #f9f9f9; */
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 0 2px;
+  padding: 0px 3px;
+  padding-right: 10px;
 }
 
 .ask-card-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
 }
 
 .close-btn {
   color: #616161;
+  height: 40px !important; /* 确保和发布按钮一致 */
+  width: 40px !important;
 }
 
 .publish-btn {
-  font-weight: bold;
+  font-size: 13px !important;
+  border-radius: 13px !important;
+  height: 26px !important;
+  min-width: 55px !important;
+  align-items: center;
+  justify-content: center;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  transition: background-color 0.3s ease;
 }
 
 .title-input {
   width: 100%;
   font-size: 16px;
   font-weight: bold;
-  padding: 12px 14px;          /* 去掉内边距 */
+  padding: 12px 14px;
 }
 
 .divider {
@@ -244,8 +247,8 @@ export default {
   line-height: 1.4;
   position: relative;
 }
-.editor-container div[contenteditable="true"] {
-  outline: none;     /* 去掉选中时的轮廓 */
+.editor-container div[contenteditable='true'] {
+  outline: none; /* 去掉选中时的轮廓 */
   border: none;
   box-shadow: none;
   padding: 8px 0;
@@ -256,7 +259,6 @@ export default {
 }
 
 .editor-toolbar {
-  /* position: fixed; */
   bottom: 0; /* 初始底部对齐 */
   left: 0;
   width: 100%;
@@ -278,9 +280,14 @@ export default {
 .editor-btn:hover {
   color: #1976d2;
 }
-/* 
-#app {
-  max-width: 800px;
-  margin: 20px auto;
-} */
+
+.ProseMirror p.is-editor-empty::before {
+  content: attr(data-placeholder);
+  color: #a9a9a9;
+  float: left;
+  height: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
 </style>
