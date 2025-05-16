@@ -23,12 +23,12 @@
 					</v-badge>
 					<span>提问</span>
 				</v-btn> -->
-				<v-btn text class="nav-item" @click="showDialog = true" active-class="active-link">
-                    <v-badge dot color="error">
-                        <v-icon left>mdi-comment-question</v-icon>
-                    </v-badge>
-                    <span>提问</span>
-                </v-btn>
+				<v-btn text class="nav-item" @click="$emit('open-ask')" active-class="active-link">
+					<v-badge dot color="error">
+						<v-icon left>mdi-comment-question</v-icon>
+					</v-badge>
+					<span>提问</span>
+				</v-btn>
 				
 				<v-btn text class="nav-item" to="/forum/hot" active-class="active-link">
                     <v-icon left>mdi-fire</v-icon>
@@ -37,25 +37,13 @@
 			</v-row>
 		</v-container>
 
-		<!-- 提问弹窗 -->
-        <v-dialog v-model="showDialog" max-width="600px">
-            <AskCard @close="showDialog = false" />
-        </v-dialog>
-
     </v-app-bar>
 </template>
   
 <script>
-import AskCard from '../forum/AskCard.vue';
 
 export default {
 	name: 'AppHeader',
-	components: { AskCard },
-    data() {
-        return {
-            showDialog: false
-        };
-    }
 }
 </script>
 
