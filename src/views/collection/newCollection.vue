@@ -63,6 +63,7 @@ export default {
       collectionName: this.$route.query.isChange ? this.$route.query.collectionName : null,
       collectionDesc: this.$route.query.isChange ? (this.$route.query.collectionDesc != null ? this.$route.query.collectionDesc : '') : '',
       isPublic: this.$route.query.isChange ? this.$route.query.isPublic : true,
+      mainType: this.$route.query.mainType ? this.$route.query.mainType : null,
       titleRule: {
         required: (value) => value == null || (value != null && value != '') || '收藏夹名称不可为空',
       },
@@ -80,6 +81,7 @@ export default {
       }
     },
     addCollection() {
+      console.log(this.mainType)
       this.$Axios({
         method: 'post',
         url: '/collectionService/addCollection',
@@ -87,6 +89,7 @@ export default {
           newName: this.collectionName,
           isPublic: this.isPublic,
           desc: this.collectionDesc,
+          mainType: this.mainType
         }),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -113,6 +116,7 @@ export default {
           newName: this.collectionName,
           isPublic: this.isPublic,
           desc: this.collectionDesc,
+          mainType: this.mainType
         }),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -131,11 +135,13 @@ export default {
         });
     },
     deleteCollection() {
+      console.log(this.mainType)
       this.$Axios({
         method: 'get',
         url: '/collectionService/deleteCollection',
         params: {
           collectionID: this.collectionID,
+          mainType: this.mainType
         },
       }).then((response) => {
         if (response.data.code == 1) {

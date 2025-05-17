@@ -12,16 +12,17 @@
 </style>
 <template>
   <div class="page">
-    <van-nav-bar id="toolbar" title="我的收藏" left-text="返回" left-arrow @click-left="back" fixed placeholder @click-right="$router.push('/newCollection')">
+    <van-nav-bar id="toolbar" title="我的收藏" left-text="返回" left-arrow @click-left="back" fixed placeholder 
+    @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType } })">
       <template #right>
         <a>新增</a>
       </template>
     </van-nav-bar>
     <div class="collectionlist full">
-      <van-tabs v-model="active">
+      <van-tabs v-model="active" @change="onTabChange">
         <van-tab v-for="(item, index) in collections" :key="index" :title="item.title">
-          <van-pull-refresh v-model="refreshing" @refresh="getCollection(item.mainType)" class="full">
-            <van-list v-model="loading" :finished="finished" @load="getCollection(item.mainType)">
+          <van-pull-refresh v-model="refreshing" @refresh="getCollection()" class="full">
+            <van-list v-model="loading" :finished="finished" @load="getCollection()">
               <div v-for="(item, index) in myCollection" :key="index">
                 <van-swipe-cell>
                   <van-cell
@@ -52,7 +53,7 @@
                     <img src="@/images/empty-picture/no_data.svg" />
                   </template>
                   <template>
-                    <v-btn color="primary" small @click="$router.push('/newCollection')">
+                    <v-btn color="primary" small @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType } })">
                       新增收藏夹
                       <v-icon right dark> mdi-star-plus </v-icon>
                     </v-btn>
@@ -76,10 +77,12 @@ export default {
       refreshing: false,
       loading: false,
       finished: false,
-      collections:[{
-        "title":"文档",
-        "mainType":"DOCUMENT"
-      }]
+      active: 0,
+      collections: [
+        { title: "文档", mainType: "DOCUMENT" },
+        { title: "问题", mainType: "QUESTION" },
+        { title: "回答", mainType: "ANSWER" }
+      ],
     };
   },
   mounted() {},
@@ -87,15 +90,22 @@ export default {
     back() {
       this.$router.go(-1); //返回上一层
     },
-    getCollection(mainType) {
+    onTabChange() {
+      this.getCollection(); // 切换 Tab 时重新加载数据
+    },
+    getCollection() {
+      console.log(this.collections[this.active].mainType)
       this.$Axios({
         method: 'get',
         url: '/collectionService/getCollection',
         params: {
-          "mainType": mainType
+          "mainType": this.collections[this.active].mainType
         }
       }).then((response) => {
-        this.myCollection = response.data.msg.collection;
+        this.myCollection = response.data.msg.collection.map(item => ({
+          ...item,
+          files: item.files || []  // 如果 files 是 undefined，则赋值为空数组
+        }));
         this.loading = false;
         this.refreshing = false;
         this.finished = true; //一次性全部加载，直接完成
@@ -109,10 +119,12 @@ export default {
           collectionName: collectionName,
           collectionDesc: collectionDesc,
           isPublic: isPublic,
+          mainType: this.collections[this.active].mainType, // 这里加入 mainType
         },
       });
     },
     toChangeCollection(collectionID, collectionName, collectionDesc, isPublic) {
+      console.log(mainType)
       this.$router.push({
         path: '/newCollection',
         query: {
@@ -121,6 +133,7 @@ export default {
           collectionDesc: collectionDesc,
           isPublic: isPublic,
           isChange: true,
+          mainType: this.collections[this.active].mainType, // 这里加入 mainType
         },
       });
     },

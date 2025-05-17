@@ -89,6 +89,7 @@ export default {
         url: '/collectionService/getCollectionFileList',
         params: {
           collectionID: this.$route.query.collectionID,
+          mainType: this.$route.query.mainType,
         },
       }).then((response) => {
         this.fileList = response.data.msg;
@@ -104,6 +105,7 @@ export default {
         params: {
           collectionID: this.$route.query.collectionID,
           fileID: fileID,
+          mainType: this.$route.query.mainType,
         },
       }).then((response) => {
         if (response.data.state == 'SUCCESS') {
@@ -112,6 +114,7 @@ export default {
       });
     },
     toChangeCollection() {
+      console.log(this.$route.query.mainType)
       this.$router.push({
         path: '/newCollection',
         query: {
@@ -120,6 +123,7 @@ export default {
           collectionDesc: this.$route.query.collectionDesc,
           isPublic: this.$route.query.isPublic,
           isChange: true,
+          mainType: this.$route.query.mainType,
         },
       });
     },

@@ -12,6 +12,17 @@
         发布
       </v-btn>
     </div>
+    <!-- <van-nav-bar id="toolbar" title="提问" left-text="返回" left-arrow @click-left="back" fixed placeholder @click-right="publish">
+      <template #right>
+        <a>发布</a>
+      </template>
+    </van-nav-bar>
+    <div class="newcollection">
+      <v-text-field class="newcollection__input small" placeholder="输入问题标题，并以问号结尾（必填）" outlined dense hide-details="auto">
+  
+      </v-text-field>
+      <v-textarea class="newcollection__input " v-model="collectionDesc" placeholder="详细说明问题，以获取专业解答（选填）" outlined dense hide-details></v-textarea>
+    </div> -->
 
     <!-- 标题输入 -->
     <input
@@ -290,4 +301,20 @@ export default {
   user-select: none;
 }
 
+</style>
+
+<style lang="less" scoped>
+@import '~@/vant-variables.less';
+.newcollection {
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+  &__input {
+    margin-bottom: 15px !important;
+    margin-top: 0px !important;
+    &__label {
+      font-size: 14px;
+    }
+  }
+}
 </style>
