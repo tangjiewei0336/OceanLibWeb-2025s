@@ -1,8 +1,20 @@
 <template>
     <div class="forum">
         <v-app-bar app fixed color="white" elevation="1" height="64">
-            <AppHeader />
+            <AppHeader @open-ask="showDialog = true" />
         </v-app-bar>
+
+        <!-- 弹窗，受 showDialog 控制 -->
+        <v-dialog
+            v-model="showDialog"
+            fullscreen
+            hide-overlay
+            transition="dialog-bottom-transition"
+            persistent
+        >
+            <!-- 这里直接用 AskCard -->
+            <AskCard @close="showDialog = false" />
+        </v-dialog>
 
         <div style="margin-top: 220px; margin-bottom: 50px">
             <ContentCard
@@ -12,11 +24,13 @@
         </div>
         
         <v-bottom-navigation 
+            app
             shift 
             color="primary" 
             grow 
             fixed
             v-model="navigation"
+            class="bottom-nav-on-top"
         >
             <v-btn value="library" to="/index">
             <span>文库</span>
@@ -41,8 +55,21 @@
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
 import ContentCard from '../../components/forum/ContentCard.vue';
+import AskCard from '../../components/forum/AskCard.vue'
 
 export default {
-    components: { AppHeader, ContentCard },
+    components: { AppHeader, ContentCard, AskCard },
+    data() {
+        return {
+        navigation: null,
+        showDialog: false,
+        }
+    }
 }
 </script>
+
+<style scoped>
+.bottom-nav-on-top {
+  z-index: 2000; /* 确保底部导航在弹窗之上 */
+}
+</style>
