@@ -3,13 +3,11 @@
         <v-app-bar app fixed color="white" elevation="1" height="64">
             <AppHeader />
         </v-app-bar>
-
-
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 1100px; margin-top: 220px;"
+            style="height: 1100px; margin-top: 150px;"
             @scroll.passive="handleScroll"
         >
             <QuestionCard
@@ -96,7 +94,6 @@ export default {
     computed: {
         paginatedData() {
             const end = this.currentPageNum * this.itemsPerPage
-            console.log(end)
             return this.allData.slice(0, end)
         }
     },
@@ -120,7 +117,7 @@ export default {
             }
             try {
                 // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
-
+                this.isLoading = true
                 const response = [200, {
                     state: "SUCCESS",
                     code: "1",
@@ -139,6 +136,11 @@ export default {
                     }).list
                 }];
                 let data = response[1].msg
+
+                if (data.length < this.itemsPerPage) {
+                    this.noMore = true
+                }
+
                 this.allData = [...this.allData, ...data]
 
                 this.currentPageNum += 1

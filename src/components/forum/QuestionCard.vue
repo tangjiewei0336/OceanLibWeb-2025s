@@ -1,5 +1,5 @@
 <template>
-	<v-card class="pa-4" flat outlined>
+	<v-card class="pa-4" flat>
 		<div class="text-h7 font-weight-bold">{{ title }}</div>
 		<div class="text-body-2 mt-3" v-if="isExpanded">
 			{{ content }}
@@ -65,6 +65,7 @@
 				<span>悬赏: {{ reward }}</span>
 			</div>
 		</div>
+		<v-divider></v-divider>
 	</v-card>
 </template>
   
@@ -77,10 +78,20 @@ export default {
         }
     },
 	props: {
-		id: {
+		qid: {
 			type: String,
 			required: true
 		},
+		qtitle: {
+			type: String,
+			required: true
+		},
+		interface: {
+			type: String,
+			required: true
+		},
+
+		// useless
 		answerCount: {
 			type: Number,
 			default: 0
@@ -108,7 +119,7 @@ export default {
 	},
 	methods: {
 		saveQuestionInfo() {
-			localStorage.setItem('forum_qid', this.id)
+			localStorage.setItem('forum_qid', this.qid)
 			localStorage.setItem('forum_answerCount', this.answerCount)
 			localStorage.setItem('forum_reward', this.reward)
 			localStorage.setItem('forum_title', this.title)

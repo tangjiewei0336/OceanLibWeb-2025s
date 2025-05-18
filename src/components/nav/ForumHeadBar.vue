@@ -9,10 +9,10 @@
 				>
 			</v-row>
 			<v-row>
-				<v-btn text class="nav-item" to="/forum/recommend" active-class="active-link">
-					<v-icon left>mdi-star-box</v-icon>
-					<span>推荐</span>
-				</v-btn>
+				<v-btn text class="nav-item" to="/forum/hot" active-class="active-link">
+                    <v-icon left>mdi-fire</v-icon>
+                    <span>热榜</span>
+                </v-btn>
 				<v-btn text class="nav-item" to="/forum/question" active-class="active-link">
 					<v-icon left>mdi-pen</v-icon>
 					<span>直答</span>
@@ -29,11 +29,6 @@
 					</v-badge>
 					<span>提问</span>
 				</v-btn>
-				
-				<v-btn text class="nav-item" to="/forum/hot" active-class="active-link">
-                    <v-icon left>mdi-fire</v-icon>
-                    <span>热榜</span>
-                </v-btn>
 			</v-row>
 		</v-container>
 
