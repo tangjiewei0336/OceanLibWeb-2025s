@@ -55,12 +55,12 @@ const asyncRouterMap = [{
         component: (resolve) => require(['../views/forum/ask.vue'], resolve)
     },
     {
-        path: '/forum/mine',
+        path: '/forum/hot',
         meta: {
-            title: '知乎个人',
+            title: '知乎热榜',
             permission: ["USER", "ADMIN"]
         },
-        component: (resolve) => require(['../views/forum/mine.vue'], resolve)
+        component: (resolve) => require(['../views/forum/hot.vue'], resolve)
     },
     {
         path: '/uploadFile',

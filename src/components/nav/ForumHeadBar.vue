@@ -17,24 +17,33 @@
 					<v-icon left>mdi-pen</v-icon>
 					<span>直答</span>
 				</v-btn>
-				<v-btn text class="nav-item" to="/forum/ask" active-class="active-link">
+				<!-- <v-btn text class="nav-item" to="/forum/ask" active-class="active-link">
+					<v-badge dot color="error">
+						<v-icon left>mdi-comment-question</v-icon>
+					</v-badge>
+					<span>提问</span>
+				</v-btn> -->
+				<v-btn text class="nav-item" @click="$emit('open-ask')" active-class="active-link">
 					<v-badge dot color="error">
 						<v-icon left>mdi-comment-question</v-icon>
 					</v-badge>
 					<span>提问</span>
 				</v-btn>
-				<v-btn text class="nav-item" to="/forum/mine" active-class="active-link">
-					<v-icon left>mdi-account</v-icon>
-					<span>我的</span>
-				</v-btn>
+				
+				<v-btn text class="nav-item" to="/forum/hot" active-class="active-link">
+                    <v-icon left>mdi-fire</v-icon>
+                    <span>热榜</span>
+                </v-btn>
 			</v-row>
 		</v-container>
+
     </v-app-bar>
-  </template>
+</template>
   
 <script>
+
 export default {
-	name: 'AppHeader'
+	name: 'AppHeader',
 }
 </script>
 
