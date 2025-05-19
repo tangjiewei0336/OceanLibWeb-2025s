@@ -1,8 +1,35 @@
 <template>
-    <v-card class="pa-4" flat outlined>
-		<div v-if="!noTitle" class="text-h8 font-weight-bold">{{ this.title }}</div>
-  
-		<div class="text-body-2 mt-3">
+    <v-card class="pa-4" flat>
+		<v-avatar size="20" color="primary" class="mr-3">
+			<span class="white--text">{{ uid.charAt(0) }}</span>
+		</v-avatar>
+		<span class="grey--text text--lighten-1 text-caption">{{ uid }}</span>
+
+		<v-card-text>
+			<p class="text-body-2">{{ content }}</p>
+			<div class="d-flex justify-space-between align-center">
+				<p class="mb-0">
+					{{ likeCount }} 赞同 · {{ commentCount }} 评论
+				</p>
+				<span class="text-caption grey--text text--lighten-1">
+					{{ formatDate(createTime) }}
+				</span>
+			</div>
+		</v-card-text>
+
+		<v-sheet 
+			color="grey lighten-2" 
+			height="3px" 
+			width="100%"
+			rounded="0"
+		/>
+		<!-- <v-card-actions class="justify-end">
+			<v-btn variant="text" color="grey">取消</v-btn>
+			<v-btn color="primary">确认</v-btn>
+			<v-btn variant="outlined" color="secondary">更多</v-btn>
+		</v-card-actions> -->
+
+		<!-- <div class="text-body-2 mt-3">
 			<div v-if="!isExpanded">
 				{{this.uid + ": " + truncateAnswer(this.content) }}
 			</div>
@@ -94,53 +121,99 @@
 				</v-col>
 			</v-row>
 			<CommentCard/>
-		</div>
+		</div> -->
 
 	</v-card>
 
   </template>
   
 <script>
-
+import Mock from 'mockjs'
 import CommentCard from './CommentCard.vue';
 
 export default {
     name: 'ContentCard',
-	components: { CommentCard },
+	// components: { CommentCard },
     data() {
 		return {
-			isExpanded: false,
-			unFoldComment: false,
-			newComment: '',
+			uid: '',
+			content: "",
+			commentCount: 0,
+			likeCount: 0,
+			liked: false,
+			createTime: null,
+			// isExpanded: false,
+			// unFoldComment: false,
+			// newComment: '',
 		}
     },
 	props: {
-		title: {
-			type: String,
-			default: "Ko no dio da!"
-		},
-		content: {
-			type: String,
-			default: "Vuetify 3.0带来了多项重大改进，包括：1. 完全兼容Vue 3的Composition API；2. 全新的设计系统，支持动态主题切换；3. 性能优化，组件渲染速度提升约40%；4. 新增VDataTable等实用组件...（此处省略后续内容）"
-		},
-		uid: {
-			type: String,
-			default: "DIO"
-		},
-		paraList: {
-			type: Array,
+		qid: {
+			type: Number,
 			required: true
 		},
-		noTitle: {
-			type: Boolean,
-			default: false
+		rid: {
+			type: Number,
+			required: true
 		},
+
+		// title: {
+		// 	type: String,
+		// 	default: "Ko no dio da!"
+		// },
+		// content: {
+		// 	type: String,
+		// 	default: "Vuetify 3.0带来了多项重大改进，包括：1. 完全兼容Vue 3的Composition API；2. 全新的设计系统，支持动态主题切换；3. 性能优化，组件渲染速度提升约40%；4. 新增VDataTable等实用组件...（此处省略后续内容）"
+		// },
+		// uid: {
+		// 	type: String,
+		// 	default: "DIO"
+		// },
+		// paraList: {
+		// 	type: Array,
+		// 	required: true
+		// },
+		// noTitle: {
+		// 	type: Boolean,
+		// 	default: false
+		// },
 	},
     methods: {
 		truncateAnswer(text, length = 30) {
 			return text.length > length 
 			? text.substring(0, length) + '...' 
 			: text
+		},
+		fetchData() {
+			const response = [200, {
+				state: "SUCCESS",
+				code: "1",
+				msg: Mock.mock({
+					'uid': '@ctitle(3,8)',
+					'title': '@ctitle(10,20)',
+					'hotPoint|5000-3000000': 1,
+					content: '@ctitle(50,100)',
+					'commentCount|10-100': 1,
+					'browse|20-300': 1,
+					'likeCount|10-50': 1,
+					'liked|1': [true, false],
+					createTime: '@datetime'
+				})
+			}]
+
+			this.uid = response[1].msg.uid
+			this.content = response[1].msg.content
+			this.likeCount = response[1].msg.likeCount
+			this.liked = response[1].msg.liked
+			this.commentCount = response[1].msg.commentCount
+			this.createTime = response[1].msg.createTime
+		},
+		formatDate(date) {
+			return new Date(date).toLocaleDateString('zh-CN', {
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit'
+			})
 		},
 		expandAnswer() {
 			// 展开全文逻辑
@@ -157,16 +230,9 @@ export default {
 		showReward() {
 			// 打赏逻辑
 		}
+    },
+	created() {
+        this.fetchData()
     }
   }
   </script>
-  
-  <style scoped>
-  .v-card__title {
-    word-break: break-word;
-    padding-bottom: 8px;
-  }
-  .v-card__text {
-    padding-top: 0;
-  }
-  </style>

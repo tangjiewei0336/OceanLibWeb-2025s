@@ -1,8 +1,9 @@
 <template>
     <div class="forum">
         <v-app-bar app fixed color="white" elevation="1" height="64">
-            <AppHeader />
         </v-app-bar>
+            <AppHeader />
+
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
@@ -13,11 +14,9 @@
             <QuestionCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
-                :id="item.id"
-                :title="item.title"
-                :content="item.content"
-                :answer-count="item.answerCount"
-                :reward="item.rewardPoints"
+                :seqId="index"
+                :qid="item.id"
+                interface="hot"
             />
             <v-progress-circular
                 v-if="isLoading"
@@ -52,7 +51,7 @@
                 <span>我的</span>
                 <v-icon>mdi-account-circle</v-icon>
             </v-btn>
-            <v-btn value="forum" to="/forum/recommend">
+            <v-btn value="forum" to="/forum/hot">
                 <span>知乎</span>
                 <v-icon>mdi-forum</v-icon>
             </v-btn>
@@ -69,17 +68,17 @@ export default {
     components: { AppHeader, QuestionCard },
     data() {
         return {
+            navigation: '',
             isLoading: false,
             noMore: false,
             currentPageNum: 0,
-            itemsPerPage: 4,
-            totalItem: 0,
+            itemsPerPage: 6,
             allData: []
         }
     },
     computed: {
         paginatedData() {
-            const end = this.currentPageNum * this.itemsPerPage
+            const end = this.allData.length
             return this.allData.slice(0, end)
         }
     },
@@ -96,7 +95,7 @@ export default {
             }
             try {
                 // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
-                
+                this.isLoading = true
                 const response = [200, {
                     state: "SUCCESS",
                     code: "1",
@@ -109,6 +108,7 @@ export default {
                             [`list|${this.itemsPerPage}`]: [{
                             'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
                             title: '@ctitle(10,20)',
+                            'hotPoint|5000-3000000': 1,
                             content: '@ctitle(50,100)',
                             'answerCount|0-100': 1,
                             'rewardPoints|0-50': 1,
@@ -120,11 +120,8 @@ export default {
                 
                 let data = response[1].msg
                 this.allData = [...this.allData, ...data.list]
-                if (data.isLastPage) {
-                    this.totalItem = data.total
+                if (data.list.length < this.itemsPerPage) {
                     this.noMore = true
-                } else {
-                    this.totalItem += this.itemsPerPage
                 }
                 this.currentPageNum += 1
                 this.isLoading = false
@@ -134,6 +131,11 @@ export default {
         }
     },
     created() {
+        let refresh = localStorage.getItem('refresh')
+        if (refresh == 'true') {
+            localStorage.setItem('refresh', 'false')
+            this.$router.go(0)
+        }
         this.fetchData()
     }
 }

@@ -187,7 +187,7 @@
           <span>我的</span>
           <v-icon>mdi-account-circle</v-icon>
         </v-btn>
-        <v-btn link to="/forum/recommend">
+        <v-btn link to="/forum/hot">
           <span>知乎</span>
           <v-icon>mdi-forum</v-icon>
         </v-btn>

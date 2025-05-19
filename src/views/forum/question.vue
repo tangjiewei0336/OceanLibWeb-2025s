@@ -1,35 +1,66 @@
 <template>
     <div class="forum">
-        <v-app-bar app fixed color="white" elevation="1" height="64">
-            <AppHeader />
-        </v-app-bar>
+        <ReturnHeader/>
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 1100px; margin-top: 220px;"
+            style="height: 550px"
             @scroll.passive="handleScroll"
         >
-            <QuestionCard 
+            <QuestionCard
+                :qid="this.qid"
+                :interface="'question'"
+            />
+            <v-sheet 
+				color="grey lighten-2" 
+				height="3px" 
+				width="92%"
+                class="mx-auto"
+                rounded="0"
+			/>
+
+            <ContentCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
-                :id="item.id"
-                :title="item.title"
-                :content="item.content"
-                :answer-count="item.answerCount"
-                :reward="item.rewardPoints"
+                :qid="qid"
+                :rid="item.id"
             />
-            <v-progress-circular
-                v-if="isLoading"
-                indeterminate
-                color="primary"
-            />
-            <v-card-text
-                v-if="noMore"
-                class="text-center text-caption pa-2"
+
+            <v-sheet
+                class="d-flex justify-center"
+                color="transparent"
+                style="position: fixed; bottom: 70px; left: 0; right: 0; z-index: 1000;"
             >
-                没有更多了...
-            </v-card-text>
+                <v-btn
+                    rounded
+                    small
+                    color="primary"
+                    class="mx-2"
+                    @click="writeAnswerButton"
+                    :width="120"
+                    :height="30"
+                >
+                    <v-icon left>mdi-pencil</v-icon>
+                    写回答
+                </v-btn>
+                <v-btn
+                    small
+                    rounded
+                    color="white"
+                    class="mx-2 primary--text"
+                    @click="goodQuestion"
+                    :width="120"
+                    :height="30"
+                >
+                    <v-icon left>
+                        {{ qliked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
+                    </v-icon>
+                    好问题 
+                    {{ qlikeCount }}
+                </v-btn>
+            </v-sheet>
+
 
         </v-container>
 
@@ -52,7 +83,7 @@
                 <span>我的</span>
                 <v-icon>mdi-account-circle</v-icon>
             </v-btn>
-            <v-btn value="forum" to="/forum/recommend">
+            <v-btn value="forum" to="/forum/hot">
                 <span>知乎</span>
                 <v-icon>mdi-forum</v-icon>
             </v-btn>
@@ -61,25 +92,30 @@
   </template>
 
 <script>
-import AppHeader from '../../components/nav/ForumHeadBar.vue'
 import QuestionCard from '../../components/forum/QuestionCard.vue';
+import ReturnHeader from '../../components/nav/ReturnHeader.vue';
+import ContentCard from '../../components/forum/ContentCard.vue';
 import Mock from 'mockjs'
 
 export default {
-    components: { AppHeader, QuestionCard },
+    components: { QuestionCard, ReturnHeader, ContentCard },
     data() {
         return {
+            navigation: '',
+            qid: 0,
+            qlikeCount: 0,
+			qliked: false,
+
             isLoading: false,
             noMore: false,
             currentPageNum: 0,
             itemsPerPage: 4,
-            totalItem: 0,
             allData: []
         }
     },
     computed: {
         paginatedData() {
-            const end = this.currentPageNum * this.itemsPerPage
+            const end = this.allData.length
             return this.allData.slice(0, end)
         }
     },
@@ -96,7 +132,7 @@ export default {
             }
             try {
                 // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
-                
+                this.isLoading = true
                 const response = [200, {
                     state: "SUCCESS",
                     code: "1",
@@ -120,21 +156,32 @@ export default {
                 
                 let data = response[1].msg
                 this.allData = [...this.allData, ...data.list]
-                if (data.isLastPage) {
-                    this.totalItem = data.total
+                if (data.list.length < this.itemsPerPage) {
                     this.noMore = true
-                } else {
-                    this.totalItem += this.itemsPerPage
                 }
-                this.currentPageNum += 1
+                if (data.list.length > 0) {
+                    this.currentPageNum += 1
+                }
                 this.isLoading = false
             } catch (error) {
                 console.error('请求失败:', error)
             }
+        },
+        writeAnswerButton() {
+
+        },
+        goodQuestion() {
+            this.qliked = !this.qliked;
+            this.qlikeCount += this.qliked ? 1 : -1;
         }
     },
     created() {
+        this.qid = Number(localStorage.getItem('qid'))
         this.fetchData()
+    },
+    mounted() {
+        this.qlikeCount = Number(localStorage.getItem('qlikeCount'))
+        this.qliked = Number(localStorage.getItem('qliked'))
     }
 }
 </script>
