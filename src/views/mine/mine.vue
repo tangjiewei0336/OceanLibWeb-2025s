@@ -183,13 +183,13 @@
           <span>互助</span>
           <v-icon>mdi-handshake</v-icon>
         </v-btn>
-        <v-btn link to="/mine">
-          <span>我的</span>
-          <v-icon>mdi-account-circle</v-icon>
-        </v-btn>
         <v-btn link to="/forum/recommend">
           <span>知乎</span>
           <v-icon>mdi-forum</v-icon>
+        </v-btn>
+        <v-btn link to="/mine">
+          <span>我的</span>
+          <v-icon>mdi-account-circle</v-icon>
         </v-btn>
       </v-bottom-navigation>
     </div>
@@ -200,7 +200,7 @@
 export default {
   data() {
     return {
-      navigation: 2,
+      navigation: 3,
       newBackground: {
         'background-image': 'url(' + require('../../images/background-picture/background-new.png') + ')',
         'background-size': '100%',

@@ -164,7 +164,7 @@ export default {
       this.showSuggest = true;
       this.$Axios({
         method: 'get',
-        url: '/docSearchService/suggest',
+        url: '/docSearchService/suggestTitle',
         params: {
           keyword: item,
           rows: 10,

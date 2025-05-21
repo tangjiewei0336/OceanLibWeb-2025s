@@ -1,13 +1,13 @@
 <template>
     <div class="forum">
-        <v-app-bar app fixed color="white" elevation="1" height="64">
-            <AppHeader />
-        </v-app-bar>
+        <!-- <v-app-bar app fixed color="white" elevation="1" height="64"> -->
+        <AppHeader />
+        <!-- </v-app-bar> -->
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 1100px; margin-top: 220px;"
+            style="height: 1100px; "
             @scroll.passive="handleScroll"
         >
             <QuestionCard 
@@ -33,30 +33,26 @@
 
         </v-container>
 
-        <v-bottom-navigation 
-            shift 
-            color="primary" 
-            grow 
-            fixed
-            v-model="navigation"
-        >
-            <v-btn value="library" to="/index">
-                <span>文库</span>
-                <v-icon>mdi-text-box-search</v-icon>
-            </v-btn>
-            <v-btn value="help" to="/wall">
-                <span>互助</span>
-                <v-icon>mdi-handshake</v-icon>
-            </v-btn>
-            <v-btn value="mine" to="/mine">
-                <span>我的</span>
-                <v-icon>mdi-account-circle</v-icon>
-            </v-btn>
-            <v-btn value="forum" to="/forum/recommend">
-                <span>知乎</span>
-                <v-icon>mdi-forum</v-icon>
-            </v-btn>
-        </v-bottom-navigation>
+        <div style="position: fixed;bottom: 0;left: 0;right: 0;">
+            <v-bottom-navigation shift color="primary" grow class="index__bottom__navigation" v-model="navigation">
+                <v-btn link to="/index">
+                    <span>文库</span>
+                    <v-icon>mdi-text-box-search</v-icon>
+                </v-btn>
+                <v-btn link to="/wall">
+                    <span>互助</span>
+                    <v-icon>mdi-handshake</v-icon>
+                </v-btn>
+                <v-btn link to="/forum/recommend">
+                    <span>知乎</span>
+                    <v-icon>mdi-forum</v-icon>
+                </v-btn>
+                <v-btn link to="/mine">
+                    <span>我的</span>
+                    <v-icon>mdi-account-circle</v-icon>
+                </v-btn>
+            </v-bottom-navigation>
+        </div>
     </div>
   </template>
 
@@ -74,7 +70,8 @@ export default {
             currentPageNum: 0,
             itemsPerPage: 4,
             totalItem: 0,
-            allData: []
+            allData: [],
+            navigation : 2,
         }
     },
     computed: {
