@@ -77,7 +77,7 @@ export default {
             noMore: false,
             currentPageNum: 0,
             itemsPerPage: 4,
-            allData: []
+            allData: [],
         }
     },
     computed: {
@@ -134,13 +134,6 @@ export default {
                 console.error('请求失败:', error)
             }
         },
-        writeAnswerButton() {
-
-        },
-        goodQuestion() {
-            this.qliked = !this.qliked;
-            this.qlikeCount += this.qliked ? 1 : -1;
-        }
     },
     created() {
         this.qid = Number(localStorage.getItem('qid'))

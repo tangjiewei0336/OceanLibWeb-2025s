@@ -21,6 +21,7 @@
 				</span>
 			</div>
 		</v-card-text>
+
 		<v-card-text v-if="this.interface === 'answer'">
 			<div class="text-body-2">{{ content }}</div>
 			<v-divider></v-divider>
@@ -52,6 +53,19 @@
 				</v-btn>
 			</div>
 
+			<v-snackbar
+                v-model="snackbar"
+                :timeout="1000"
+                color="white"
+                :style="{
+                    'position': 'fixed',
+                    'bottom': '60px',
+                }"
+                rounded="xl"
+                min-width="90"
+            >
+                <span style="color: black;">{{ snackerText }}</span>
+            </v-snackbar>
 		</v-card-text>
 
 		<v-sheet 
@@ -82,6 +96,9 @@ export default {
 			agree: false,
 			refuse: false,
 			collected: false,
+
+			snackbar: false,
+            snackerText: "",
 		}
     },
 	props: {
@@ -148,16 +165,34 @@ export default {
 			: text
 		},
 		agreeFunc() {
+			this.snackbar = true
+			if (this.agree) {
+				this.snackerText = "已取消"
+			} else {
+				this.snackerText = "已赞同"
+			}
 			this.agree = !this.agree
 			this.likeCount += this.agree ? 1 : -1
 
 			// TODO: api
 		},
 		refuseFunc() {
+			this.snackbar = true
+			if (this.refuse) {
+				this.snackerText = "已取消"
+			} else {
+				this.snackerText = "已反对"
+			}
 			this.refuse = !this.refuse
 			// TODO: api
 		},
 		collectedFunc() {
+			this.snackbar = true
+			if (this.collected) {
+				this.snackerText = "已取消"
+			} else {
+				this.snackerText = "已收藏"
+			}
 			this.collected = !this.collected
 			// TODO: api
 		},

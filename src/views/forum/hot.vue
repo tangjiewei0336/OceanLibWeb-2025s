@@ -68,7 +68,7 @@ export default {
     components: { AppHeader, QuestionCard },
     data() {
         return {
-            navigation: '',
+            navigation: 3,
             isLoading: false,
             noMore: false,
             currentPageNum: 0,

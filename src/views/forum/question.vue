@@ -1,5 +1,5 @@
 <template>
-    <div class="forum">
+    <div class="question">
         <ReturnHeader
             interface="question"
         />
@@ -63,8 +63,6 @@
                     {{ qlikeCount }}
                 </v-btn>
             </v-sheet>
-
-
         </v-container>
 
         <v-bottom-navigation 
@@ -104,7 +102,7 @@ export default {
     components: { QuestionCard, ReturnHeader, ContentCard },
     data() {
         return {
-            navigation: '',
+            navigation: 3,
             qid: 0,
             qlikeCount: 0,
 			qliked: false,
@@ -113,7 +111,8 @@ export default {
             noMore: false,
             currentPageNum: 0,
             itemsPerPage: 4,
-            allData: []
+            allData: [],
+
         }
     },
     computed: {
@@ -171,7 +170,8 @@ export default {
             }
         },
         writeAnswerButton() {
-
+            localStorage.setItem('qid', this.qid)
+            this.$router.push('./answerWrite')
         },
         goodQuestion() {
             this.qliked = !this.qliked;

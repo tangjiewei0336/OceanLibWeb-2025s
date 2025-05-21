@@ -28,9 +28,7 @@
 			</div>
 		</div>
 
-		<div
-			v-if="this.interface !== 'hot'"
-		>
+		<div v-if="this.interface === 'question' || this.interface === 'answer'">
 			<v-card-title class="pt-0 font-weight-bold">{{ qtitle }}</v-card-title>
 
 			<v-card-text v-if="this.interface === 'question'">
@@ -63,6 +61,10 @@
 					 · <span class="font-weight-bold">{{ browse }}</span> 浏览
 				</span>
 			</div>
+		</div>
+
+		<div v-if="this.interface === 'answerWrite'">
+			<v-card-title class="pt-0 font-weight-bold">{{ qtitle }}</v-card-title>
 		</div>
 	</v-card>
 </template>
@@ -131,6 +133,8 @@ export default {
 
 				localStorage.setItem('qlikeCount', this.likeCount)
 				localStorage.setItem('qliked', this.liked)
+
+				localStorage.setItem('qtitle', this.qtitle)
 
             } catch (error) {
                 console.error('请求失败:', error)

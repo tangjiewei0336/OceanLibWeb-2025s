@@ -1,54 +1,44 @@
 <template>
-    <div class="forum">
-        <v-app-bar app fixed color="white" elevation="1" height="64">
-            <AppHeader />
+    <v-app>
+        <v-app-bar app flat color="white">
+            <v-btn text color="grey" @click="handleCancel">
+                取消
+            </v-btn>
+            
+            <v-spacer></v-spacer>
+            <v-toolbar-title class="font-weight-small">写回答</v-toolbar-title>
+            <v-spacer></v-spacer>
+            
+            <v-btn
+                text
+                color="primary" 
+                depressed
+                @click="handlePublish"
+                class="mr-2"
+            >
+                发布
+            </v-btn>
         </v-app-bar>
-        <div style="margin-top: 220px; margin-bottom: 50px">
-            <QuestionCard 
-                :title="title"
-                :content="content"
-                :answer-count="answerCount"
-                :reward="rewardPoints"
-                :isAnswerWriting=true
+
+        <v-container 
+            fluid
+        >
+    
+            <QuestionCard
+                :qid="qid"
+                interface="answerWrite"
             />
 
-            <v-card-text>
-                <v-textarea
-                    v-model="answerContent"
-                    label="写下您的回答"
-                    auto-grow
-                    outlined
-                    rows="3"
-                    row-height="24"
-                    no-resize
-                    :rules="[v => !!v || '内容不能为空']"
-                ></v-textarea>
+            <v-sheet 
+                color="grey lighten-2" 
+                height="3px" 
+                class="mx-auto"
+                rounded="0"
+            />
 
-                <v-file-input
-                    v-model="files"
-                    multiple
-                    prepend-icon="mdi-paperclip"
-                    label="添加附件"
-                    show-size
-                    counter
-                    truncate-length="15"
-                ></v-file-input>
-            </v-card-text>
+        </v-container>
+        
 
-            <v-card-actions>
-                <v-btn 
-                    color="primary" 
-                    depressed
-                    @click="submitAnswer"
-                    :loading="submitting"
-                >
-                    <v-icon left>mdi-send</v-icon>
-                    提交回答
-                </v-btn>
-                <v-spacer></v-spacer>
-                <v-btn text @click="clearForm">清空</v-btn>
-            </v-card-actions>
-        </div>
         <v-bottom-navigation 
             shift 
             color="primary" 
@@ -73,52 +63,35 @@
             <v-icon>mdi-forum</v-icon>
             </v-btn>
         </v-bottom-navigation>
-    </div>
+    </v-app>
   </template>
   
 <script>
-import AppHeader from '../../components/nav/ForumHeadBar.vue'
+
+import AskCard from '../../components/forum/AskCard.vue'
 import QuestionCard from '../../components/forum/QuestionCard.vue';
 
 export default {
-    components: { AppHeader, QuestionCard },
+    components: { QuestionCard},
     data() {
         return {
-            title:localStorage.getItem('forum_title'),
-            content:localStorage.getItem('forum_content'),
-            answerCount:localStorage.getItem('forum_answerCount'),
-            rewardPoints:localStorage.getItem('forum_reward'),
-            answerContent:"",
-            files:[]
+            navigation: 3,
+            qid: 0,
+            qtitle: ''
         }
     },
     methods: {
-        expandQuestion() {
-            this.expanded = !this.expanded
+        handleCancel() {
+            // 取消操作逻辑
+            this.$router.go(-1)
         },
-        submitAnswer() {
-            this.submitting = true
-            // 模拟API请求
-            setTimeout(() => {
-                console.log('提交内容:', {
-                    answer: this.answerContent,
-                    files: this.files
-                })
-                this.submitting = false
-                this.$emit('answered')
-            }, 1500)
-        },
-        clearForm() {
-            this.answerContent = ''
-            this.files = []
-        },
-        handleEnter(e) {
-            if (e.ctrlKey || e.shiftKey) {
-                this.answerContent += '\n'
-            } else {
-                this.submitAnswer()
-            }
+        handlePublish() {
+            // 发布操作逻辑
+            console.log('发布回答')
         }
+    },
+    created() {
+        this.qid = Number(localStorage.getItem('qid'))
     }
 }
 </script>

@@ -9,26 +9,20 @@
 				>
 			</v-row>
 			<v-row>
+				<v-btn text class="nav-item" active-class="active-link">
+					<v-icon left>mdi-pen</v-icon>
+					<span>关注</span>
+				</v-btn>
+				<v-btn text class="nav-item" active-class="active-link">
+					<v-badge dot color="error">
+						<v-icon left>mdi-comment-question</v-icon>
+					</v-badge>
+					<span>推荐</span>
+				</v-btn>
 				<v-btn text class="nav-item" to="/forum/hot" active-class="active-link">
                     <v-icon left>mdi-fire</v-icon>
                     <span>热榜</span>
                 </v-btn>
-				<v-btn text class="nav-item" to="/forum/question" active-class="active-link">
-					<v-icon left>mdi-pen</v-icon>
-					<span>直答</span>
-				</v-btn>
-				<!-- <v-btn text class="nav-item" to="/forum/ask" active-class="active-link">
-					<v-badge dot color="error">
-						<v-icon left>mdi-comment-question</v-icon>
-					</v-badge>
-					<span>提问</span>
-				</v-btn> -->
-				<v-btn text class="nav-item" @click="$emit('open-ask')" active-class="active-link">
-					<v-badge dot color="error">
-						<v-icon left>mdi-comment-question</v-icon>
-					</v-badge>
-					<span>提问</span>
-				</v-btn>
 			</v-row>
 		</v-container>
 
