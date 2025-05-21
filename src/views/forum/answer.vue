@@ -1,6 +1,8 @@
 <template>
     <div>
-        <ReturnHeader/>
+        <ReturnHeader
+            interface="answer"
+        />
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"

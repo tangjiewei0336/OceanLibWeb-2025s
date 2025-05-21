@@ -2,6 +2,7 @@
     <v-card
 		class="pa-4"
 		flat
+		:ripple="false"
 		@click="toAnswer"
 	>
 		<v-avatar size="20" color="primary" class="mr-3">
@@ -31,22 +32,22 @@
 				<span class="grey--text text--lighten-1 text-caption mr-2">{{ truncateContent(uid, 1) }}</span>
 				
 				<template v-if="!refuse">
-					<v-btn small text @click="agreeFunc" class="px-1">
+					<v-btn :ripple="false" small text @click="agreeFunc" class="px-1">
 					<v-icon left small>{{ agree ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}</v-icon>
 					</v-btn>
 				</template>
 				
 				<template v-if="!agree">
-					<v-btn small  text @click="refuseFunc" class="px-1">
+					<v-btn :ripple="false" small text @click="refuseFunc" class="px-1">
 					<v-icon left small>{{ refuse ? 'mdi-thumb-down' : 'mdi-thumb-down-outline' }}</v-icon>
 					</v-btn>
 				</template>
 				
-				<v-btn small  text @click="collectedFunc" class="px-1">
+				<v-btn :ripple="false" small text @click="collectedFunc" class="px-1">
 					<v-icon left small>{{ collected ? 'mdi-star' : 'mdi-star-outline' }}</v-icon>
 				</v-btn>
 				
-				<v-btn small  text @click="commentFunc" class="px-1">
+				<v-btn :ripple="false" small text @click="commentFunc" class="px-1">
 					<v-icon left small>mdi-chat-outline</v-icon>
 				</v-btn>
 			</div>

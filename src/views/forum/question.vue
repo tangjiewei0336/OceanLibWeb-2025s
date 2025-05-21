@@ -1,6 +1,8 @@
 <template>
     <div class="forum">
-        <ReturnHeader/>
+        <ReturnHeader
+            interface="question"
+        />
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
@@ -25,6 +27,7 @@
                 :key="index"
                 :qid="qid"
                 :rid="item.id"
+                interface="question"
             />
 
             <v-sheet

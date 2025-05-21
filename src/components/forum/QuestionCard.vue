@@ -34,19 +34,9 @@
 			<v-card-title class="pt-0 font-weight-bold">{{ qtitle }}</v-card-title>
 
 			<v-card-text v-if="this.interface === 'question'">
-				<div v-if="!expanded">
+				<div v-if="!expanded" @click="expanded = true" >
 					{{ truncateContent(qcontent) }}
-					<v-btn 
-						@click="expanded = true" 
-						text
-						small
-						color="grey"
-					>
-						展开
-						<v-icon right small>
-							{{ 'mdi-chevron-down' }}
-						</v-icon>
-					</v-btn>
+					<span class="grey--text text--lighten-1 text-caption">展开...</span>
 				</div>
 				<div v-if="expanded">
 					{{ qcontent }}
@@ -155,7 +145,7 @@ export default {
 			return colorMap[num] || 'transparent'
 		},
 		toQuestion() {
-			if (this.interface == 'hot') {
+			if (this.interface == 'hot' || this.interface == 'answer') {
 				localStorage.setItem('qid', this.qid)
 				this.$router.push('./question')
 			}
