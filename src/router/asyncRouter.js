@@ -47,20 +47,20 @@ const asyncRouterMap = [{
         component: (resolve) => require(['../views/forum/answerWrite.vue'], resolve)
     },
     {
-        path: '/forum/ask',
-        meta: {
-            title: '知乎提问',
-            permission: ["USER", "ADMIN"]
-        },
-        component: (resolve) => require(['../views/forum/ask.vue'], resolve)
-    },
-    {
         path: '/forum/hot',
         meta: {
             title: '知乎热榜',
             permission: ["USER", "ADMIN"]
         },
         component: (resolve) => require(['../views/forum/hot.vue'], resolve)
+    },
+    {
+        path: '/forum/questionSearch',
+        meta: {
+            title: '知乎搜索问题',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/forum/qsearch/qsearch.vue'], resolve)
     },
     {
         path: '/uploadFile',
