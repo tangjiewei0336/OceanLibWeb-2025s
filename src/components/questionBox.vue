@@ -90,9 +90,10 @@
         </v-icon>
         {{ title }}
       </div>
-      <div class="question-box__content text-ellipsis-3" v-html="content"></div>
+      <!-- <div class="question-box__content text-ellipsis-3" v-html="replaceImagesWithPlaceholder(content)"></div> -->
+      <div class="question-box__content text-ellipsis-3">{{ getPlainTextWithImagePlaceholder(content).slice(0, 100) }}</div>
       <div class="question-box__meta">
-        <span class="question-box__meta-item">{{ formattedTime }}</span>
+        <!-- <span class="question-box__meta-item">{{ formattedTime }}</span> -->
         <span class="question-box__meta-item">{{ answerCount }} 回答</span>
         <span class="question-box__meta-item">{{ viewCount }} 浏览</span>
         <span class="question-box__meta-item" v-if="rewardPoints > 0">
@@ -150,6 +151,12 @@
         // 以后需要改到问题的详细页面
         this.$router.push({ path: `/question/${this.id}` });
       },
+      getPlainTextWithImagePlaceholder(html) {
+        const replaced = html.replace(/<img[^>]*>/gi, ' [图片] ');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = replaced;
+        return tempDiv.textContent || tempDiv.innerText || '';
+      }
     },
   };
   </script>
