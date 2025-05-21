@@ -21,7 +21,6 @@ export default {
     name: 'ReturnHeader',
     methods: {
         goBack() {
-            localStorage.setItem('refresh', 'true')
             this.$router.go(-1)
         },
         performSearch() {

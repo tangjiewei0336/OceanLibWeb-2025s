@@ -29,11 +29,11 @@
 		</div>
 
 		<div
-			v-if="this.interface === 'question'"
+			v-if="this.interface !== 'hot'"
 		>
 			<v-card-title class="pt-0 font-weight-bold">{{ qtitle }}</v-card-title>
 
-			<v-card-text>
+			<v-card-text v-if="this.interface === 'question'">
 				<div v-if="!expanded">
 					{{ truncateContent(qcontent) }}
 					<v-btn 
@@ -67,9 +67,11 @@
 			</v-card-text>
 
 			<div style="margin-left: 20px;" class="text-caption ml-4">
-				
-				<span class="font-weight-bold">{{ commentNum }}</span> 评论 · 
-				<span class="font-weight-bold">{{ browse }}</span> 浏览
+				<span v-if="this.interface === 'answer'">知乎 · </span>
+				<span class="font-weight-bold">{{ commentNum }}</span> 评论
+				<span v-if="this.interface === 'question'">
+					 · <span class="font-weight-bold">{{ browse }}</span> 浏览
+				</span>
 			</div>
 		</div>
 	</v-card>

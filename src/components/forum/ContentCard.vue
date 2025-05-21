@@ -1,12 +1,16 @@
 <template>
-    <v-card class="pa-4" flat>
+    <v-card
+		class="pa-4"
+		flat
+		@click="toAnswer"
+	>
 		<v-avatar size="20" color="primary" class="mr-3">
 			<span class="white--text">{{ uid.charAt(0) }}</span>
 		</v-avatar>
 		<span class="grey--text text--lighten-1 text-caption">{{ uid }}</span>
 
-		<v-card-text>
-			<p class="text-body-2">{{ content }}</p>
+		<v-card-text v-if="this.interface === 'question'">
+			<p class="text-body-2">{{ truncateContent(content) }}</p>
 			<div class="d-flex justify-space-between align-center">
 				<p class="mb-0">
 					{{ likeCount }} 赞同 · {{ commentCount }} 评论
@@ -16,6 +20,38 @@
 				</span>
 			</div>
 		</v-card-text>
+		<v-card-text v-if="this.interface === 'answer'">
+			<div class="text-body-2">{{ content }}</div>
+			<v-divider></v-divider>
+			<div class="d-flex align-center flex-nowrap" style="gap: 4px">
+				<v-avatar size="20" color="primary" class="mr-1">
+					<span class="white--text">{{ uid.charAt(0) }}</span>
+				</v-avatar>
+				
+				<span class="grey--text text--lighten-1 text-caption mr-2">{{ truncateContent(uid, 1) }}</span>
+				
+				<template v-if="!refuse">
+					<v-btn small text @click="agreeFunc" class="px-1">
+					<v-icon left small>{{ agree ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}</v-icon>
+					</v-btn>
+				</template>
+				
+				<template v-if="!agree">
+					<v-btn small  text @click="refuseFunc" class="px-1">
+					<v-icon left small>{{ refuse ? 'mdi-thumb-down' : 'mdi-thumb-down-outline' }}</v-icon>
+					</v-btn>
+				</template>
+				
+				<v-btn small  text @click="collectedFunc" class="px-1">
+					<v-icon left small>{{ collected ? 'mdi-star' : 'mdi-star-outline' }}</v-icon>
+				</v-btn>
+				
+				<v-btn small  text @click="commentFunc" class="px-1">
+					<v-icon left small>mdi-chat-outline</v-icon>
+				</v-btn>
+			</div>
+
+		</v-card-text>
 
 		<v-sheet 
 			color="grey lighten-2" 
@@ -23,109 +59,9 @@
 			width="100%"
 			rounded="0"
 		/>
-		<!-- <v-card-actions class="justify-end">
-			<v-btn variant="text" color="grey">取消</v-btn>
-			<v-btn color="primary">确认</v-btn>
-			<v-btn variant="outlined" color="secondary">更多</v-btn>
-		</v-card-actions> -->
-
-		<!-- <div class="text-body-2 mt-3">
-			<div v-if="!isExpanded">
-				{{this.uid + ": " + truncateAnswer(this.content) }}
-			</div>
-			<div v-if="isExpanded">
-				{{ this.uid + ": " + this.content }}
-			</div>
-			<v-btn 
-				text 
-				color="primary" 
-				class="pl-0" 
-				@click="isExpanded = !isExpanded"
-			>
-				<v-icon left>{{ isExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-				{{ isExpanded ? '收起内容' : '展开内容' }}
-			</v-btn>
-		</div>
-  
-		<v-card-actions class="px-2 pt-0">
-			<v-btn 
-				text 
-				small
-				@click="vote('up')"
-			>
-				<v-icon left>mdi-thumb-up</v-icon>
-				{{ this.paraList[0] }}
-			</v-btn>
-			
-			<v-btn 
-				text 
-				small
-				@click="vote('down')"
-			>
-			<v-icon left>mdi-thumb-down</v-icon>
-				{{ this.paraList[1] }}
-			</v-btn>
-			
-			<v-btn 
-				text 
-				small
-				@click="unFoldComment = !unFoldComment"
-			>
-				<v-icon left>mdi-comment</v-icon>
-				{{ this.paraList[2] }}
-			</v-btn>
-			
-			<v-btn 
-				text 
-				small
-				@click="like"
-			>
-				<v-icon left>mdi-heart</v-icon>
-				{{ this.paraList[3] }}
-			</v-btn>
-			
-			<v-btn 
-				icon 
-				small
-				@click="showReward"
-			>
-				<v-icon>mdi-hand-coin</v-icon>
-				{{ this.paraList[4] }}
-			</v-btn>
-		</v-card-actions>
-
-		<div v-if="unFoldComment">
-			<v-row no-gutters align="center">
-				<v-col cols="9">
-					<v-textarea
-						v-model="newComment"
-						label="理性发言，友善互动"
-						auto-grow
-						outlined
-						dense
-						row-height="15"
-						no-resize
-						class="mr-2"
-						hide-details
-                	></v-textarea>
-				</v-col>
-				<v-col cols="auto">
-					<v-btn 
-						color="primary" 
-						@click="addComment"
-						small
-						depressed
-					>
-						发布
-					</v-btn>
-				</v-col>
-			</v-row>
-			<CommentCard/>
-		</div> -->
 
 	</v-card>
-
-  </template>
+</template>
   
 <script>
 import Mock from 'mockjs'
@@ -142,9 +78,9 @@ export default {
 			likeCount: 0,
 			liked: false,
 			createTime: null,
-			// isExpanded: false,
-			// unFoldComment: false,
-			// newComment: '',
+			agree: false,
+			refuse: false,
+			collected: false,
 		}
     },
 	props: {
@@ -156,27 +92,10 @@ export default {
 			type: Number,
 			required: true
 		},
-
-		// title: {
-		// 	type: String,
-		// 	default: "Ko no dio da!"
-		// },
-		// content: {
-		// 	type: String,
-		// 	default: "Vuetify 3.0带来了多项重大改进，包括：1. 完全兼容Vue 3的Composition API；2. 全新的设计系统，支持动态主题切换；3. 性能优化，组件渲染速度提升约40%；4. 新增VDataTable等实用组件...（此处省略后续内容）"
-		// },
-		// uid: {
-		// 	type: String,
-		// 	default: "DIO"
-		// },
-		// paraList: {
-		// 	type: Array,
-		// 	required: true
-		// },
-		// noTitle: {
-		// 	type: Boolean,
-		// 	default: false
-		// },
+		interface: {
+			type: String,
+			required: true
+		},
 	},
     methods: {
 		truncateAnswer(text, length = 30) {
@@ -192,7 +111,7 @@ export default {
 					'uid': '@ctitle(3,8)',
 					'title': '@ctitle(10,20)',
 					'hotPoint|5000-3000000': 1,
-					content: '@ctitle(50,100)',
+					content: '@ctitle(100,500)',
 					'commentCount|10-100': 1,
 					'browse|20-300': 1,
 					'likeCount|10-50': 1,
@@ -215,24 +134,38 @@ export default {
 				day: '2-digit'
 			})
 		},
-		expandAnswer() {
-			// 展开全文逻辑
+		toAnswer() {
+			if (this.interface === 'question') {
+				localStorage.setItem('rid', this.rid)
+				localStorage.setItem('qid', this.qid)
+				this.$router.push('./answer')
+			}
 		},
-		vote(type) {
-			// 赞同/反对逻辑
+		truncateContent(text, length = 34) {
+			return text.length > length 
+			? text.substring(0, length) + '...'
+			: text
 		},
-		showComments() {
-			// 显示评论逻辑
+		agreeFunc() {
+			this.agree = !this.agree
+			this.likeCount += this.agree ? 1 : -1
+
+			// TODO: api
 		},
-		like() {
-			// 点赞逻辑
+		refuseFunc() {
+			this.refuse = !this.refuse
+			// TODO: api
 		},
-		showReward() {
-			// 打赏逻辑
+		collectedFunc() {
+			this.collected = !this.collected
+			// TODO: api
+		},
+		commentFunc() {
+
 		}
     },
 	created() {
         this.fetchData()
     }
   }
-  </script>
+</script>

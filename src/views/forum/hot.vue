@@ -135,6 +135,8 @@ export default {
         if (refresh == 'true') {
             localStorage.setItem('refresh', 'false')
             this.$router.go(0)
+        } else {
+            localStorage.setItem('refresh', 'true')
         }
         this.fetchData()
     }
