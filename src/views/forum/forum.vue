@@ -1,20 +1,81 @@
+<style scoped lang="less">
+@import '~@/vant-variables.less';
+.forum {
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+
+  &__top {
+    background-color: white;
+    padding: 20px;
+
+    &__logo {
+      width: 120px;
+    }
+
+    &__searchBox {
+      margin: 10px 0;
+    }
+
+    &__grid {
+      margin: 10px 0;
+    }
+
+    &__adSwipe {
+      margin-bottom: 10px;
+    }
+  }
+
+  &__artical {
+    margin-top: 5px;
+    background-color: white;
+    padding: 20px;
+
+    &__group {
+      display: flex;
+      justify-content: space-between;
+
+      &__title {
+        font-size: 16px;
+
+        &--extraDesc {
+          font-size: 12px;
+        }
+
+        &--divider {
+          margin: 0 5px;
+        }
+      }
+
+      &__more {
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+      }
+
+      &__tabs {
+        margin: 5px 0;
+
+        &__tab {
+          margin: 10px 0;
+        }
+      }
+      &__fileBox {
+        margin-top: 15px;
+      }
+    }
+  }
+
+}
+</style>
+<style scoped>
+.v-btn:not(.v-btn--round).v-size--default {
+  height: -webkit-fill-available;
+}
+</style>
 <template>
     <div class="forum">
-        <v-app-bar app fixed color="white" elevation="1" height="64">
-            <AppHeader @open-ask="showDialog = true" />
-        </v-app-bar>
-
-        <!-- 弹窗，受 showDialog 控制 -->
-        <v-dialog
-            v-model="showDialog"
-            fullscreen
-            hide-overlay
-            transition="dialog-bottom-transition"
-            persistent
-        >
-            <!-- 这里直接用 AskCard -->
-            <AskCard @close="showDialog = false" />
-        </v-dialog>
+        <AppHeader />
 
         <div style="margin-top: 220px; margin-bottom: 50px">
             <ContentCard
@@ -23,53 +84,40 @@
             />
         </div>
         
-        <v-bottom-navigation 
-            app
-            shift 
-            color="primary" 
-            grow 
-            fixed
-            v-model="navigation"
-            class="bottom-nav-on-top"
-        >
-            <v-btn value="library" to="/index">
-            <span>文库</span>
-            <v-icon>mdi-text-box-search</v-icon>
-            </v-btn>
-            <v-btn value="help" to="/wall">
-            <span>互助</span>
-            <v-icon>mdi-handshake</v-icon>
-            </v-btn>
-            <v-btn value="mine" to="/mine">
-            <span>我的</span>
-            <v-icon>mdi-account-circle</v-icon>
-            </v-btn>
-            <v-btn value="forum" to="/forum/recommend">
-            <span>知乎</span>
-            <v-icon>mdi-forum</v-icon>
-            </v-btn>
-        </v-bottom-navigation>
+        <div style="position: fixed;bottom: 0;left: 0;right: 0;">
+            <v-bottom-navigation shift color="primary" grow class="index__bottom__navigation" v-model="navigation">
+                <v-btn link to="/index">
+                    <span>文库</span>
+                    <v-icon>mdi-text-box-search</v-icon>
+                </v-btn>
+                <v-btn link to="/wall">
+                    <span>互助</span>
+                    <v-icon>mdi-handshake</v-icon>
+                </v-btn>
+                <v-btn link to="/forum/recommend">
+                    <span>知乎</span>
+                    <v-icon>mdi-forum</v-icon>
+                </v-btn>
+                <v-btn link to="/mine">
+                    <span>我的</span>
+                    <v-icon>mdi-account-circle</v-icon>
+                </v-btn>
+            </v-bottom-navigation>
+        </div>
     </div>
   </template>
   
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
 import ContentCard from '../../components/forum/ContentCard.vue';
-import AskCard from '../../components/forum/AskCard.vue'
 
 export default {
-    components: { AppHeader, ContentCard, AskCard },
+    components: { AppHeader, ContentCard },
     data() {
         return {
-        navigation: null,
+        navigation: 2,
         showDialog: false,
         }
-    }
+    },
 }
 </script>
-
-<style scoped>
-.bottom-nav-on-top {
-  z-index: 2000; /* 确保底部导航在弹窗之上 */
-}
-</style>
