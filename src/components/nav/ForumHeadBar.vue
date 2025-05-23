@@ -82,13 +82,3 @@ export default {
 }
 
 </style>
-
-<!--           
-<v-col cols="12">
-	<v-text-field
-		solo flat hide-details
-		prepend-inner-icon="mdi-magnify"
-		class="search-field"
-	></v-text-field>
-</v-col>
- -->

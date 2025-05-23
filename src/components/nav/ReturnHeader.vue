@@ -37,7 +37,7 @@ export default {
             this.searchMenu = false
         },
 		writeAnswer() {
-			// 处理写回答逻辑
+      this.$router.push('./answerWrite')
 		}
     },
 	props: {
