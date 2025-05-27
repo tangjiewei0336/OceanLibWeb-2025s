@@ -50,9 +50,9 @@
 </style>
 <template>
   <div class="page">
-    <van-nav-bar ref="toolbar" title="我的内容" left-text="返回" left-arrow @click-left="back" fixed placeholder></van-nav-bar>
-    <van-tabs sticky class="full" :offset-top="tabsOffset">
-      <van-tab title="文档" name="0" class="full">
+    <van-nav-bar ref="toolbar" title="草稿箱" left-text="返回" left-arrow @click-left="back" fixed placeholder></van-nav-bar>
+    <van-tabs v-model="activeTab" sticky class="full" :offset-top="tabsOffset">
+        <van-tab title="文档" name="0" class="full">
         <van-pull-refresh class="pullRefresh full" v-model="content.fileList.refreshing" @refresh="getMyFileList(true)">
           <van-list v-model="content.fileList.loading" :finished="content.fileList.finished" @load="getMyFileList()" class="full">
             <div v-for="fileInfo in myFileList" :key="fileInfo.fileID">
@@ -62,7 +62,7 @@
                   :ratersNum="fileInfo.fileExtraEntity.ratersNum" :paymentMethod="fileInfo.paymentMethod" :paymentAmount="fileInfo.paymentAmount"
                   :isVipIncome="fileInfo.fileExtraEntity.isVipIncome" :fileTagList="fileInfo.tagNames"></v-fileBox>
                 <v-card-actions>
-                  <v-btn fab dark x-small color="primary" @click="changeFileInfo(fileInfo.fileID)">
+                  <v-btn fab dark x-small color="primary">
                     <v-icon>mdi-note-edit</v-icon>
                   </v-btn>
                   <v-btn fab dark x-small color="primary">
@@ -112,51 +112,25 @@
               </v-card>
             </div>
             <template #finished>
-              <div class="myDocfinished">
-                <!--若无文件则显示空提示-->
-                <van-empty description="您还没有已经发布的文档呢" v-if="myFileList.length==0">
-                  <template slot="image">
-                    <img src="@/images/empty-picture/no_record.svg" />
-                  </template>
-                  <template>
-                    <v-btn color="primary" small class="mr-2" to="/uploadFile">上传更多文档
-                      <v-icon right dark>mdi-file-upload</v-icon>
-                    </v-btn>
-                    <v-btn color="primary" small>查看草稿箱文档
-                      <v-icon right dark>mdi-seal-variant</v-icon>
-                    </v-btn>
-                  </template>
-                </van-empty>
-                <!-- <div v-else class="notice-nomore__text">没有更多已经发布的文档了</div>
-                <v-btn color="primary" small class="mr-2" to="/uploadFile">上传更多文档
-                  <v-icon right dark>mdi-file-upload</v-icon>
-                </v-btn>
-                <v-btn color="primary" small>查看草稿箱文档
-                  <v-icon right dark>mdi-seal-variant</v-icon>
-                </v-btn> -->
-                <div v-else description="没有更多已经发布的文档了">
+              <!--若无文件则显示空提示-->
+              <van-empty description="您还没有已经发布的文档呢" v-if="myFileList.length==0">
+                <template slot="image">
+                  <img src="@/images/empty-picture/no_record.svg" />
+                </template>
+                <template>
                   <v-btn color="primary" small class="mr-2" to="/uploadFile">上传更多文档
                     <v-icon right dark>mdi-file-upload</v-icon>
                   </v-btn>
-                  <v-btn color="primary" small>查看草稿箱文档
-                    <v-icon right dark>mdi-seal-variant</v-icon>
-                  </v-btn>
-                </div>
-              </div>
+                </template>
+              </van-empty>
+              <div v-else class="notice-nomore__text">没有更多已经发布的文档了</div>
+              <v-btn color="primary" small class="mr-2" to="/uploadFile">上传更多文档
+                <v-icon right dark>mdi-file-upload</v-icon>
+              </v-btn>
             </template>
           </van-list>
         </van-pull-refresh>
       </van-tab>
-      <!-- <van-tab title="专栏" name="1">
-        <van-empty description="程序猿们正在努力开发中">
-          <template slot="image">
-            <img src="@/images/empty-picture/no_internet.svg" />
-          </template>
-          <v-btn color="primary" small class="mr-2" to="/about">加入我们
-            <v-icon right dark>mdi-account-cog</v-icon>
-          </v-btn>
-        </van-empty>
-      </van-tab> -->
       <van-tab title="提问" name="1" class="full">
         <van-pull-refresh class="pullRefresh full" v-model="content.questionList.refreshing" @refresh="getMyQuestionList(true)">
           <van-list v-model="content.questionList.loading" :finished="content.questionList.finished" @load="getMyQuestionList()" class="full">
@@ -186,9 +160,6 @@
                   <!-- <v-btn fab dark x-small color="primary">
                     <v-icon>mdi-share-variant</v-icon>
                   </v-btn> -->
-                  <v-btn fab dark x-small color="primary"  @click="hideQuestion(question.id)">
-                    <v-icon>mdi-eye-off</v-icon>
-                  </v-btn>
                   <v-btn fab dark x-small color="error"  @click="confirmDeleteQuestion(question.id)">
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
@@ -224,7 +195,7 @@
             </div>
             <template #finished>
               <div class="myQuestionfinished">
-                <van-empty description="您还没有发布任何问题" v-if="myQuestionList.length==0">
+                <van-empty description="您还没有保存任何问题的草稿" v-if="myQuestionList.length==0">
                   <template slot="image">
                     <img src="@/images/empty-picture/no_record.svg" />
                   </template>
@@ -232,184 +203,51 @@
                     <v-btn color="primary" small class="mr-2" @click="showDialog = true">去提问
                       <v-icon right dark>mdi-comment-question</v-icon>
                     </v-btn>
-                    <v-btn color="primary" small :to="{ path: '/myDraftQuestion', query: { tab: '1' } }">查看草稿箱问题
-                      <v-icon right dark>mdi-seal-variant</v-icon>
-                    </v-btn>
                   </template>
                 </van-empty>
-                <div v-else description="没有更多已经发布的问题了">
+                <div v-else description="没有更多保存的问题草稿了">
                   <v-btn color="primary" small class="mr-2" @click="showDialog = true">去提问
                     <v-icon right dark>mdi-comment-question</v-icon>
                   </v-btn>
-                  <v-btn color="primary" small :to="{ path: '/myDraftQuestion', query: { tab: '1' } }">查看草稿箱问题
-                    <v-icon right dark>mdi-seal-variant</v-icon>
-                  </v-btn>
                 </div>
               </div>
             </template>
           </van-list>
         </van-pull-refresh>
-      </van-tab>
-
-      <v-dialog
-				v-model="showDialog"
-				fullscreen
-				hide-overlay
-				transition="dialog-bottom-transition"
-				persistent
-			>
-				<AskCard 
-          @close="handleAskCardClose"
-          :questionId="this.toupdate_questionId"
-          />
-      </v-dialog>
-        
-        <v-dialog
-				v-model="showDialogAnswer"
-				fullscreen
-				hide-overlay
-				transition="dialog-bottom-transition"
-				persistent
-        >
-				<AnswerCard 
-          @close="handleAnswerClose"
-          :answerId="this.toupdate_answerId"
-          :questionId="this.toupdate_answer_questionId"
-          :questionTitle="this.toupdate_answer_questionTitle"
-        />
-			</v-dialog>
-
-      <van-tab title="回答" name="2" class="full">
-        <van-pull-refresh class="pullRefresh full" v-model="content.answerList.refreshing" @refresh="getMyAnswerList(true)">
-          <van-list v-model="content.answerList.loading" :finished="content.answerList.finished" @load="getMyAnswerList()" class="full">
-            <div v-for="answer in myAnswerList" :key="answer.id">
-              <v-card class="myAsk" outlined>
-                <v-answerBox
-                  :key="answer.id"
-                  v-bind="answer"
-                  class="myAsk__questionBox"
-                />
-                <!-- <div class="question-box__tags">
-                  <van-tag
-                    v-for="tag in question.tagIds"
-                    :key="tag"
-                    type="primary"
-                    class="question-box__tag"
-                  >
-                    {{ tag }}
-                  </van-tag>
-                </div> -->
-                <!-- 操作按钮 -->
-                <v-card-actions>
-                  <!-- <v-btn fab dark x-small color="primary" @click="changeQuestionInfo(question.id)"> -->
-                  <v-btn fab dark x-small color="primary" @click="handleAnswerUpdate(answer)">
-                    <v-icon>mdi-note-edit</v-icon>
-                  </v-btn>
-                  <!-- <v-btn fab dark x-small color="primary">
-                    <v-icon>mdi-share-variant</v-icon>
-                  </v-btn> -->
-                  <v-btn fab dark x-small color="error" @click="confirmDeleteAnswer(answer.id)">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                  <v-spacer></v-spacer>
-                  <v-btn icon @click="answer.show = !answer.show; $forceUpdate();">
-                    <v-icon>{{ answer.show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                  </v-btn>
-                </v-card-actions>
-
-                <!-- 展开内容 -->
-                <v-expand-transition>
-                  <div v-show="answer.show">
-                    <v-divider></v-divider>
-                    <v-simple-table dense style="width: 500px">
-                      <template v-slot:default>
-                        <thead>
-                          <tr>
-                            <th class="text-left">更新时间</th>
-                            <th class="text-left">上传时间</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>{{ formatTime(answer.updateTime) }}</td>
-                            <td>{{ formatTime(answer.createTime) }}</td>
-                          </tr>
-                        </tbody>
-                      </template>
-                    </v-simple-table>
-                  </div>
-                </v-expand-transition>
-              </v-card>
-            </div>
-            <template #finished>
-              <div class="myQuestionfinished">
-                <van-empty description="您还没有回答任何问题" v-if="myAnswerList.length==0">
-                  <template slot="image">
-                    <img src="@/images/empty-picture/no_record.svg" />
-                  </template>
-                  <template>
-                    <v-btn color="primary" small class="mr-2" to="/forum/recommend">回答问题
-                      <v-icon right dark>mdi-reply</v-icon>
-                    </v-btn>
-                    <!-- <v-btn color="primary" small>查看草稿箱问题
-                      <v-icon right dark>mdi-seal-variant</v-icon>
-                    </v-btn> -->
-                  </template>
-                </van-empty>
-                <div v-else description="没有更多已经回答的问题了">
-                  <v-btn color="primary" small class="mr-2" to="/forum/recommend">回答问题
-                    <v-icon right dark>mdi-reply</v-icon>
-                  </v-btn>
-                  <!-- <v-btn color="primary" small>查看草稿箱问题
-                    <v-icon right dark>mdi-seal-variant</v-icon>
-                  </v-btn> -->
-                </div>
-              </div>
-            </template>
-          </van-list>
-        </van-pull-refresh>
-      </van-tab>
-
-      <van-tab title="帮帮帖" name="3">
-        <van-empty description="程序猿们正在努力开发中">
-          <template slot="image">
-            <img src="@/images/empty-picture/no_internet.svg" />
-          </template>
-          <v-btn color="primary" small class="mr-2" to="/about">加入我们
-            <v-icon right dark>mdi-account-cog</v-icon>
-          </v-btn>
-        </van-empty>
       </van-tab>
     </van-tabs>
+    <v-dialog
+    v-model="showDialog"
+    fullscreen
+    hide-overlay
+    transition="dialog-bottom-transition"
+    persistent
+    >
+        <AskCard 
+        @close="handleAskCardClose"
+        :questionId="this.toupdate_questionId"
+        />
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import fileBox from '../../components/fileBox';
 import questionBox from '../../components/questionBox';
-import answerBox from '../../components/answerBox';
 import { Dialog } from 'vant';
 import AskCard from '@/components/forum/AskCard.vue'
-import AnswerCard from '@/components/forum/AnswerCard.vue'
 
 export default {
   components: {
     'v-fileBox': fileBox,
     'v-questionBox': questionBox,
-    'v-answerBox': answerBox,
     AskCard,
-    AnswerCard,
   },
   data() {
     return {
-      toupdate_questionId: null,
-      toupdate_answerId: null,
-      toupdate_answer_questionId: null,
-      toupdate_answer_questionTitle: "",
-
       tabsOffset: 0,
       showDialog: false,
-      showDialogAnswer: false,
+      activeTab: '0', // 文档栏默认选中
       myFileList: [
         {
           "fileID": 1,
@@ -495,20 +333,6 @@ export default {
           attachmentIds: ['att001', 'att002'],
         },
       ],
-      myAnswerList: [
-        {
-          id: 111,
-          content: `
-            <p>这是描述</p><img src="https://pic3.zhimg.com/80/v2-8eddcbe0f97aa68d7aeed10775187ddc_r.jpg"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          likeCount: 50,
-          commentCount: 3,
-          question: { id: 1, title: 'Vue 与 React 的主要区别？',content: 'dwdoai' }
-        },
-      ],
       content: {
         fileList: {
           loading: false,
@@ -544,24 +368,18 @@ export default {
     };
   },
   mounted() {
-    this.tabsOffset = this.$refs['toolbar'].height;
+    // this.tabsOffset = this.$refs['toolbar'].height;
   },
+  created() {
+    const tabFromQuery = this.$route.query.tab;
+    if (tabFromQuery === '1' || tabFromQuery === '0') {
+        this.activeTab = tabFromQuery;
+    }
+},
   methods: {
     handleAskCardClose() {
-      this.showDialog = false;
-      this.toupdate_questionId = null;
-    },
-    handleAnswerClose() {
-      this.showDialogAnswer = false;
-      this.toupdate_answerId = null;
-      this.toupdate_answer_questionId = null;
-      this.toupdate_answer_questionTitle = "";
-    },
-    handleAnswerUpdate(answer) {
-      this.showDialogAnswer = true;
-      this.toupdate_answerId = answer.id;
-      this.toupdate_answer_questionId = answer.questionId;
-      this.toupdate_answer_questionTitle = answer.question.title;
+        this.showDialog = false;
+        this.toupdate_questionId = null;
     },
     back() {
       this.$router.go(-1); //返回上一层
@@ -571,34 +389,31 @@ export default {
         this.content.fileList.pageNum = 1;
         this.content.fileList.finished = false;
       }
-      // this.$Axios({
-      //   method: 'get',
-      //   url: '/docInfoService/getMyFileList',
-      //   params: {
-      //     isFolder: false,
-      //     pageNum: this.content.fileList.pageNum,
-      //     pageSize: 4,
-      //   },
-      // }).then((response) => {
-      //   if (!isRefreshing) {
-      //     this.myFileList.push(...response.data.msg.list);
-      //   } else {
-      //     this.myFileList = response.data.msg.list;
-      //   }
-      //   this.myFileList.map((data) => {
-      //     data.show = false;
-      //   });
-      //   if (response.data.msg.isLastPage) {
-      //     this.content.fileList.finished = true;
-      //   } else {
-      //     this.content.fileList.pageNum += 1;
-      //   }
-      //   this.content.fileList.loading = false;
-      //   this.content.fileList.refreshing = false;
-      // });
-      this.content.fileList.finished = true;
-      this.content.fileList.loading = false;
-      this.content.fileList.refreshing = false;
+      this.$Axios({
+        method: 'get',
+        url: '/docInfoService/getMyFileList',
+        params: {
+          isFolder: false,
+          pageNum: this.content.fileList.pageNum,
+          pageSize: 4,
+        },
+      }).then((response) => {
+        if (!isRefreshing) {
+          this.myFileList.push(...response.data.msg.list);
+        } else {
+          this.myFileList = response.data.msg.list;
+        }
+        this.myFileList.map((data) => {
+          data.show = false;
+        });
+        if (response.data.msg.isLastPage) {
+          this.content.fileList.finished = true;
+        } else {
+          this.content.fileList.pageNum += 1;
+        }
+        this.content.fileList.loading = false;
+        this.content.fileList.refreshing = false;
+      });
     },
     changeFileInfo(fileID) {
       this.$router.push({
@@ -608,14 +423,12 @@ export default {
         },
       });
     },
-
     formatTime(datetime) {
       const d = new Date(datetime);
       const date = d.toLocaleDateString(); // 2025/5/21
       const time = d.toLocaleTimeString().slice(0, 5); // eg. 15:30
       return `${date} ${time}`;
     },
-
     getMyQuestionList(isRefreshing = false) {
       if (isRefreshing) {
         this.content.questionList.pageNum = 1;
@@ -659,50 +472,10 @@ export default {
     //     },
     //   });
     // },
-    hideQuestion(questionId) {
-      Dialog.confirm({
-        title: '确认隐藏',
-        message: '此操作会将该问题移至“草稿箱”，隐藏后可在草稿箱查看，是否继续？',
-        confirmButtonText: '确定隐藏',
-        cancelButtonText: '我再想想',
-      })
-      .then(() => {
-        this.doHideQuestion(questionId);
-      })
-      .catch(() => {
-      });
-    },
-    doHideQuestion(questionId) {
-      this.$Axios({
-        method: 'PUT',
-        url: '/qaService/question/update',
-        params: {
-          page: this.content.questionList.pageNum,
-          isPost: 0,
-          isHide: 1,
-        },
-      })
-      .then((response) => {
-        const data = response.data;
-        if (data.code === 0) {
-          this.myQuestionList = this.myQuestionList.filter(q => q.id !== questionId);
-          this.$toast.success('已成功隐藏该问题');
-        } else {
-          this.$toast.fail(data.msg || '隐藏失败');
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        this.$toast.fail('网络错误，隐藏失败');
-        this.$set(this.myQuestionList[idx], 'hiding', false);
-      });
-      // this.myQuestionList = this.myQuestionList.filter(q => q.id !== questionId);
-      // this.$toast.success('已成功隐藏该问题');
-    },
     confirmDeleteQuestion(questionId) {
       Dialog.confirm({
         title: '确认删除',
-        message: '此操作不可恢复，是否确定要删除这条提问？',
+        message: '此操作不可恢复，是否确定要删除这条问题草稿？',
       })
       .then(() => {
         this.deleteQuestion(questionId);
@@ -720,72 +493,7 @@ export default {
         if (response.data.code === 0) {
           // 从列表移除
           this.myQuestionList = this.myQuestionList.filter(q => q.id !== questionId);
-          this.$toast.success('已成功删除该问题');
-        } else {
-          this.$toast.fail(response.data.msg || '删除失败');
-        }
-      })
-      .catch(() => {
-        this.$toast.fail('网络错误，删除失败');
-      });
-    },
-    getMyAnswerList(isRefreshing) {
-      if (isRefreshing) {
-        this.content.answerList.pageNum = 1;
-        this.content.answerList.finished = false;
-      }
-      // this.$Axios({
-      //   method: 'get',
-      //   url: '/qaService/answer/list',
-      //   params: {
-      //     page: this.content.answerList.pageNum,
-      //     pageSize: 4,
-      //     username: localStorage.getItem('username'),
-      //     sort: 0
-      //   },
-      // }).then((response) => {
-      //   if (!isRefreshing) {
-      //     this.answerList.push(...response.data.msg.list);
-      //   } else {
-      //     this.answerList = response.data.msg.list;
-      //   }
-      //   this.answerList.map((data) => {
-      //     data.show = false;
-      //   });
-      //   if (response.data.msg.isLastPage) {
-      //     this.content.answerList.finished = true;
-      //   } else {
-      //     this.content.answerList.pageNum += 1;
-      //   }
-      //   this.content.answerList.loading = false;
-      //   this.content.answerList.refreshing = false;
-      // });
-      this.content.answerList.finished = true;
-      this.content.answerList.loading = false;
-      this.content.answerList.refreshing = false;
-    },
-    confirmDeleteAnswer(answerId) {
-      Dialog.confirm({
-        title: '确认删除',
-        message: '此操作不可恢复，是否确定要删除这条回答？',
-      })
-      .then(() => {
-        this.deleteAnswer(answerId);
-      })
-      .catch(() => {
-      });
-    },
-    deleteAnswer(answerId) {
-      this.$Axios({
-        method: 'DELETE',
-        url: '/qaService/answer/delete',
-        params: { answerId },
-      })
-      .then(response => {
-        if (response.data.code === 0) {
-          // 从列表移除
-          this.myAnswerList = this.myAnswerList.filter(q => q.id !== answerId);
-          this.$toast.success('已成功删除该回答');
+          this.$toast.success('已成功删除该问题草稿');
         } else {
           this.$toast.fail(response.data.msg || '删除失败');
         }
