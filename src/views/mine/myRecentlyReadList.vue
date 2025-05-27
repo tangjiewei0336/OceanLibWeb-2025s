@@ -51,7 +51,7 @@
             </div>
             <template #finished>
               <!--若无收藏夹则显示空提示-->
-              <van-empty description="没有最近7天的浏览记录呢" v-if="fileList.length==0">
+              <van-empty description="没有最近7天的浏览记录呢" v-if="questionList.length==0">
                 <template slot="image">
                   <img src="@/images/empty-picture/no_record.svg" />
                 </template>
@@ -157,6 +157,9 @@ export default {
         this.question_loading = false;
         this.question_finished = true;
       });
+      // this.question_refreshing = false;
+      // this.question_loading = false;
+      // this.question_finished = true;
     },
   },
 };
