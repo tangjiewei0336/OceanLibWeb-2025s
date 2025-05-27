@@ -1,110 +1,174 @@
 <template>
-  <v-card elevation="2" class="ask-card">
-    <!-- 顶部导航栏 -->
-    <div class="ask-card-toolbar">
-      <v-btn icon @click="$emit('close')" class="close-btn">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-      <span class="ask-card-title">提问</span>
-      <v-btn color="primary" @click="publish" class="publish-btn" 
-        :disabled="!title.trim()" 
-        >
-        发布
-      </v-btn>
-    </div>
-    <!-- <van-nav-bar id="toolbar" title="提问" left-text="返回" left-arrow @click-left="back" fixed placeholder @click-right="publish">
-      <template #right>
-        <a>发布</a>
-      </template>
-    </van-nav-bar>
-    <div class="newcollection">
-      <v-text-field class="newcollection__input small" placeholder="输入问题标题，并以问号结尾（必填）" outlined dense hide-details="auto">
+<div class="ask-card">
+  <!-- 顶部导航栏 -->
+  <div class="ask-card-toolbar">
+    <v-btn icon @click="$emit('close')" class="close-btn">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
+    <span class="ask-card-title">{{ questionId ? '编辑问题' : '提问' }}</span>
+    <v-btn color="primary" @click="publish" class="publish-btn" 
+      :disabled="!title.trim()" 
+      >
+      {{ questionId ? '更新' : '发布' }}
+    </v-btn>
+  </div>
+
+  <!-- 标题输入 -->
+  <input
+  v-model="title"
+  class="title-input"
+  placeholder="输入问题标题，并以问号结尾（必填）"
+  @blur="checkTitle"
+  @input="onTitleInput"
+  ref="titleInput"
+  />
   
-      </v-text-field>
-      <v-textarea class="newcollection__input " v-model="collectionDesc" placeholder="详细说明问题，以获取专业解答（选填）" outlined dense hide-details></v-textarea>
+  <!-- 分割线 -->
+  <hr class="divider" />
+
+  <div>
+    <!-- <div>
+      <button @click="printEditorHtml">print html</button>
+      <button @click="getEditorText">print text</button>
     </div> -->
-
-    <!-- 标题输入 -->
-    <input
-      v-model="title"
-      class="title-input"
-      placeholder="输入问题标题，并以问号结尾（必填）"
-      @blur="checkTitle"
-      @input="onTitleInput"
-      ref="titleInput"
-    />
-
-    <!-- 分割线 -->
-    <hr class="divider" />
-
-    <div class="editor-container">
-      <editor-content :editor="editor" />
-      <div class="editor-toolbar">
-        <v-btn icon @click="openImageDialog" class="editor-btn">
-          <v-icon>mdi-image</v-icon>
-        </v-btn>
-      </div>
+    <div style="border: 1px solid #ccc; margin-top: 10px">
+      <!-- 工具栏 -->
+      <Toolbar
+        style="border-bottom: 1px solid #ccc"
+        :editor="editor"
+        :defaultConfig="toolbarConfig"
+      />
+      <!-- 编辑器 -->
+      <Editor
+        style="height: 900px; overflow-y: hidden"
+        :defaultConfig="editorConfig"
+        v-model="html"
+        @onChange="onChange"
+        @onCreated="onCreated"
+      />
     </div>
-
-    <!-- 图片上传对话框 -->
-    <v-dialog v-model="imageDialog" max-width="600px">
-      <v-card>
-        <v-card-title class="headline">上传图片</v-card-title>
-        <v-card-text>
-          <v-file-input
-            v-model="imageFile"
-            label="选择图片"
-            accept="image/*"
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text @click="imageDialog = false">取消</v-btn>
-          <!-- <v-btn color="primary" @click="imageDialog = false">上传</v-btn> -->
-          <v-btn color="primary" @click="confirmUpload">上传</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-card>
+    <!-- <div style="margin-top: 10px">
+      <textarea
+        v-model="html"
+        readonly
+        style="width: 100%; height: 200px; outline: none"
+      ></textarea>
+    </div> -->
+  </div>
+</div>
 </template>
 
 <script>
-import { Editor, EditorContent } from '@tiptap/vue-2'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import Image from '@tiptap/extension-image'
+import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 
 export default {
   name: 'AskCard',
-  emits: ['close'],
-  components: {
-    EditorContent,
+  props: {
+    questionId: {
+      type: [String, Number],
+      default: null,
+    },
+    initialTitle: {
+      type: String,
+      default: '',
+    },
+    initialContent: {
+      type: String,
+      default: '',
+    },
   },
+  emits: ['close'],
+  components: { Editor, Toolbar },
   data() {
+    const vm = this;
     return {
-      title: '',
-      editor: null,
       imageDialog: false,
       imageFile: null,
+
+      title: vm.initialTitle,
+      html: vm.initialContent,
+      editor: null,
+      toolbarConfig: {
+        // toolbarKeys: [ /* 显示哪些菜单，如何排序、分组 */ ],
+        // excludeKeys: [ /* 隐藏哪些菜单 */ ],
+      },
+      editorConfig: {
+        placeholder: "详细说明问题，以获取专业解答（选填）",
+        // autoFocus: false,
+
+        // 所有的菜单配置，都要在 MENU_CONF 属性下
+        MENU_CONF: {
+          uploadImage: {
+            // 不指定 server，走 customUpload
+            // server: '',
+            maxNumberOfFiles: 1,
+            maxFileSize: 5 * 1024 * 1024, // 5MB
+            // 自定义上传：把 file 读成 DataURL，再插入
+            // customUpload(file, insertImgFn) {
+            //   const reader = new FileReader();
+            //   reader.onload = e => {
+            //     const dataUrl = e.target.result;
+            //     // 用编辑器提供的回调插入图片
+            //     insertImgFn(dataUrl);
+            //   };
+            //   reader.readAsDataURL(file);
+            // },
+            async customUpload(file, insertImgFn) {
+              // 1. 构造表单
+              const form = new FormData();
+              form.append('file', file);
+
+              // 这里的 this 就是组件实例
+              vm.$Axios({
+                method: 'post',
+                url: '/api/upload/image',
+                data: form,
+              })
+              .then(resp => {
+                insertImgFn(resp.data.data.url);
+                vm.$toast.success('上传成功');
+              })
+              .catch(err => {
+                console.error(err);
+                vm.$toast.fail('上传失败');
+              });
+            },
+          }
+        },
+      },
     }
   },
-  mounted() {
-    this.editor = new Editor({
-      extensions: [
-        StarterKit,
-        Image,
-        Placeholder.configure({
-          placeholder: '详细说明问题，以获取专业解答（选填）',
-        }),
-      ],
-      content: '',
-    })
-  },
-  beforeUnmount() {
-    if (this.editor) {
-      this.editor.destroy()
-      this.editor = null
+  async mounted() {
+    // console.log(this.questionId)
+    // console.log(this.initialTitle)
+    if (this.questionId) {
+      try {
+        const resp = await this.$Axios.get('/qaService/question/details', {
+          params: { questionId: this.questionId }
+        });
+        const data = resp.data;
+        if (data.code === 0) {
+          this.title = data.data.question.title;
+          this.html = data.data.question.content;
+        } else {
+          this.$toast.fail(data.msg || '获取问题详情失败');
+        }
+      } catch (err) {
+        console.error('拉取详情异常', err);
+        this.$toast.fail('获取问题详情失败');
+      }
     }
+  },
+  // beforeUnmount() {
+  //   if (this.editor) {
+  //     this.editor.destroy()
+  //     this.editor = null
+  //   }
+  // },
+  beforeDestroy() {
+    const editor = this.editor;
+    if (editor == null) return;
+    editor.destroy(); // 组件销毁时，及时销毁 editor ，重要！！！
   },
   methods: {
     checkTitle() {
@@ -123,79 +187,99 @@ export default {
         }, 100)
       }
     },
-    openImageDialog() {
-      this.imageDialog = true
+    onCreated(editor) {
+      this.editor = Object.seal(editor); // 【注意】一定要用 Object.seal() 否则会报错
     },
-    confirmUpload() {
-      if (!this.imageFile) return;
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target.result;
+    onChange(editor) {
+      // console.log("onChange", editor.getHtml()); // onChange 时获取编辑器最新内容
+    },
+    getEditorText() {
+      const editor = this.editor;
+      if (editor == null) return;
 
-        const imgElement = document.createElement('img');
-        imgElement.src = imageUrl;
+      console.log(editor.getText()); // 执行 editor API
+    },
+    printEditorHtml() {
+      const editor = this.editor;
+      if (editor == null) return;
 
-        imgElement.onload = () => {
-          // 获取编辑器内容区域的宽度作为最大宽度
-          const editorContent = this.$el.querySelector('.editor-container');
-          const maxWidth = editorContent ? editorContent.clientWidth : window.innerWidth * 0.9;
-
-          let width = imgElement.width;
-          let height = imgElement.height;
-
-          if (width > maxWidth) {
-            const ratio = maxWidth / width;
-            width = maxWidth;
-            height = height * ratio;
-          }
-
-          // 插入图片到编辑器
-          this.editor.chain().focus().setImage({ src: imageUrl }).run();
-
-          // 延时确保图片插入到 DOM 后设置宽高
-          setTimeout(() => {
-            const insertedImages = document.querySelectorAll('.ProseMirror img');
-            const lastImage = insertedImages[insertedImages.length - 1];
-            if (lastImage) {
-              lastImage.style.width = `${width}px`;
-              lastImage.style.height = `${height}px`;
-              lastImage.style.maxWidth = '100%'; // 防止超出边界
-              lastImage.style.height = 'auto';   // 保持纵横比
-            }
-          }, 50);
-
-          // 清除文件和关闭对话框
-          this.imageFile = null;
-          this.imageDialog = false;
-          console.log('上传成功');
-        };
-      };
-      reader.readAsDataURL(this.imageFile);
+      console.log(editor.getHtml()); // 执行 editor API
     },
 
-    publish() {
-      const content = this.editor.getHTML()
+    async publish() {
+      const content = this.editor.getHtml()
       if (!this.title) {
         alert('请填写标题')
         return
       }
-      // TODO: 调用发布 API
-      console.log('发布内容：', { title: this.title, content })
-      alert('发布成功！')
+      console.log(this.title)
+      console.log(content)
+      if (this.questionId) {
+        this.$Axios({
+          method: 'PUT',
+          url: '/qaService/question/update',
+          params: {
+            questionId : this.questionId
+          },
+          data: {
+            title: this.title,
+            content: content,
+          },
+        })
+        .then(response => {
+          const data = response.data;
+          if (data.code === 0) {
+            this.$toast.success('更新成功！');
+            this.$emit('close');
+          } else {
+            this.$toast.fail(data.msg || '更新失败');
+          }
+        })
+        .catch(err => {
+          console.error('更新异常', err);
+          this.$toast.fail('更新失败，请重试');
+        });
+      }
+      else {
+        // 使用 PUT 请求到 /qaService/question/new 传入 title 和 content
+        this.$Axios({
+          method: 'PUT',
+          url: '/qaService/question/new',
+          params: {
+            title: this.title,
+            content: content,
+          },
+        })
+        .then(response => {
+          const data = response.data;
+          if (data.code === 0) {
+            this.$toast.success('发布成功！');
+            this.$emit('close');
+          } else {
+            this.$toast.fail(data.msg || '发布失败');
+          }
+        })
+        .catch(err => {
+          console.error('发布异常', err);
+          this.$toast.fail('发布失败，请重试');
+        });
+      }
     },
   },
 }
 </script>
-
-<style>
+<style src="@wangeditor/editor/dist/css/style.css"></style>
+<style scoped>
 .ask-card {
   max-width: 100%;
-  margin: 10px auto;
+  margin: 0px auto;
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;      /* 整个视口高度 */
   background-color: #fff;
 }
 
