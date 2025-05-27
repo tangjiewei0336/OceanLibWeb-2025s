@@ -2,31 +2,31 @@
 <div class="ask-card">
   <!-- 顶部导航栏 -->
   <div class="ask-card-toolbar">
-    <v-btn icon @click="$emit('close')" class="close-btn">
+    <v-btn icon @click="onCloseClick" class="close-btn">
       <v-icon>mdi-close</v-icon>
     </v-btn>
     <span class="ask-card-title">{{ questionId ? '编辑问题' : '提问' }}</span>
     <v-btn color="primary" @click="publish" class="publish-btn" 
       :disabled="!title.trim()" 
       >
-      {{ questionId ? '更新' : '发布' }}
+      发布
     </v-btn>
   </div>
 
   <!-- 标题输入 -->
   <input
-  v-model="title"
-  class="title-input"
-  placeholder="输入问题标题，并以问号结尾（必填）"
-  @blur="checkTitle"
-  @input="onTitleInput"
-  ref="titleInput"
+    v-model="title"
+    class="title-input"
+    placeholder="输入问题标题，并以问号结尾（必填）"
+    @blur="checkTitle"
+    @input="onTitleInput"
+    ref="titleInput"
   />
   
   <!-- 分割线 -->
   <hr class="divider" />
 
-  <div>
+  <div class="editorarea">
     <!-- <div>
       <button @click="printEditorHtml">print html</button>
       <button @click="getEditorText">print text</button>
@@ -148,8 +148,8 @@ export default {
         });
         const data = resp.data;
         if (data.code === 0) {
-          this.title = data.data.question.title;
-          this.html = data.data.question.content;
+          this.title = data.msg.question.title;
+          this.html = data.msg.question.content;
         } else {
           this.$toast.fail(data.msg || '获取问题详情失败');
         }
@@ -171,6 +171,46 @@ export default {
     editor.destroy(); // 组件销毁时，及时销毁 editor ，重要！！！
   },
   methods: {
+    onCloseClick() {
+      if (!this.title.trim() && !this.html.trim()) {
+        this.$emit('close')
+        return
+      }
+      else if (this.questionId) {
+        this.$emit('close')
+        return
+      }
+      this.$dialog.confirm({
+        title: '是否保存草稿？',
+        message: '你还没有发布，是否保存为草稿？',
+      })
+      .then(() => {
+        this.publishDraft()
+      })
+      .catch(() => {
+        this.$emit('close')
+      });
+    },
+    // 保存草稿
+    publishDraft() {
+      const content = this.editor.getHtml();
+      this.$Axios({
+        method: 'PUT',
+        url: '/qaService/question/new',
+        params: {
+          title: this.title,
+          content: content,
+          hidden: true,
+        },
+      })
+      .then(() => {
+        this.$toast.success('草稿已保存');
+        this.$emit('close');
+      })
+      .catch(() => {
+        this.$toast.fail('保存失败');
+      });
+    },
     checkTitle() {
       if (
         this.title &&
@@ -276,7 +316,7 @@ export default {
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 10px 15px;
+  /* padding: 10px 15px; */
   display: flex;
   flex-direction: column;
   height: 100vh;      /* 整个视口高度 */
@@ -293,7 +333,7 @@ export default {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 0px 3px;
+  padding: 10px 3px;
   padding-right: 10px;
 }
 
@@ -324,81 +364,15 @@ export default {
   width: 100%;
   font-size: 16px;
   font-weight: bold;
-  padding: 12px 14px;
+  padding: 12px 17px;
 }
 
 .divider {
   border: none;
   border-top: 1px solid #e0e0e0;
-  margin: 4px 12px;
+  margin: 4px 17px;
 }
-
-.editor-container {
-  min-height: 250px;
-  border: none;
-  padding: 4px 14px;
-  background-color: transparent;
-  font-size: 14px;
-  line-height: 1.4;
-  position: relative;
-}
-.editor-container div[contenteditable='true'] {
-  outline: none; /* 去掉选中时的轮廓 */
-  border: none;
-  box-shadow: none;
-  padding: 8px 0;
-}
-
-.editor-container p {
-  margin: 6px 0;
-}
-
-.editor-toolbar {
-  bottom: 0; /* 初始底部对齐 */
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  background-color: #fff;
-  padding: 5px 0;
-  border-top: 1px solid #e0e0e0;
-  z-index: 1000;
-  transition: bottom 0.2s ease;
-}
-
-.editor-btn {
-  color: #616161;
-  transition: color 0.2s ease;
-}
-
-.editor-btn:hover {
-  color: #1976d2;
-}
-
-.ProseMirror p.is-editor-empty::before {
-  content: attr(data-placeholder);
-  color: #a9a9a9;
-  float: left;
-  height: 0;
-  pointer-events: none;
-  user-select: none;
-}
-
-</style>
-
-<style lang="less" scoped>
-@import '~@/vant-variables.less';
-.newcollection {
-  display: flex;
-  flex-direction: column;
-  margin: 20px;
-  &__input {
-    margin-bottom: 15px !important;
-    margin-top: 0px !important;
-    &__label {
-      font-size: 14px;
-    }
-  }
-}
+.editorarea {
+  padding: 4px 15px;
+}    
 </style>
