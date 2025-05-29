@@ -85,7 +85,7 @@
             
       <template #finished>
         <!--若无合适的文件则显示空提示-->
-        <van-empty :description="'抱歉没有找到与「'+keywords+'」相关的文档'" v-if="fileList.length==0">
+        <van-empty :description="'抱歉没有找到与「'+keywords+'」相关的文档'" v-if="questionList.length==0">
           <template #image>
             <img src="@/images/empty-picture/no_search.svg" />
           </template>
@@ -137,7 +137,7 @@ export default {
     return {
       keywords: '',
       startNum: 1,
-      fileList: [],
+      questionList: [],
       suggestList: [],
       showSuggest: false,
       showResult: false,
@@ -152,7 +152,7 @@ export default {
     },
     restartQSearch() {
       this.startNum = 1;
-      this.fileList = [];
+      this.questionList = [];
       this.suggestList = [];
       this.showSuggest = false;
       this.showResult = false;
@@ -205,7 +205,7 @@ export default {
         },
       }).then((response) => {
         let searchHits = response.data.msg.searchHits;
-        let fileListTemp = searchHits.map((data) => {
+        let questionListTemp = searchHits.map((data) => {
           if (data.highlightFields != null) {
             if (data.highlightFields.abstractContent != null && data.highlightFields.abstractContent.length > 0) {
               data.content.abstractContent = data.highlightFields.abstractContent[0];
@@ -220,7 +220,7 @@ export default {
           return data.content;
         });
 
-        this.fileList.push.apply(this.fileList, fileListTemp);
+        this.questionList.push.apply(this.questionList, questionListTemp);
         this.startNum += 1;
         if (response.data.msg.totalHits < 10) {
           this.finished = true;
