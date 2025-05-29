@@ -17,7 +17,7 @@ const asyncRouterMap = [{
     {
         path: '/forum/recommend',
         meta: {
-            title: '知乎',
+            title: '知乎最新',
             permission: ["USER", "ADMIN"]
         },
         component: (resolve) => require(['../views/forum/forum.vue'], resolve)
@@ -61,6 +61,14 @@ const asyncRouterMap = [{
             permission: ["USER", "ADMIN"]
         },
         component: (resolve) => require(['../views/forum/qsearch/qsearch.vue'], resolve)
+    },
+    {
+        path: '/myDraftQuestion',
+        meta: {
+            title: '我的问题草稿箱',
+            permission: ["USER", "ADMIN"]
+        },
+        component: (resolve) => require(['../views/mine/myDraftQuestion.vue'], resolve)
     },
     {
         path: '/uploadFile',
