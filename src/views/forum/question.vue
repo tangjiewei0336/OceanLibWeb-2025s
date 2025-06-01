@@ -31,8 +31,13 @@
                 v-for="(item, index) in paginatedData" 
                 :key="index"
                 :qid="qid"
-                :rid="item.id"
+                :aid="item.id"
                 interface="question"
+                :uid="item.userId"
+                :content="item.content"
+                :commentCount="item.commentCount"
+                :likeCount="item.likeCount"
+                :createTime="item.createTime"
             />
 
             <v-sheet
@@ -153,12 +158,10 @@ export default {
                 },
             }).then(response => {
                 let data = response.data.msg.content
-                console.log(data)
                 this.allData = [...this.allData, ...data]
-                if (data.length < this.itemsPerPage) {
+                if (this.allData.length >= this.commentNum) {
                     this.noMore = true
-                }
-                if (data.length > 0) {
+                } else {
                     this.currentPageNum += 1
                 }
                 this.isLoading = false

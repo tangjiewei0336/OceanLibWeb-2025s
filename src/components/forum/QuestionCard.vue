@@ -119,7 +119,6 @@ export default {
 			type: Number,
 			default: 0
 		},
-
 		qtitle: {
 			type: String,
 			default: ''
@@ -186,6 +185,13 @@ export default {
 			}
 		},
 		truncateContent(text, length = 34) {
+			const regex = /<p[^>]*>(.*?)<\/p>/g;
+			let match;
+			if ((match = regex.exec(text)) !== null) {
+				text = match[1]
+			} else {
+				text = ""
+			}
 			return text.length > length 
 			? text.substring(0, length)
 			: text

@@ -16,11 +16,12 @@
                 :key="index"
                 :seqId="index"
                 :qid="item.bindId"
+                interface="hot"
                 :qtitle="item.title"
                 :hotPoint="item.viewCount"
                 :qcontent="item.content"
+                :commentNum="item.answerCount"
                 :browse="item.viewCount"
-                interface="hot"
             />
             <v-row justify="center" align="center">
                 <v-col cols="auto">

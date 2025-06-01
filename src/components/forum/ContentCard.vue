@@ -5,6 +5,7 @@
 		:ripple="false"
 		@click="toAnswer"
 	>
+		
 		<v-avatar size="30" color="primary" class="mr-3">
 			<span class="white--text">{{ uid.charAt(0) }}</span>
 		</v-avatar>
@@ -177,7 +178,7 @@ export default {
 			type: Number,
 			required: true
 		},
-		rid: {
+		aid: {
 			type: Number,
 			required: true
 		},
@@ -186,12 +187,8 @@ export default {
 			required: true
 		},
 		uid: {
-			type: Number,
-			default: 0
-		},
-		aid: {
-			type: Number,
-			default: 0
+			type: String,
+			default: ""
 		},
 		content: {
 			type: String,
@@ -248,12 +245,19 @@ export default {
 		},
 		toAnswer() {
 			if (this.interface === 'question') {
-				localStorage.setItem('rid', this.rid)
+				localStorage.setItem('aid', this.aid)
 				localStorage.setItem('qid', this.qid)
 				this.$router.push('./answer')
 			}
 		},
 		truncateContent(text, length = 34) {
+			const regex = /<p[^>]*>(.*?)<\/p>/g;
+			let match;
+			if ((match = regex.exec(text)) !== null) {
+				text = match[1]
+			} else {
+				text = ""
+			}
 			return text.length > length 
 			? text.substring(0, length) + '...'
 			: text
