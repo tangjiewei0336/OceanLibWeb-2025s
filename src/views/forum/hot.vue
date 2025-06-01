@@ -15,14 +15,22 @@
                 v-for="(item, index) in paginatedData" 
                 :key="index"
                 :seqId="index"
-                :qid="item.id"
+                :qid="item.bindId"
+                :qtitle="item.title"
+                :hotPoint="item.viewCount"
+                :qcontent="item.content"
+                :browse="item.viewCount"
                 interface="hot"
             />
-            <v-progress-circular
-                v-if="isLoading"
-                indeterminate
-                color="primary"
-            />
+            <v-row justify="center" align="center">
+                <v-col cols="auto">
+                    <v-progress-circular
+                        v-if="isLoading"
+                        indeterminate
+                        color="primary"
+                    />
+                </v-col>
+            </v-row>
             <v-card-text
                 v-if="noMore"
                 class="text-center text-caption pa-2"
@@ -62,6 +70,7 @@
 <script>
 import AppHeader from '../../components/nav/ForumHeadBar.vue'
 import QuestionCard from '../../components/forum/QuestionCard.vue';
+import axios from 'axios'
 import Mock from 'mockjs'
 
 export default {
@@ -93,41 +102,26 @@ export default {
             if (this.noMore) {
                 return
             }
-            try {
-                // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
-                this.isLoading = true
-                const response = [200, {
-                    state: "SUCCESS",
-                    code: "1",
-                    msg: {
-                        pageNum: this.currentPageNum,
-                        pageSize: this.itemsPerPage,
-                        total: 100,
-                        isLastPage: false,
-                        list: Mock.mock({
-                            [`list|${this.itemsPerPage}`]: [{
-                            'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
-                            title: '@ctitle(10,20)',
-                            'hotPoint|5000-3000000': 1,
-                            content: '@ctitle(50,100)',
-                            'answerCount|0-100': 1,
-                            'rewardPoints|0-50': 1,
-                            createTime: '@datetime'
-                            }]
-                        }).list
-                    }
-                }]
-                
-                let data = response[1].msg
-                this.allData = [...this.allData, ...data.list]
-                if (data.list.length < this.itemsPerPage) {
+            this.isLoading = true
+            this.$Axios({
+                method: 'get',
+                url: '/qaService/question/list',
+                params: {
+                    page: this.currentPageNum + 1,
+                    pageSize: this.itemsPerPage,
+                    sort: 1
+                },
+            }).then(response => {
+                let data = response.data.msg.content
+                this.allData = [...this.allData, ...data]
+                if (data.length < this.itemsPerPage) {
                     this.noMore = true
                 }
                 this.currentPageNum += 1
                 this.isLoading = false
-            } catch (error) {
+            }).catch(error => {
                 console.error('请求失败:', error)
-            }
+            })
         }
     },
     created() {

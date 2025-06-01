@@ -13,6 +13,11 @@
             <QuestionCard
                 :qid="this.qid"
                 interface="answer"
+                :qtitle="qtitle"
+                :hotPoint="hotPoint"
+                :qcontent="qcontent"
+                :commentNum="commentNum"
+                :browse="browse"
             />
             <v-sheet 
 				color="grey lighten-2" 
@@ -70,6 +75,12 @@ export default {
         return {
             navigation: '',
             qid: 0,
+            qtitle: '',
+            hotPoint: 0,
+            qcontent: '',
+            commentNum: 0,
+            browse: 0,
+
             qlikeCount: 0,
 			qliked: false,
 
@@ -98,31 +109,63 @@ export default {
                 return
             }
             try {
-                // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
                 this.isLoading = true
-                const response = [200, {
-                    state: "SUCCESS",
-                    code: "1",
-                    msg: {
-                        pageNum: this.currentPageNum,
+                // const response = [200, {
+                //     state: "SUCCESS",
+                //     code: "1",
+                //     msg: {
+                //         pageNum: this.currentPageNum,
+                //         pageSize: this.itemsPerPage,
+                //         total: 100,
+                //         isLastPage: false,
+                //         list: Mock.mock({
+                //             [`list|${this.itemsPerPage}`]: [{
+                //             'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
+                //             title: '@ctitle(10,20)',
+                //             content: '@ctitle(100,500)',
+                //             'answerCount|0-100': 1,
+                //             'rewardPoints|0-50': 1,
+                //             createTime: '@datetime'
+                //             }]
+                //         }).list
+                //     }
+                // }]
+
+                this.$Axios({
+                    method: 'get',
+                    url: '/qaService/answer/list',
+                    params: {
+                        questionId: this.qid,
+                        page: this.currentPageNum + 1,
                         pageSize: this.itemsPerPage,
-                        total: 100,
-                        isLastPage: false,
-                        list: Mock.mock({
-                            [`list|${this.itemsPerPage}`]: [{
-                            'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
-                            title: '@ctitle(10,20)',
-                            content: '@ctitle(100,500)',
-                            'answerCount|0-100': 1,
-                            'rewardPoints|0-50': 1,
-                            createTime: '@datetime'
-                            }]
-                        }).list
+                    },
+                }).then(response => {
+                    let data = response[1].msg
+                    this.allData = [...this.allData, ...data]
+                    if (data.length < this.itemsPerPage) {
+                        this.noMore = true
                     }
-                }]
+                    if (data.length > 0) {
+                        this.currentPageNum += 1
+                    }
+                    this.isLoading = false
+                }).catch(error => {
+                    console.error('请求失败:', error)
+                })
+
+                const response = await axios({
+                    method: 'get',
+                    url: '/list',
+                    params: {
+                        questionId: this.qid,
+                        page: this.currentPageNum,
+                        pageSize: this.itemsPerPage,
+                    },
+                });
                 
+
                 let data = response[1].msg
-                this.allData = [...this.allData, ...data.list]
+                this.allData = [...this.allData, ...data.question]
                 if (data.list.length < this.itemsPerPage) {
                     this.noMore = true
                 }
@@ -137,11 +180,18 @@ export default {
     },
     created() {
         this.qid = Number(localStorage.getItem('qid'))
+
+        this.qtitle = String(localStorage.getItem('qtitle'))
+        this.hotPoint = Number(localStorage.getItem('hotPoint'))
+        this.qcontent = String(localStorage.getItem('qcontent'))
+        this.commentNum = Number(localStorage.getItem('commentNum'))
+        this.browse = Number(localStorage.getItem('browse'))
+        
         this.fetchData()
     },
     mounted() {
-        this.qlikeCount = Number(localStorage.getItem('qlikeCount'))
-        this.qliked = Number(localStorage.getItem('qliked'))
+        // this.qlikeCount = Number(localStorage.getItem('qlikeCount'))
+        // this.qliked = Number(localStorage.getItem('qliked'))
     }
 }
 </script>

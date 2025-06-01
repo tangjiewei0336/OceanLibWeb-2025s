@@ -12,6 +12,21 @@
 
 		<v-card-text v-if="this.interface === 'question'">
 			<p class="text-body-2">{{ truncateContent(content) }}</p>
+			<v-row class="mt-3" no-gutters v-if="urls.length > 2">
+				<v-col 
+					v-for="(url, i) in limitedUrls"
+					:key="i"
+					cols="4"
+				>
+					<v-img
+						:url="url"
+						:width="90"
+						:height="60"
+						cover
+						class="rounded"
+					></v-img>
+				</v-col>
+			</v-row>
 			<div class="d-flex justify-space-between align-center">
 				<p class="mb-0">
 					{{ likeCount }} 赞同 · {{ commentCount }} 评论
@@ -144,24 +159,19 @@ export default {
 	components: { CommentPopup },
     data() {
 		return {
-			uid: '',
-			aid: 0,
-			content: "",
-			commentCount: 0,
-			likeCount: 0,
-			liked: false,
-			createTime: null,
-			agree: false,
-			refuse: false,
-			collected: false,
-			collectedCount: 0,
-
 			snackbar: false,
             snackerText: "",
 			replyText: "",
 			commentOpen: false,
+
+			urls: []
 		}
     },
+	computed: {
+		limitedUrls() {
+			return this.urls.slice(0, 3);
+		}
+	},
 	props: {
 		qid: {
 			type: Number,
@@ -175,6 +185,30 @@ export default {
 			type: String,
 			required: true
 		},
+		uid: {
+			type: Number,
+			default: 0
+		},
+		aid: {
+			type: Number,
+			default: 0
+		},
+		content: {
+			type: String,
+			default: ''
+		},
+		commentCount: {
+			type: Number,
+			default: 0
+		},
+		likeCount: {
+			type: Number,
+			default: 0
+		},
+		createTime: {
+			type: String,
+			default: ''
+		}
 	},
     methods: {
 		truncateAnswer(text, length = 30) {
@@ -183,34 +217,27 @@ export default {
 			: text
 		},
 		fetchData() {
-			const response = [200, {
-				state: "SUCCESS",
-				code: "1",
-				msg: Mock.mock({
-					'uid': '@ctitle(3,8)',
-					'aid|1-100': 1,
-					'title': '@ctitle(10,20)',
-					'hotPoint|5000-3000000': 1,
-					content: '@ctitle(100,500)',
-					'commentCount|10-100': 1,
-					'collectedCount|5-200': 1,
-					'browse|20-300': 1,
-					'likeCount|10-50': 1,
-					'liked|1': [true, false],
-					'collected|1': [true, false],
-					createTime: '@datetime'
-				})
-			}]
-
-			this.uid = response[1].msg.uid
-			this.aid = response[1].msg.aid
-			this.content = response[1].msg.content
-			this.likeCount = response[1].msg.likeCount
-			this.liked = response[1].msg.liked
-			this.commentCount = response[1].msg.commentCount
-			this.createTime = response[1].msg.createTime
-			this.collected = response[1].msg.collected
-			this.collectedCount = response[1].msg.collectedCount
+			// 获取指定回复
+			
+			// const response = [200, {
+			// 	state: "SUCCESS",
+			// 	code: "1",
+			// 	msg: Mock.mock({
+			// 		'uid': '@ctitle(3,8)',
+			// 		'aid|1-100': 1,
+			// 		'title': '@ctitle(10,20)',
+			// 		'hotPoint|5000-3000000': 1,
+			// 		content: '@ctitle(100,500)',
+			// 		'commentCount|10-100': 1,
+			// 		'collectedCount|5-200': 1,
+			// 		'browse|20-300': 1,
+			// 		'likeCount|10-50': 1,
+			// 		'liked|1': [true, false],
+			// 		'collected|1': [true, false],
+			// 		createTime: '@datetime'
+			// 	})
+			// }]
+			this.extractImageUrls(this.content)
 		},
 		formatDate(date) {
 			return new Date(date).toLocaleDateString('zh-CN', {
@@ -266,6 +293,14 @@ export default {
 		},
 		toComment() {
 			console.log('Comment')
+		},
+		extractImageUrls(html) {
+			const regex = /<img[^>]+src="([^">]+)"/g;
+			this.urls = [];
+			let match;
+			while ((match = regex.exec(html)) !== null) {
+				this.urls.push(match[1]);
+			}
 		}
     },
 	created() {

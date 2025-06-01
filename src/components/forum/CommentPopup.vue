@@ -39,8 +39,8 @@
                 <CommentCard
                     v-for="(item, index) in paginatedData" 
                     :key="index"
-                    :cid="item.cid"
-                    :uid="item.uid"
+                    
+                    :uid="item.commentBuildUsername"
                     :content="item.content"
                     :date="item.date"
                     :subComments="item.subComments"
@@ -111,46 +111,60 @@ export default {
                 this.fetchData();
             }
         },
-        fetchData() {
+        async fetchData() {
             if (this.noMore) {
                 return
             }
             try {
                 this.isLoading = true
-                const response = [200, {
-                    state: "SUCCESS",
-                    code: "1",
-                    msg: {
-                        commentCount: 10,
-                        list: Mock.mock({
-                        [`list|${this.itemsPerPage}`]: [{
-                            'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
-                            uid: '@ctitle(3,8)',
-                            'cid|1-1000': 1,
-                            content: '@ctitle(50,100)',
-                            'date': '@datetime',
-                            'likeCount|0-500': 1,
-                            'liked|1': [true, false],
-                            'disliked|1': [true, false],
-                            'subComments|2-10': [{ 
-                                'cid|1-1000': 1,
-                                'reply_cid|1-100': 0,
-                                'reply_uid': '@ctitle(3,8)',
-                                'uid': '@ctitle(3,8)',
-                                'content': '@ctitle(20,100)',
-                                'likeCount|0-500': 1,
-                                'liked|1': [true, false],
-                                'disliked|1': [true, false],
-                                'date': '@datetime',
-                            }]
-                        }]
-                    }).list}
-                }]
+
+                // 获取指定回答的所有回复
+                const response = await axios({
+                    method: 'get',
+                    url: '/comment/getComment',
+                    params: {
+                        bindID: this.cid,
+                        mainType: 'answer',
+                        commentCount: 2,
+                        replyCount: 0,
+                        pageNum: this.currentPageNum,
+                    },
+                });
+
+                // const response = [200, {
+                //     state: "SUCCESS",
+                //     code: "1",
+                //     msg: {
+                //         commentCount: 10,
+                //         list: Mock.mock({
+                //         [`list|${this.itemsPerPage}`]: [{
+                //             'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
+                //             uid: '@ctitle(3,8)',
+                //             'cid|1-1000': 1,
+                //             content: '@ctitle(50,100)',
+                //             'date': '@datetime',
+                //             'likeCount|0-500': 1,
+                //             'liked|1': [true, false],
+                //             'disliked|1': [true, false],
+                //             'subComments|2-10': [{ 
+                //                 'cid|1-1000': 1,
+                //                 'reply_cid|1-100': 0,
+                //                 'reply_uid': '@ctitle(3,8)',
+                //                 'uid': '@ctitle(3,8)',
+                //                 'content': '@ctitle(20,100)',
+                //                 'likeCount|0-500': 1,
+                //                 'liked|1': [true, false],
+                //                 'disliked|1': [true, false],
+                //                 'date': '@datetime',
+                //             }]
+                //         }]
+                //     }).list}
+                // }]
 
                 let data = response[1].msg
                 this.commentCount = data.commentCount
-                this.allData = [...this.allData, ...data.list]
-                if (data.list.length < this.itemsPerPage) {
+                this.allData = [...this.allData, ...data.comments]
+                if (data.comments.length < this.itemsPerPage) {
                     this.noMore = true
                 }
                 this.currentPageNum += 1

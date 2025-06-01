@@ -81,17 +81,31 @@ export default {
         }
     },
     methods: {
-        fetchBasicData() {
-            const data = Mock.mock({
-                'cid|+1': 1,
-                'uid': '@ctitle(3,8)',
-                'content': '@ctitle(50,100)',
-                'date': '@datetime',
-                'likeCount|1-100': 1,
-                'liked|1': [true, false],
-                'disliked|1': [true, false],
-                'commentCount|1-100': 1
+        async fetchBasicData() {
+            const response = await axios({
+                method: 'get',
+                url: '/comment/getComment',
+                params: {
+                    bindID: this.cid,
+                    mainType: 'answer',
+                    commentCount: this.itemsPerPage,
+                    replyCount: 2,
+                    pageNum: this.currentPageNum,
+                },
             });
+
+            // 获取指定回复
+            // const data = Mock.mock({
+            //     'cid|+1': 1,
+            //     'uid': '@ctitle(3,8)',
+            //     'content': '@ctitle(50,100)',
+            //     'date': '@datetime',
+            //     'likeCount|1-100': 1,
+            //     'liked|1': [true, false],
+            //     'disliked|1': [true, false],
+            //     'commentCount|1-100': 1
+            // });
+
             this.uid = data.uid;
             this.content = data.content;
             this.date = data.date;
@@ -99,12 +113,14 @@ export default {
             this.liked = data.liked;
             this.disliked = data.disliked;
             this.commentCount = data.commentCount;
+
         },
         fetchSubComments() {
             if (this.noMore) {
                 return
             }
             try {
+                // 获取指定回复的子回复
                 this.isLoading = true
                 const data = Mock.mock({
                     'subComments|6': [
