@@ -64,6 +64,7 @@ export default {
       collectionDesc: this.$route.query.isChange ? (this.$route.query.collectionDesc != null ? this.$route.query.collectionDesc : '') : '',
       isPublic: this.$route.query.isChange ? this.$route.query.isPublic : true,
       mainType: this.$route.query.mainType ? this.$route.query.mainType : null,
+      active: Number(this.$route.query.active || 0),
       titleRule: {
         required: (value) => value == null || (value != null && value != '') || '收藏夹名称不可为空',
       },
@@ -99,6 +100,10 @@ export default {
           if (response.data.code == 1) {
             Notify({ type: 'success', message: '创建成功' });
             this.$router.go(-1);
+            // this.$router.replace({
+            //   path: "/myCollectionList",
+            //   query: { active: this.active }
+            // });
           }
         })
         .catch((response) => {
@@ -125,7 +130,11 @@ export default {
         .then((response) => {
           if (response.data.code == 1) {
             Notify({ type: 'success', message: '修改成功' });
-            this.$router.replace('/myCollectionList');
+            // this.$router.replace('/myCollectionList');
+            this.$router.replace({
+              path: "/myCollectionList",
+              query: { active: this.active }
+            });
           }
         })
         .catch((response) => {
@@ -146,7 +155,11 @@ export default {
       }).then((response) => {
         if (response.data.code == 1) {
           Notify({ type: 'success', message: '删除成功' });
-          this.$router.replace('/myCollectionList');
+          // this.$router.replace('/myCollectionList');
+          this.$router.replace({
+            path: "/myCollectionList",
+            query: { active: this.active }
+          });
         }
       });
     },

@@ -15,7 +15,7 @@
     <van-nav-bar id="toolbar" title="我的收藏" left-text="返回" left-arrow @click-left="back" fixed placeholder 
     @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType } })">
       <template #right>
-        <a>新增</a>
+        <a @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType } })">新增</a>
       </template>
     </van-nav-bar>
     <div class="collectionlist full">
@@ -73,11 +73,13 @@
 export default {
   data() {
     return {
+      active: Number(this.$route.query.active || 0),
+
       myCollection: [],
       refreshing: false,
       loading: false,
       finished: false,
-      active: 0,
+      // active: 0,
       collections: [
         { title: "文档", mainType: "DOCUMENT" },
         { title: "问题", mainType: "QUESTION" },
@@ -90,8 +92,17 @@ export default {
     back() {
       this.$router.go(-1); //返回上一层
     },
-    onTabChange() {
+    onTabChange(newIndex) {
+      // this.active = newIndex;
       this.getCollection(); // 切换 Tab 时重新加载数据
+      // this.$router.replace({
+      //   path: this.$route.path,
+      //   query: {
+      //     // 保留其它可能存在的 query 字段，比如分页、筛选之类
+      //     ...this.$route.query,
+      //     active: newIndex
+      //   }
+      // });
     },
     getCollection() {
       console.log(this.collections[this.active].mainType)
@@ -99,7 +110,7 @@ export default {
         method: 'get',
         url: '/collectionService/getCollection',
         params: {
-          "mainType": this.collections[this.active].mainType
+          mainType: this.collections[this.active].mainType
         }
       }).then((response) => {
         this.myCollection = response.data.msg.collection.map(item => ({
@@ -120,11 +131,12 @@ export default {
           collectionDesc: collectionDesc,
           isPublic: isPublic,
           mainType: this.collections[this.active].mainType, // 这里加入 mainType
+          active: this.active  // 👉 把 active 一并传进去
         },
       });
     },
     toChangeCollection(collectionID, collectionName, collectionDesc, isPublic) {
-      console.log(mainType)
+      // console.log(this.collections[this.active].mainType)
       this.$router.push({
         path: '/newCollection',
         query: {
@@ -134,6 +146,7 @@ export default {
           isPublic: isPublic,
           isChange: true,
           mainType: this.collections[this.active].mainType, // 这里加入 mainType
+          active: this.active  // 👉 把 active 一并传进去
         },
       });
     },

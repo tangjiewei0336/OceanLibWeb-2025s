@@ -80,13 +80,18 @@ export default {
   },
   methods: {
     back() {
-      this.$router.go(-1); //返回上一层
+      // this.$router.go(-1); //返回上一层
+      console.log(this.$route.query.active)
+      this.$router.replace({
+        path: '/myCollectionList',
+        query: { active: this.$route.query.active }
+      });
     },
     getCollectionFileList() {
       this.loading = true;
       this.$Axios({
         method: 'get',
-        url: '/collectionService/getCollectionFileList',
+        url: '/collectionService/getCollectionItemList',
         params: {
           collectionID: this.$route.query.collectionID,
           mainType: this.$route.query.mainType,
@@ -124,6 +129,7 @@ export default {
           isPublic: this.$route.query.isPublic,
           isChange: true,
           mainType: this.$route.query.mainType,
+          active: this.$route.query.active
         },
       });
     },
