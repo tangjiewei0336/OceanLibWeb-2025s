@@ -5,9 +5,9 @@
 		:ripple="false"
 		@click="toAnswer"
 	>
-		
 		<v-avatar size="30" color="primary" class="mr-3">
-			<span class="white--text">{{ uid.charAt(0) }}</span>
+			<img v-if="cacheAvatar" :src="avatarSrc" alt="用户头像">
+			<span v-else class="white--text">{{ uid.charAt(0) }}</span>
 		</v-avatar>
 		<span>{{ uid }}</span>
 
@@ -39,7 +39,7 @@
 		</v-card-text>
 
 		<v-card-text v-if="this.interface === 'answer'">
-			<div class="text-body-2">{{ content }}</div>
+			<div v-html="content"></div>
 			<v-divider></v-divider>
 			<div class="d-flex align-center">
 				<v-avatar size="30" color="primary" class="mr-1">
@@ -165,7 +165,14 @@ export default {
 			replyText: "",
 			commentOpen: false,
 
-			urls: []
+			urls: [],
+			refuse: false,
+			agree: false,
+			collected: false,
+			collectedCount: 0,
+
+			cacheAvatar: false,
+			avatarSrc: null,
 		}
     },
 	computed: {
@@ -203,6 +210,10 @@ export default {
 			default: 0
 		},
 		createTime: {
+			type: String,
+			default: ''
+		},
+		avatar: {
 			type: String,
 			default: ''
 		}
@@ -305,10 +316,52 @@ export default {
 			while ((match = regex.exec(html)) !== null) {
 				this.urls.push(match[1]);
 			}
+		},
+		getAvatar() {
+			console.log(this.avatar)
+			if (this.avatar.length > 0) {
+				return this.avatar
+			} else {
+				return uid.charAt(0)
+			}
+		},
+		async urlToBase64(url) {
+			const response = await fetch(url);
+			const blob = await response.blob();
+			return new Promise((resolve) => {
+				const reader = new FileReader();
+				reader.onload = () => resolve(reader.result);
+				reader.readAsDataURL(blob);
+			});
+		},
+		async saveAvatar(url) {
+			if (localStorage.getItem(url) != null) {
+				console.log("already in cache")
+				return true;
+			}
+			try {
+				const base64Data = await this.urlToBase64(url);
+				if (base64Data) {
+					localStorage.setItem(url, base64Data);
+					console.log('save to cache:', url);
+					return true;
+				}
+			} catch (error) {
+				console.error('save fail:', error);
+			}
+			return false;
 		}
     },
-	created() {
+	async created() {
         this.fetchData()
+		if (this.avatar.length > 0) {
+			this.cacheAvatar = true
+			this.avatarSrc = this.avatar
+			// this.cacheAvatar = await this.saveAvatar(this.avatar)
+			// if (this.cacheAvatar) this.avatarSrc = localStorage.getItem(this.avatar)
+		} else {
+			this.cacheAvatar = false;
+		}
     }
   }
 </script>

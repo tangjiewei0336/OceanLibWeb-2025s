@@ -22,6 +22,7 @@
                 :qcontent="item.content"
                 :commentNum="item.answerCount"
                 :browse="item.viewCount"
+                :likeCount="item.likeCount"
             />
             <v-row justify="center" align="center">
                 <v-col cols="auto">
@@ -114,8 +115,10 @@ export default {
                 },
             }).then(response => {
                 let data = response.data.msg.content
+                console.log('hot question: ', data)
                 this.allData = [...this.allData, ...data]
-                if (data.length < this.itemsPerPage) {
+                console.log(response.data.msg.last)
+                if (response.data.msg.last) {
                     this.noMore = true
                 }
                 this.currentPageNum += 1

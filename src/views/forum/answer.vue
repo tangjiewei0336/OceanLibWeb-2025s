@@ -31,8 +31,13 @@
                 v-for="(item, index) in paginatedData" 
                 :key="index"
                 :qid="qid"
-                :rid="item.id"
+                :aid="item.id"
                 interface="answer"
+                :uid="item.userId"
+                :content="item.content"
+                :commentCount="item.commentCount"
+                :likeCount="item.likeCount"
+                :createTime="item.createTime"
             />
         </v-container>
 
@@ -93,8 +98,7 @@ export default {
     },
     computed: {
         paginatedData() {
-            const end = this.allData.length
-            return this.allData.slice(0, end)
+            return this.allData
         }
     },
     methods: {
@@ -108,79 +112,52 @@ export default {
             if (this.noMore) {
                 return
             }
-            try {
-                this.isLoading = true
-                // const response = [200, {
-                //     state: "SUCCESS",
-                //     code: "1",
-                //     msg: {
-                //         pageNum: this.currentPageNum,
-                //         pageSize: this.itemsPerPage,
-                //         total: 100,
-                //         isLastPage: false,
-                //         list: Mock.mock({
-                //             [`list|${this.itemsPerPage}`]: [{
-                //             'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
-                //             title: '@ctitle(10,20)',
-                //             content: '@ctitle(100,500)',
-                //             'answerCount|0-100': 1,
-                //             'rewardPoints|0-50': 1,
-                //             createTime: '@datetime'
-                //             }]
-                //         }).list
-                //     }
-                // }]
+            this.isLoading = true
+            // const response = [200, {
+            //     state: "SUCCESS",
+            //     code: "1",
+            //     msg: {
+            //         pageNum: this.currentPageNum,
+            //         pageSize: this.itemsPerPage,
+            //         total: 100,
+            //         isLastPage: false,
+            //         list: Mock.mock({
+            //             [`list|${this.itemsPerPage}`]: [{
+            //             'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
+            //             title: '@ctitle(10,20)',
+            //             content: '@ctitle(100,500)',
+            //             'answerCount|0-100': 1,
+            //             'rewardPoints|0-50': 1,
+            //             createTime: '@datetime'
+            //             }]
+            //         }).list
+            //     }
+            // }]
 
-                this.$Axios({
-                    method: 'get',
-                    url: '/qaService/answer/list',
-                    params: {
-                        questionId: this.qid,
-                        page: this.currentPageNum + 1,
-                        pageSize: this.itemsPerPage,
-                    },
-                }).then(response => {
-                    let data = response[1].msg
-                    this.allData = [...this.allData, ...data]
-                    if (data.length < this.itemsPerPage) {
-                        this.noMore = true
-                    }
-                    if (data.length > 0) {
-                        this.currentPageNum += 1
-                    }
-                    this.isLoading = false
-                }).catch(error => {
-                    console.error('请求失败:', error)
-                })
-
-                const response = await axios({
-                    method: 'get',
-                    url: '/list',
-                    params: {
-                        questionId: this.qid,
-                        page: this.currentPageNum,
-                        pageSize: this.itemsPerPage,
-                    },
-                });
-                
-
-                let data = response[1].msg
-                this.allData = [...this.allData, ...data.question]
-                if (data.list.length < this.itemsPerPage) {
+            this.$Axios({
+                method: 'get',
+                url: '/qaService/answer/list',
+                params: {
+                    questionId: this.qid,
+                    page: this.currentPageNum + 1,
+                    pageSize: this.itemsPerPage,
+                },
+            }).then(response => {
+                let data = response.data.msg.content
+                this.allData = [...this.allData, ...data]
+                if (this.allData.length >= this.commentNum) {
                     this.noMore = true
-                }
-                if (data.list.length > 0) {
+                } else {
                     this.currentPageNum += 1
                 }
                 this.isLoading = false
-            } catch (error) {
+            }).catch(error => {
                 console.error('请求失败:', error)
-            }
+            })
         },
     },
     created() {
         this.qid = Number(localStorage.getItem('qid'))
-
         this.qtitle = String(localStorage.getItem('qtitle'))
         this.hotPoint = Number(localStorage.getItem('hotPoint'))
         this.qcontent = String(localStorage.getItem('qcontent'))

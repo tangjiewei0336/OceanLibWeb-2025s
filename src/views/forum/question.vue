@@ -18,6 +18,7 @@
                 :qcontent="qcontent"
                 :commentNum="commentNum"
                 :browse="browse"
+                :likeCount="qlikeCount"
             />
             <v-sheet 
 				color="grey lighten-2" 
@@ -38,6 +39,7 @@
                 :commentCount="item.commentCount"
                 :likeCount="item.likeCount"
                 :createTime="item.createTime"
+                :avatar="item.avatar"
             />
 
             <v-sheet
@@ -158,6 +160,7 @@ export default {
                 },
             }).then(response => {
                 let data = response.data.msg.content
+                console.log("answers: ", data)
                 this.allData = [...this.allData, ...data]
                 if (this.allData.length >= this.commentNum) {
                     this.noMore = true
@@ -166,6 +169,7 @@ export default {
                 }
                 this.isLoading = false
             }).catch(error => {
+                this.isLoading = false
                 console.error('请求失败:', error)
             })
         },
@@ -179,7 +183,7 @@ export default {
 
             this.$Axios({
                 method: 'post',
-                url: '/qaService/like/question',
+                url: '/qaService/like/evaluateQuestion',
                 params: {
                     questionId: this.qid,
                     userId: localStorage.getItem('username')
@@ -197,12 +201,9 @@ export default {
         this.qcontent = String(localStorage.getItem('qcontent'))
         this.commentNum = Number(localStorage.getItem('commentNum'))
         this.browse = Number(localStorage.getItem('browse'))
-
+        this.qlikeCount = Number(localStorage.getItem('likeCount'))
+        
         this.fetchData()
     },
-    mounted() {
-        // this.qlikeCount = Number(localStorage.getItem('qlikeCount'))
-        // this.qliked = Number(localStorage.getItem('qliked'))
-    }
 }
 </script>

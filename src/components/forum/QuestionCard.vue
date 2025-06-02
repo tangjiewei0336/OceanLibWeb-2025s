@@ -138,6 +138,10 @@ export default {
 		browse: {
 			type: Number,
 			default: 0
+		},
+		likeCount: {
+			type: Number,
+			default: 0
 		}
 	},
 	methods: {
@@ -180,7 +184,7 @@ export default {
 				localStorage.setItem('qcontent', this.qcontent)
 				localStorage.setItem('commentNum', this.commentNum)
 				localStorage.setItem('browse', this.browse)
-
+				localStorage.setItem('likeCount', this.likeCount)
 				this.$router.push('./question')
 			}
 		},
