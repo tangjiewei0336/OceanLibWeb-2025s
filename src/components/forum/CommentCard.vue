@@ -9,6 +9,10 @@
         <div>
             <div>
                 <span>{{ uid }}</span>
+                <span v-if="replyTo.length > 0">
+                    <v-icon>mdi-chevron-right</v-icon>
+                    {{ replyTo }}
+                </span>
             </div>
             <div>
                 <span class="text--lighten-1 text-caption" @click="reply">{{ content }}</span>
@@ -33,19 +37,20 @@
             </div>
 
             <CommentCard
-                v-for="(item, index) in SubData" 
+                v-for="(item, index) in SubData"
                 :key="index"
-                :cid="item.cid"
-                :uid="item.uid"
-                :content="item.content"
-                :date="item.date"
-                :subComments="item.subComments"
-                :likeCount="item.likeCount"
-                :liked="item.liked"
-                :disliked="item.disliked"
+                :id="item.id"
+                :cid="cid"
+                :aid="aid"
+                :uid="uid"
+                :content="item.commentContent"
+                :date="item.buildDate"
+                :likeCount="item.likeNumber"
+                :disliked="Boolean(item.dislikeNumber)"
+                :replyTo="item.replyToCommentReplier"
                 interface="inner"
             />
-            <div v-if="subComments.length > 2" class="d-flex align-center">
+            <div v-if="replyCount > 2" class="d-flex align-center">
                 <v-btn
                     small
                     :ripple="false"
@@ -53,30 +58,61 @@
                     class="rounded-pill"
                     depressed
                 >
-                    查看更多 {{ subComments.length - 2 }} 条回复 >
+                    查看更多 {{ replyCount - 2 }} 条回复 >
                 </v-btn>
             </div>
         </div>
+        <v-bottom-sheet
+            v-model="commentWriteOpen"
+            inset
+        >
+            <CommentWrite
+                :uid="uid"
+                :aid="aid"
+                :interface="getInterface"
+                :cid="cid"
+                :rid="id"
+                :isReply="getIsReply"
+                @close="finishComment"
+            />
+        </v-bottom-sheet>
     </v-card>
 </template>
 
 <script>
+import CommentWrite from './CommentWrite.vue'
+
 export default {
     name: "CommentCard",
+    components: { CommentWrite },
     data() {
         return {
             inner_likeCount: 0,
             inner_liked: false,
             inner_disliked: false,
+
+            commentWriteOpen: false
         }
     },
     props: {
+        id: {
+            type: String,
+            required: true
+        },
         cid: {
-            type: Number,
+            type: String,
             required: true
         },
         uid: {
             type: String,
+            required: true
+        },
+        rid: {
+            type: String,
+            required: false
+        },
+        aid: {
+            type: Number,
             required: true
         },
         content: {
@@ -103,6 +139,14 @@ export default {
             type: Array,
             default: () => []
         },
+        replyCount: {
+            type: Number,
+            default: 0
+        },
+        replyTo: {
+            type: String,
+            default: ''
+        },
         interface: {
             type: String,
             required: true
@@ -112,15 +156,44 @@ export default {
         SubData() {
             const end = Math.min(this.subComments.length, 2);
             return this.subComments.slice(0, end)
+        },
+        getIsReply() {
+            if (this.interface == "outer") {
+                return false;
+            } else {
+                return true;
+            }
+        },
+        getInterface() {
+            if (this.interface == "outer") {
+                return "level2";
+            } else {
+                return "level3";
+            }
         }
     },
     methods: {
         formatDate(date) {
-			return new Date(date).toLocaleDateString('zh-CN', {
-				year: 'numeric',
-				month: '2-digit',
-				day: '2-digit'
-			})
+            try {
+                // 尝试创建Date对象（会自动处理多种格式）
+                const d = new Date(date);
+                // 检查是否为无效日期（NaN）
+                if (isNaN(d.getTime())) throw new Error("Invalid date");
+                // 有效日期则格式化
+                return d.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            } catch (e) {
+                // 任何解析失败时返回原字符串
+                return String(date);
+            }
+			// return new Date(date).toLocaleDateString('zh-CN', {
+			// 	year: 'numeric',
+			// 	month: '2-digit',
+			// 	day: '2-digit'
+			// })
 		},
         likeComment() {
             if (this.inner_liked) {
@@ -144,10 +217,18 @@ export default {
             }
         },
         reply() {
-            console.log('reply')
+            this.commentWriteOpen = true
         },
         allReply() {
             this.$emit('allreply', this.cid);
+            localStorage.setItem('replyCount', this.replyCount)
+            localStorage.setItem('replyContent', this.content)
+            localStorage.setItem('replyDate', this.date)
+            localStorage.setItem('replyLikeCount', this.likeCount)
+            localStorage.setItem('replyUid', this.uid)
+        },
+        finishComment() {
+            this.commentWriteOpen = false
         }
     },
     created() {

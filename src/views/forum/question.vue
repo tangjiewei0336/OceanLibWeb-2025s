@@ -178,17 +178,23 @@ export default {
             this.$router.push('./answerWrite')
         },
         async goodQuestion() {
-            this.qliked = !this.qliked;
-            this.qlikeCount += this.qliked ? 1 : -1;
-
+            let isCancel = 0
+            if (this.qliked) {
+                this.qliked = false;
+                isCancel = 1
+            } else {
+                this.qliked = true;
+            }
             this.$Axios({
                 method: 'post',
                 url: '/qaService/like/evaluateQuestion',
                 params: {
                     questionId: this.qid,
-                    userId: localStorage.getItem('username')
+                    isCancel: isCancel,
+                    isLike: 1
                 },
             }).then(response => {
+                this.qlikeCount = response.data.msg.likeCount
             }).catch(error => {
                 console.error('点赞失败:', error)
             })
@@ -202,7 +208,8 @@ export default {
         this.commentNum = Number(localStorage.getItem('commentNum'))
         this.browse = Number(localStorage.getItem('browse'))
         this.qlikeCount = Number(localStorage.getItem('likeCount'))
-        
+        this.qliked = Boolean(localStorage.getItem('qliked') == 'true')
+
         this.fetchData()
     },
 }

@@ -19,7 +19,7 @@
             </v-avatar>
             <span>{{ uid }}</span>
             <v-sheet 
-                color="grey lighten-2" 
+                color="grey lighten-2"
                 height="5px"
                 width="100%"
                 rounded="0"
@@ -39,14 +39,15 @@
                 <CommentCard
                     v-for="(item, index) in paginatedData" 
                     :key="index"
-                    
+                    :id="item.id"
+                    :aid="aid"
+                    :cid="item.id"
                     :uid="item.commentBuildUsername"
-                    :content="item.content"
-                    :date="item.date"
-                    :subComments="item.subComments"
-                    :likeCount="item.likeCount"
-                    :liked="item.liked"
-                    :disliked="item.disliked"
+                    :content="item.commentContent"
+                    :likeCount="item.likeNumber"
+                    :date="item.buildDate"
+                    :subComments="item.replyCommentList"
+                    :replyCount="item.replyCount"
                     interface="outer"
                     @allreply="allReply"
                 />
@@ -61,6 +62,7 @@
                 <span class="text-h6 mx-auto pa-2">评论回复</span>
             </div>
             <ReplyCard
+                :aid="aid"
                 :cid="detail_cid"
             />
         </div>
@@ -85,7 +87,8 @@ export default {
             allData: [],
 
             detailed: false,
-            detail_cid: 0
+            detail_cid: 0,
+            detailed_replyCount: 0
         }
     },
     props: {
@@ -112,35 +115,26 @@ export default {
             }
         },
         async fetchData() {
-            if (this.noMore) {
+            if (this.noMore || this.isLoading) {
                 return
             }
-            /*
-            export interface Request {
-                bindID: number;
-                commentCount: number;
-                mainType: number;
-                pageNum: number;
-                replyCount: number;
-                [property: string]: any;
-            }
-            */
             this.isLoading = true
             this.$Axios({
                 method: 'get',
                 url: '/comment/getComment',
                 params: {
                     bindID: this.aid,
-                    mainType: 0,
+                    mainType: "ANSWER",
                     pageNum: this.currentPageNum + 1,
                     commentCount: this.itemsPerPage,
                     replyCount: 2
                 },
             }).then(response => {
-                console.log(response)
-                let data = response.data.msg.content
+                let data = response.data.msg.comments
+                console.log(response.data.msg)
+                this.commentCount = response.data.msg.commentCount
                 this.allData = [...this.allData, ...data]
-                if (this.allData.length >= this.commentNum) {
+                if (this.allData.length >= this.commentCount) {
                     this.noMore = true
                 } else {
                     this.currentPageNum += 1

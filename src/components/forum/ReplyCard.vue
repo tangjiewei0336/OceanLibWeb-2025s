@@ -8,13 +8,13 @@
             @scroll.passive="handleScroll"
         >
             <CommentCard
+                :id="cid"
                 :cid="cid"
                 :uid="uid"
-                :content="content"
-                :date="date"
-                :likeCount="likeCount"
-                :liked="liked"
-                :disliked="disliked"
+                :aid="aid"
+                :content="replyContent"
+                :date="replyDate"
+                :likeCount="replyLikeCount"
                 interface="outer"
             />
             <v-sheet
@@ -25,19 +25,19 @@
             />
             <div>
                 <v-card-text class="pa-1" style="margin-left: 10px;">
-                    评论 {{ commentCount }}
+                    评论 {{ replyCount }}
                 </v-card-text>
             </div>
             <CommentCard
-                v-for="(item, index) in subComments" 
+                v-for="(item, index) in paginatedData" 
                 :key="index"
-                :cid="item.cid"
-                :uid="item.uid"
-                :content="item.content"
-                :date="item.date"
-                :likeCount="item.likeCount"
-                :liked="item.liked"
-                :disliked="item.disliked"
+                :id="item.id"
+                :cid="cid"
+                :aid="aid"
+                :uid="item.replyBuildUsername"
+                :content="item.commentContent"
+                :date="item.buildDate"
+                :likeCount="item.likeNumber"
                 interface="inner"
             />
         </v-container>
@@ -53,98 +53,71 @@ export default {
     components: { CommentCard },
     data() {
         return {
-            uid: "",
-            content: "",
-            date: "",
-            likeCount: 0,
-            liked: false,
-            disliked: false,
-            commentCount: 0,
-
             isLoading: false,
             noMore: false,
             currentPageNum: 0,
             itemsPerPage: 6,
-            subComments: []
+            allData: [],
+
+            uid: '',
+            replyCount: 0,
+            replyContent: "",
+            replyDate: '',
+            replyLikeCount: 0
         }
     },
     props: {
-        cid: {
+        aid: {
             type: Number,
+            required: true
+        },
+        cid: {
+            type: String,
             required: true
         },
     },
     computed: {
-        SubData() {
-            const end = this.subComments.length;
-            return this.subComments.slice(0, end)
+        paginatedData() {
+            const end = this.allData.length
+            return this.allData.slice(0, end)
         }
     },
     methods: {
-        async fetchBasicData() {
-            const response = await axios({
-                method: 'get',
-                url: '/comment/getComment',
-                params: {
-                    bindID: this.cid,
-                    mainType: 'answer',
-                    commentCount: this.itemsPerPage,
-                    replyCount: 2,
-                    pageNum: this.currentPageNum,
-                },
-            });
-
-            // 获取指定回复
-            // const data = Mock.mock({
-            //     'cid|+1': 1,
-            //     'uid': '@ctitle(3,8)',
-            //     'content': '@ctitle(50,100)',
-            //     'date': '@datetime',
-            //     'likeCount|1-100': 1,
-            //     'liked|1': [true, false],
-            //     'disliked|1': [true, false],
-            //     'commentCount|1-100': 1
-            // });
-
-            this.uid = data.uid;
-            this.content = data.content;
-            this.date = data.date;
-            this.likeCount = data.likeCount;
-            this.liked = data.liked;
-            this.disliked = data.disliked;
-            this.commentCount = data.commentCount;
-
+        handleScroll() {
+            const container = this.$refs.scrollContainer;
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+                this.fetchData();
+            }
         },
-        fetchSubComments() {
-            if (this.noMore) {
+        async fetchData() {
+            if (this.noMore || this.isLoading) {
                 return
             }
-            try {
-                // 获取指定回复的子回复
-                this.isLoading = true
-                const data = Mock.mock({
-                    'subComments|6': [
-                        {
-                            'cid|+1': 1,
-                            'uid': '@ctitle(3,8)',
-                            'content': '@ctitle(50,100)',
-                            'date': '@datetime',
-                            'likeCount|1-100': 1,
-                            'liked|1': true,
-                            'disliked|1': true
-                        }
-                    ]
-                });
-
-                this.subComments = [...this.subComments, ...data.subComments]
-                if (data.subComments.length < this.itemsPerPage) {
+            this.isLoading = true
+            this.$Axios({
+                method: 'get',
+                url: '/comment/getCommentReply',
+                params: {
+                    bindID: this.aid,
+                    mainType: "ANSWER",
+                    commentID: this.cid,
+                    pageNum: this.currentPageNum + 1,
+                    replyCount: this.itemsPerPage,
+                },
+            }).then(response => {
+                let data = response.data.msg.replyCommentList
+                console.log(data)
+                this.allData = [...this.allData, ...data]
+                if (this.allData.length >= this.replyCount) {
                     this.noMore = true
+                } else {
+                    this.currentPageNum += 1
                 }
-                this.currentPageNum += 1
                 this.isLoading = false
-            } catch (error) {
+            }).catch(error => {
+                this.isLoading = false
                 console.error('请求失败:', error)
-            }
+            })
         },
         reply() {
             console.log('reply')
@@ -168,16 +141,14 @@ export default {
                 this.liked = false;
             }
         },
-        handleScroll() {
-            const container = this.$refs.scrollContainer;
-            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-                this.fetchSubComments();
-            }
-        },
     },
     created() {
-        this.fetchBasicData();
-        this.fetchSubComments();
+        this.fetchData()
+        this.replyCount = Number(localStorage.getItem('replyCount'))
+        this.replyContent = localStorage.getItem('replyContent')
+        this.replyDate = localStorage.getItem('replyDate')
+        this.replyLikeCount = Number(localStorage.getItem('replyLikeCount'))
+        this.uid = localStorage.getItem('replyUid')
     }
 }
 </script>

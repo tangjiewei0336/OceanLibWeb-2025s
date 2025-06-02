@@ -46,12 +46,9 @@
 					<span class="white--text">我</span>
 				</v-avatar>
 				<v-btn
-					depressed
 					outlined
-					color="grey lighten-4"
-  					class=" text--darken-1 my-4"
-					:ripple="false"
-					:rounded='true'
+					color="grey darken-1"
+					class="my-4"
 					@click="toComment"
 				>
 					思想交汇总能激发非凡灵感
@@ -59,7 +56,8 @@
 			</div>
 			<div class="d-flex align-center flex-nowrap" style="gap: 4px">
 				<v-avatar size="30" color="primary" class="mr-1">
-					<span class="white--text">{{ uid.charAt(0) }}</span>
+					<img v-if="cacheAvatar" :src="avatarSrc" alt="用户头像">
+					<span v-else class="white--text">{{ uid.charAt(0) }}</span>
 				</v-avatar>
 				
 				<span class="grey--text text--lighten-1 text-caption mr-2">{{ truncateContent(uid, 1) }}</span>
@@ -139,6 +137,23 @@
 				
 				</v-card>
 			</v-bottom-sheet>
+
+			<v-bottom-sheet
+				v-model="commentWriteOpen"
+				inset
+			>
+				<v-card>
+					<div>
+						<CommentWrite
+							:uid="this.uid"
+							:aid="this.aid"
+							interface="level1"
+							@close="finishComment"
+						/>
+					</div>
+				
+				</v-card>
+			</v-bottom-sheet>
 		</v-card-text>
 
 		<v-sheet 
@@ -154,16 +169,18 @@
 <script>
 import Mock from 'mockjs'
 import CommentPopup from './CommentPopup.vue'
+import CommentWrite from './CommentWrite.vue'
 
 export default {
     name: 'ContentCard',
-	components: { CommentPopup },
+	components: { CommentPopup, CommentWrite },
     data() {
 		return {
 			snackbar: false,
             snackerText: "",
 			replyText: "",
 			commentOpen: false,
+			commentWriteOpen: false,
 
 			urls: [],
 			refuse: false,
@@ -173,6 +190,7 @@ export default {
 
 			cacheAvatar: false,
 			avatarSrc: null,
+			myComment: ""
 		}
     },
 	computed: {
@@ -226,25 +244,6 @@ export default {
 		},
 		fetchData() {
 			// 获取指定回复
-			
-			// const response = [200, {
-			// 	state: "SUCCESS",
-			// 	code: "1",
-			// 	msg: Mock.mock({
-			// 		'uid': '@ctitle(3,8)',
-			// 		'aid|1-100': 1,
-			// 		'title': '@ctitle(10,20)',
-			// 		'hotPoint|5000-3000000': 1,
-			// 		content: '@ctitle(100,500)',
-			// 		'commentCount|10-100': 1,
-			// 		'collectedCount|5-200': 1,
-			// 		'browse|20-300': 1,
-			// 		'likeCount|10-50': 1,
-			// 		'liked|1': [true, false],
-			// 		'collected|1': [true, false],
-			// 		createTime: '@datetime'
-			// 	})
-			// }]
 			this.extractImageUrls(this.content)
 		},
 		formatDate(date) {
@@ -256,7 +255,7 @@ export default {
 		},
 		toAnswer() {
 			if (this.interface === 'question') {
-				localStorage.setItem('aid', this.aid)
+				localStorage.setItem('top_aid', this.aid)
 				localStorage.setItem('qid', this.qid)
 				this.$router.push('./answer')
 			}
@@ -307,7 +306,8 @@ export default {
 			// TODO: api
 		},
 		toComment() {
-			console.log('Comment')
+			// this.commentOpen = true
+			this.commentWriteOpen = true
 		},
 		extractImageUrls(html) {
 			const regex = /<img[^>]+src="([^">]+)"/g;
@@ -350,6 +350,10 @@ export default {
 				console.error('save fail:', error);
 			}
 			return false;
+		},
+		finishComment() {
+			this.commentWriteOpen = false
+			this.commentOpen = false
 		}
     },
 	async created() {

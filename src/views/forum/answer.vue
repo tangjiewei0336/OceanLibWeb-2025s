@@ -38,6 +38,7 @@
                 :commentCount="item.commentCount"
                 :likeCount="item.likeCount"
                 :createTime="item.createTime"
+                :avatar="item.avatar"
             />
         </v-container>
 
@@ -94,6 +95,8 @@ export default {
             currentPageNum: 0,
             itemsPerPage: 4,
             allData: [],
+
+            top_aid: 0,
         }
     },
     computed: {
@@ -113,27 +116,6 @@ export default {
                 return
             }
             this.isLoading = true
-            // const response = [200, {
-            //     state: "SUCCESS",
-            //     code: "1",
-            //     msg: {
-            //         pageNum: this.currentPageNum,
-            //         pageSize: this.itemsPerPage,
-            //         total: 100,
-            //         isLastPage: false,
-            //         list: Mock.mock({
-            //             [`list|${this.itemsPerPage}`]: [{
-            //             'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
-            //             title: '@ctitle(10,20)',
-            //             content: '@ctitle(100,500)',
-            //             'answerCount|0-100': 1,
-            //             'rewardPoints|0-50': 1,
-            //             createTime: '@datetime'
-            //             }]
-            //         }).list
-            //     }
-            // }]
-
             this.$Axios({
                 method: 'get',
                 url: '/qaService/answer/list',
@@ -150,10 +132,10 @@ export default {
                 } else {
                     this.currentPageNum += 1
                 }
-                this.isLoading = false
             }).catch(error => {
                 console.error('请求失败:', error)
             })
+            this.isLoading = false
         },
     },
     created() {
@@ -163,7 +145,8 @@ export default {
         this.qcontent = String(localStorage.getItem('qcontent'))
         this.commentNum = Number(localStorage.getItem('commentNum'))
         this.browse = Number(localStorage.getItem('browse'))
-        
+        this.top_aid = Number(localStorage.getItem('top_aid'))
+
         this.fetchData()
     },
     mounted() {

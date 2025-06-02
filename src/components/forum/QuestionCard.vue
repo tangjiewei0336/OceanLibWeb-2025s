@@ -25,7 +25,7 @@
 				{{ qtitle }}
 				<div class="d-flex mt-3">
 				<div class="text-caption grey--text">
-					<span>热度: {{ hotFormat(hotPoint) }}</span>
+					<span>{{ hotFormat(hotPoint) }} 热度</span>
 				</div>
 				</div>
 			</div>
@@ -142,6 +142,10 @@ export default {
 		likeCount: {
 			type: Number,
 			default: 0
+		},
+		qliked: {
+			type: Boolean,
+			default: false
 		}
 	},
 	methods: {
@@ -185,6 +189,7 @@ export default {
 				localStorage.setItem('commentNum', this.commentNum)
 				localStorage.setItem('browse', this.browse)
 				localStorage.setItem('likeCount', this.likeCount)
+				localStorage.setItem('qliked', this.qliked)
 				this.$router.push('./question')
 			}
 		},

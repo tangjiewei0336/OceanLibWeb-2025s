@@ -23,6 +23,7 @@
                 :commentNum="item.answerCount"
                 :browse="item.viewCount"
                 :likeCount="item.likeCount"
+                :qliked="item.isLiked"
             />
             <v-row justify="center" align="center">
                 <v-col cols="auto">
@@ -101,7 +102,7 @@ export default {
             }
         },
         async fetchData() {
-            if (this.noMore) {
+            if (this.noMore || this.isLoading) {
                 return
             }
             this.isLoading = true
@@ -115,16 +116,18 @@ export default {
                 },
             }).then(response => {
                 let data = response.data.msg.content
-                console.log('hot question: ', data)
+                // console.log('hot question: ', data)
+
                 this.allData = [...this.allData, ...data]
-                console.log(response.data.msg.last)
                 if (response.data.msg.last) {
                     this.noMore = true
+                } else {
+                    this.currentPageNum += 1
                 }
-                this.currentPageNum += 1
                 this.isLoading = false
             }).catch(error => {
                 console.error('请求失败:', error)
+                this.isLoading = false
             })
         }
     },
