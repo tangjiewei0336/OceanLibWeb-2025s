@@ -84,14 +84,38 @@
 			<div>
 				<v-container>
 					<v-row>
-						<v-btn text class="nav-item" to="/forum/recommend" active-class="active-link">
+						<!-- <v-btn text class="nav-item" to="/forum/recommend" active-class="active-link">
 							<v-icon left>mdi-newspaper-variant-outline</v-icon>
 							<span>最新</span>
 						</v-btn>
 						<v-btn text class="ForumHeadBar__nav-item" to="/forum/hot" active-class="ForumHeadBar__active-link">
 							<v-icon left>mdi-fire</v-icon>
 							<span>热榜</span>
+						</v-btn> -->
+						<v-btn
+						text
+						ripple="false"
+						class="ForumHeadBar__nav-item"
+						to="/forum/recommend"
+						exact
+						exact-active-class="ForumHeadBar__active-link"
+						>
+						<v-icon left>mdi-newspaper-variant-outline</v-icon>
+						<span>最新</span>
 						</v-btn>
+
+						<v-btn
+						text
+						ripple="false"
+						class="ForumHeadBar__nav-item"
+						to="/forum/hot"
+						exact
+						exact-active-class="ForumHeadBar__active-link"
+						>
+						<v-icon left>mdi-fire</v-icon>
+						<span>热榜</span>
+						</v-btn>
+
 						<!-- <v-btn text class="ForumHeadBar__nav-item" to="/forum/question" active-class="ForumHeadBar__active-link">
 							<v-icon left>mdi-pen</v-icon>
 							<span>直答</span>

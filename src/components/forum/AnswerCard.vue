@@ -2,7 +2,7 @@
     <div class="ask-card">
       <!-- 顶部导航栏 -->
       <div class="ask-card-toolbar">
-        <v-btn icon @click="$emit('close')" class="close-btn">
+        <v-btn icon @click="$emit('close', { shouldRefreshAnswer: true })" class="close-btn">
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <span class="ask-card-title">{{ this.answerId ? '编辑回答' : '写回答' }}</span>
@@ -209,7 +209,7 @@ export default {
           const data = response.data;
           if (data.state === "SUCCESS") {
             this.$toast.success('更新成功！');
-            this.$emit('close', { shouldRefresh: true });
+            this.$emit('close', { shouldRefreshAnswer: true });
           } else {
             this.$toast.fail(data.msg || '更新失败');
           }
@@ -234,7 +234,7 @@ export default {
           const data = response.data;
           if (data.code === 0) {
             this.$toast.success('发布成功！');
-            this.$emit('close', { shouldRefresh: true });
+            this.$emit('close', { shouldRefreshAnswer: true });
           } else {
             this.$toast.fail(data.msg || '发布失败');
           }

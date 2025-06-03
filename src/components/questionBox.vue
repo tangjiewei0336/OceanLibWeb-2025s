@@ -154,6 +154,7 @@ export default {
     rewardPoints: [String, Number],
     answerCount: [String, Number],
     viewCount: [String, Number],
+    isLiked: Boolean,
     tagIds: {
       type: Array,
       default: () => [],
@@ -172,7 +173,16 @@ export default {
   methods: {
     goToDetail() {
       // 以后需要改到问题的详细页面
-      this.$router.push({ path: `/question/${this.bindId}` });
+      localStorage.setItem('qid', bindId)
+      localStorage.setItem('qtitle', title)
+      localStorage.setItem('hotPoint', viewCount)
+      localStorage.setItem('qcontent', content)
+      localStorage.setItem('commentNum', answerCount)
+      localStorage.setItem('browse', viewCount)
+      localStorage.setItem('likeCount', likeCount)
+      localStorage.setItem('qliked', isLiked)
+      this.$router.push('./question')
+      // this.$router.push({ path: `/question/${this.bindId}` });
     },
     getPlainTextWithImagePlaceholder(html) {
       const replaced = html.replace(/<img[^>]*>/gi, ' [图片] ');

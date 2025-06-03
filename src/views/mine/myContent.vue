@@ -562,13 +562,13 @@ export default {
         this.getMyQuestionList(true); // 重新加载问题列表
       }
     },
-    handleAnswerClose({ shouldRefresh }) {
+    handleAnswerClose({ shouldRefreshAnswer }) {
       this.showDialogAnswer = false;
       this.toupdate_answerId = 0;
       this.toupdate_answerContent = "";
       this.toupdate_answer_questionId = 0;
       this.toupdate_answer_questionTitle = "";
-      if (shouldRefresh) {
+      if (shouldRefreshAnswer) {
         this.getMyAnswerList(true); // 重新加载回答列表
       }
     },
