@@ -16,6 +16,7 @@
                 :date="replyDate"
                 :likeCount="replyLikeCount"
                 interface="outer"
+                @refresh="refresh"
             />
             <v-sheet
                 color="grey lighten-2" 
@@ -39,6 +40,7 @@
                 :date="item.buildDate"
                 :likeCount="item.likeNumber"
                 interface="inner"
+                @refresh="refresh"
             />
         </v-container>
     </v-card>
@@ -141,6 +143,9 @@ export default {
                 this.liked = false;
             }
         },
+        refresh() {
+            
+        }
     },
     created() {
         this.fetchData()

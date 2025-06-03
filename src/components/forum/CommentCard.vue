@@ -9,9 +9,9 @@
         <div>
             <div>
                 <span>{{ uid }}</span>
-                <span v-if="replyTo.length > 0">
+                <span v-if="inner_replyTo.length > 0">
                     <v-icon>mdi-chevron-right</v-icon>
-                    {{ replyTo }}
+                    {{ inner_replyTo }}
                 </span>
             </div>
             <div>
@@ -37,12 +37,13 @@
             </div>
 
             <CommentCard
-                v-for="(item, index) in SubData"
+                v-for="(item, index) in subComments"
                 :key="index"
                 :id="item.id"
                 :cid="cid"
-                :aid="aid"
                 :uid="uid"
+                :rid="item.id"
+                :aid="aid"
                 :content="item.commentContent"
                 :date="item.buildDate"
                 :likeCount="item.likeNumber"
@@ -88,6 +89,7 @@ export default {
     data() {
         return {
             inner_likeCount: 0,
+            inner_replyTo: '',
             liked: false,
             disliked: false,
 
@@ -109,7 +111,8 @@ export default {
         },
         rid: {
             type: String,
-            required: false
+            required: false,
+            default: ''
         },
         aid: {
             type: Number,
@@ -167,25 +170,16 @@ export default {
     methods: {
         formatDate(date) {
             try {
-                // 尝试创建Date对象（会自动处理多种格式）
                 const d = new Date(date);
-                // 检查是否为无效日期（NaN）
                 if (isNaN(d.getTime())) throw new Error("Invalid date");
-                // 有效日期则格式化
                 return d.toLocaleDateString('zh-CN', {
                     year: 'numeric',
                     month: '2-digit',
                     day: '2-digit'
                 });
             } catch (e) {
-                // 任何解析失败时返回原字符串
                 return String(date);
             }
-			// return new Date(date).toLocaleDateString('zh-CN', {
-			// 	year: 'numeric',
-			// 	month: '2-digit',
-			// 	day: '2-digit'
-			// })
 		},
         likeComment() {
             this.$Axios({
@@ -243,19 +237,25 @@ export default {
             this.commentWriteOpen = true
         },
         allReply() {
-            this.$emit('allreply', this.cid);
             localStorage.setItem('replyCount', this.replyCount)
             localStorage.setItem('replyContent', this.content)
             localStorage.setItem('replyDate', this.date)
             localStorage.setItem('replyLikeCount', this.likeCount)
             localStorage.setItem('replyUid', this.uid)
+            this.$emit('allreply', this.cid);
         },
         finishComment() {
             this.commentWriteOpen = false
+            this.$emit('refresh');
         }
     },
     created() {
         this.inner_likeCount = this.likeCount
+        if (this.replyTo == null) {
+            this.inner_replyTo = ""
+        } else {
+            this.inner_replyTo = this.replyTo
+        }
     }
 }
 </script>

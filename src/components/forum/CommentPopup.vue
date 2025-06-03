@@ -131,8 +131,8 @@ export default {
                 },
             }).then(response => {
                 let data = response.data.msg.comments
-                console.log(response.data.msg)
                 this.commentCount = response.data.msg.commentCount
+                // console.log(response.data.msg)
                 this.allData = [...this.allData, ...data]
                 if (this.allData.length >= this.commentCount) {
                     this.noMore = true
@@ -159,6 +159,9 @@ export default {
             this.$nextTick(() => {
                 this.$refs.inputField.focus(); // 手动聚焦
             });
+        },
+        refresh() {
+            
         }
     },
     created() {

@@ -7,7 +7,7 @@
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 550px"
+            style="height: calc(100vh - 100px);"
             @scroll.passive="handleScroll"
         >
             <QuestionCard
@@ -22,7 +22,7 @@
             <v-sheet 
 				color="grey lighten-2" 
 				height="3px" 
-				width="92%"
+				width="95%"
                 class="mx-auto"
                 rounded="0"
 			/>
@@ -95,8 +95,6 @@ export default {
             currentPageNum: 0,
             itemsPerPage: 4,
             allData: [],
-
-            top_aid: 0,
         }
     },
     computed: {
@@ -137,6 +135,14 @@ export default {
             })
             this.isLoading = false
         },
+        parseData(resData) {
+            try {
+                this.allData = JSON.parse(resData);
+            } catch (e) {
+                console.error('解析失败:', e);
+                this.allDat = [];
+            }
+        }
     },
     created() {
         this.qid = Number(localStorage.getItem('qid'))
@@ -145,13 +151,15 @@ export default {
         this.qcontent = String(localStorage.getItem('qcontent'))
         this.commentNum = Number(localStorage.getItem('commentNum'))
         this.browse = Number(localStorage.getItem('browse'))
-        this.top_aid = Number(localStorage.getItem('top_aid'))
+
+        let resData = localStorage.getItem('resData')
+        this.parseData(resData)
+
+        this.currentPageNum = Number(localStorage.getItem('aPage'))
+        this.itemsPerPage = Number(localStorage.getItem('aPageNum'))
+        this.noMore = Boolean(localStorage.getItem('aNoMore'))
 
         this.fetchData()
     },
-    mounted() {
-        // this.qlikeCount = Number(localStorage.getItem('qlikeCount'))
-        // this.qliked = Number(localStorage.getItem('qliked'))
-    }
 }
 </script>

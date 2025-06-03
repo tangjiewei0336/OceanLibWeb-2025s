@@ -7,7 +7,7 @@
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: calc(100vh - 150px);"
+            style="height: calc(100vh - 120px);"
             @scroll.passive="handleScroll"
         >
             <QuestionCard
@@ -23,7 +23,7 @@
             <v-sheet 
 				color="grey lighten-2" 
 				height="3px" 
-				width="92%"
+				width="95%"
                 class="mx-auto"
                 rounded="0"
 			/>
@@ -40,9 +40,14 @@
                 :likeCount="item.likeCount"
                 :createTime="item.createTime"
                 :avatar="item.avatar"
+                @toAnswer="toAnswer"
             />
 
-            <v-row justify="center" align="center">
+            <v-row
+                justify="center"
+                align="center"
+                style="margin-top: 20px;"
+            >
                 <v-col cols="auto">
                     <v-progress-circular
                         v-if="isLoading"
@@ -210,6 +215,19 @@ export default {
             }).catch(error => {
                 console.error('点赞失败:', error)
             })
+        },
+        toAnswer(aid) {
+            let id = 0
+            for (; id < this.allData.length; id++) {
+                if (this.allData[id].id == aid) break;
+            }
+            let resData = this.allData.slice(id, this.allData.length)
+            // console.log("store, ", resData)
+            localStorage.setItem('resData', JSON.stringify(resData))
+            localStorage.setItem('aPage', this.currentPageNum)
+            localStorage.setItem('aPageNum', this.itemsPerPage)
+            localStorage.setItem('aNoMore', this.noMore)
+            this.$router.push('./answer')
         }
     },
     created() {

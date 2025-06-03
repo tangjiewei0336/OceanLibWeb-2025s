@@ -51,13 +51,6 @@
                     />
                 </v-col>
             </v-row>
-            <!-- <v-card-text
-                v-if="noMore"
-                class="text-center text-caption pa-2"
-            >
-                没有更多了...
-            </v-card-text> -->
-
         </v-container>
 
         <v-bottom-navigation 
@@ -187,7 +180,7 @@ export default {
             this.isLoading = false
             this.fetchData()
             this.pullDownState = ''
-        }
+        },
     },
     created() {
         let refresh = localStorage.getItem('refresh')
@@ -201,13 +194,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-/* .pull-indicator {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: height 0.3s ease;
-  background: rgba(0, 0, 0, 0.02);
-} */
-</style>
