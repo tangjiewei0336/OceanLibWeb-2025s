@@ -51,12 +51,12 @@
                     />
                 </v-col>
             </v-row>
-            <v-card-text
+            <!-- <v-card-text
                 v-if="noMore"
                 class="text-center text-caption pa-2"
             >
                 没有更多了...
-            </v-card-text>
+            </v-card-text> -->
 
         </v-container>
 
@@ -139,7 +139,6 @@ export default {
             }).then(response => {
                 let data = response.data.msg.content
                 // console.log('hot question: ', data)
-
                 this.allData = [...this.allData, ...data]
                 if (response.data.msg.last) {
                     this.noMore = true

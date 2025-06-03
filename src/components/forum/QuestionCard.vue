@@ -51,14 +51,14 @@
 			<v-card-text v-if="this.interface === 'question'">
 				<div class="d-flex align-center">
 					<div 
-					class="text-container" 
-					:style="{ width: expanded ? '100%' : 'calc(100% - 130px)' }"
+						class="text-container" 
+						:style="{ width: expanded ? '100%' : 'calc(100% - 130px)' }"
 					>
 					<div v-if="!expanded" @click="expanded = true">
 						{{ truncateContent(qcontent) }}
 						<span 
-						v-if="qcontent.length >= 35"
-						class="grey--text text--lighten-1 text-caption"
+							v-if="extractText(qcontent).length >= 35"
+							class="grey--text text--lighten-1 text-caption"
 						>展开...</span>
 					</div>
 
@@ -66,7 +66,7 @@
 						<div class="html-container">
 							<div v-html="qcontent" class="html-content"></div>
 						</div>
-						<div>
+						<div style="margin-top: -20px">
 							<v-btn 
 								@click="expanded = false" 
 								text small
@@ -95,7 +95,7 @@
 				<span v-if="this.interface === 'answer'">知乎 · </span>
 				<span class="font-weight-bold">{{ commentNum }}</span> 回答
 				<span v-if="this.interface === 'question'">
-					 · <span class="font-weight-bold">{{ browse }}</span> 浏览
+					 · <span class="font-weight-bold">{{ hotFormat(browse) }}</span> 浏览
 				</span>
 			</div>
 		</div>
@@ -228,9 +228,9 @@ export default {
 <style scoped>
 
 .html-container {
-  width: 500px; /* 固定宽度 */
-  max-width: 100%; /* 响应式：不超过父容器 */
-  overflow: hidden; /* 防止内容溢出 */
+  width: 500px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .html-content img {

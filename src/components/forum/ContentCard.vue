@@ -9,27 +9,26 @@
 			<img v-if="cacheAvatar" :src="avatarSrc" alt="用户头像">
 			<span v-else class="white--text">{{ uid.charAt(0) }}</span>
 		</v-avatar>
-		<span>{{ uid }}</span>
+		<span class="grey--text">{{ uid }}</span>
 
-		<v-card-text v-if="this.interface === 'question'">
-			<p class="text-body-2">{{ truncateContent(content) }}</p>
-			<v-row class="mt-3" no-gutters v-if="urls.length > 2">
+		<v-card-text v-if="this.interface === 'question'" class="pa-1">
+			<p class="grey--text text--darken-3 mb-1">{{ truncateContent(content) }}</p>
+			<v-row class="mt-1" no-gutters v-if="urls.length > 2">
 				<v-col 
 					v-for="(url, i) in limitedUrls"
 					:key="i"
 					cols="4"
 				>
 					<v-img
-						:url="url"
-						:width="90"
-						:height="60"
+						:src="url"
+						style="width: calc((100vw - 80px) / 3); aspect-ratio: 8/5"
 						cover
 						class="rounded"
 					></v-img>
 				</v-col>
 			</v-row>
 			<div class="d-flex justify-space-between align-center">
-				<p class="mb-0">
+				<p class="text-body-2 grey--text mb-1">
 					{{ likeCount }} 赞同 · {{ commentCount }} 评论
 				</p>
 				<span class="text-caption grey--text text--lighten-1">
@@ -245,7 +244,6 @@ export default {
 			: text
 		},
 		fetchData() {
-			// 获取指定回复
 			this.extractImageUrls(this.content)
 		},
 		formatDate(date) {
@@ -265,7 +263,7 @@ export default {
 		truncateContent(text, length = 34) {
 			let pure_text = this.extractText(text)
 			return pure_text.length > length 
-			? pure_text.substring(0, length)
+			? pure_text.substring(0, length) + '...'
 			: pure_text
 		},
 		extractText(htmlString) {
@@ -387,7 +385,10 @@ export default {
         this.fetchData()
 		if (this.avatar.length > 0) {
 			this.cacheAvatar = true
-			this.avatarSrc = this.avatar
+			this.avatarSrc = this.avatar.match(/\.(jpg|jpeg|png|gif|webp)$/i) 
+				? this.avatar 
+				: `${this.avatar}.jpg`;
+
 			// this.cacheAvatar = await this.saveAvatar(this.avatar)
 			// if (this.cacheAvatar) this.avatarSrc = localStorage.getItem(this.avatar)
 		} else {

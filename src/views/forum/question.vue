@@ -7,7 +7,7 @@
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 550px"
+            style="height: calc(100vh - 150px);"
             @scroll.passive="handleScroll"
         >
             <QuestionCard
@@ -41,6 +41,16 @@
                 :createTime="item.createTime"
                 :avatar="item.avatar"
             />
+
+            <v-row justify="center" align="center">
+                <v-col cols="auto">
+                    <v-progress-circular
+                        v-if="isLoading"
+                        indeterminate
+                        color="primary"
+                    />
+                </v-col>
+            </v-row>
 
             <v-sheet
                 class="d-flex justify-center"
@@ -160,9 +170,11 @@ export default {
                 },
             }).then(response => {
                 let data = response.data.msg.content
-                console.log("answers: ", data)
+                // console.log("answers: ", data)
                 this.allData = [...this.allData, ...data]
-                if (this.allData.length >= this.commentNum) {
+                if (this.allData.length >= this.commentNum ||
+                    this.allData.length < this.itemsPerPage
+                ) {
                     this.noMore = true
                 } else {
                     this.currentPageNum += 1
