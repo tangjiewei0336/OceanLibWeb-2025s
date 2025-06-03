@@ -19,7 +19,7 @@
 
     <v-menu offset-y>
       <template v-slot:activator="{ props }">
-        <v-btn icon v-bind="props">
+        <v-btn icon v-bind="props" @click="performSearch">
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
       </template>
@@ -34,7 +34,10 @@ export default {
             this.$router.go(-1)
         },
         performSearch() {
-            this.searchMenu = false
+            // this.searchMenu = false
+            this.$router.push({
+              path: 'questionSearch',
+            });
         },
 		writeAnswer() {
       this.$router.push('./answerWrite')

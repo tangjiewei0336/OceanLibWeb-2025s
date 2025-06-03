@@ -79,45 +79,44 @@ export default {
       fileList: [],
       // mock
       questionList: [
-        {
-          id: 'q12345',
-          title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
-          content: `
-            <p>我正在开发一个类似知乎的前端页面，使用 Vue 2 和 Quill 作为富文本编辑器。</p>
-            <p>想知道如何实现知乎那种浮动提问卡片、全屏输入界面、标签选择和悬赏设置功能。</p>
-            <p>有经验的朋友可以分享一下做法或思路吗？</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          isDeleted: false,
-          isPosted: true,
-          isHidden: false,
-          rewardPoints: 50,
-          answerCount: 3,
-          viewCount: 128,
-          tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
-          attachmentIds: ['att001', 'att002'],
-        },
-        {
-          id: 'q12345',
-          title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
-          content: `
-            <p>这是描述</p><img src="xxx"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          isDeleted: false,
-          isPosted: true,
-          isHidden: false,
-          rewardPoints: 50,
-          answerCount: 3,
-          viewCount: 128,
-          tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
-          attachmentIds: ['att001', 'att002'],
-        },
-
+        // {
+        //   id: 'q12345',
+        //   title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
+        //   content: `
+        //     <p>我正在开发一个类似知乎的前端页面，使用 Vue 2 和 Quill 作为富文本编辑器。</p>
+        //     <p>想知道如何实现知乎那种浮动提问卡片、全屏输入界面、标签选择和悬赏设置功能。</p>
+        //     <p>有经验的朋友可以分享一下做法或思路吗？</p>
+        //   `,
+        //   userId: 'user_001',
+        //   createTime: '2025-05-21T10:30:00.000Z',
+        //   updateTime: '2025-05-21T10:45:00.000Z',
+        //   isDeleted: false,
+        //   isPosted: true,
+        //   isHidden: false,
+        //   rewardPoints: 50,
+        //   answerCount: 3,
+        //   viewCount: 128,
+        //   tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
+        //   attachmentIds: ['att001', 'att002'],
+        // },
+        // {
+        //   id: 'q12345',
+        //   title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
+        //   content: `
+        //     <p>这是描述</p><img src="xxx"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
+        //   `,
+        //   userId: 'user_001',
+        //   createTime: '2025-05-21T10:30:00.000Z',
+        //   updateTime: '2025-05-21T10:45:00.000Z',
+        //   isDeleted: false,
+        //   isPosted: true,
+        //   isHidden: false,
+        //   rewardPoints: 50,
+        //   answerCount: 3,
+        //   viewCount: 128,
+        //   tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
+        //   attachmentIds: ['att001', 'att002'],
+        // },
       ],
       file_refreshing: false,
       file_loading: false,

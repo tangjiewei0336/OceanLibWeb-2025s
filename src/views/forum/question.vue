@@ -1,8 +1,8 @@
 <template>
-    <div class="forum">
-        <!-- <v-app-bar app fixed color="white" elevation="1" height="64"> -->
-        <AppHeader />
-        <!-- </v-app-bar> -->
+    <div class="question">
+        <ReturnHeader
+            interface="question"
+        />
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
@@ -67,7 +67,7 @@
                     small
                     color="primary"
                     class="mx-2"
-                    @click="writeAnswerButton"
+                    @click="handleAnswerUpdate"
                     :width="120"
                     :height="30"
                 >
@@ -92,25 +92,46 @@
             </v-sheet>
         </v-container>
 
-        <div style="position: fixed;bottom: 0;left: 0;right: 0;">
-            <v-bottom-navigation shift color="primary" grow class="index__bottom__navigation" v-model="navigation">
-                <v-btn link to="/index">
-                    <span>文库</span>
-                    <v-icon>mdi-text-box-search</v-icon>
-                </v-btn>
-                <v-btn link to="/wall">
-                    <span>互助</span>
-                    <v-icon>mdi-handshake</v-icon>
-                </v-btn>
-                <v-btn link to="/forum/recommend">
-                    <span>知乎</span>
-                    <v-icon>mdi-forum</v-icon>
-                </v-btn>
-                <v-btn link to="/mine">
-                    <span>我的</span>
-                    <v-icon>mdi-account-circle</v-icon>
-                </v-btn>
-            </v-bottom-navigation>
+        <v-dialog
+				v-model="showDialogAnswer"
+				fullscreen
+				hide-overlay
+				transition="dialog-bottom-transition"
+				persistent
+        >
+        <AnswerCard 
+          @close="handleAnswerClose"
+          :answerId="this.toupdate_answerId"
+          :answerContent="this.toupdate_answerContent"
+          :questionId="this.toupdate_answer_questionId"
+          :questionTitle="this.toupdate_answer_questionTitle"
+        />
+        </v-dialog>
+
+        <div class="forum__bottom-nav">
+        <v-bottom-navigation
+            shift
+            color="primary"
+            grow
+            v-model="navigation"
+        >
+            <v-btn link to="/index">
+            <span>文库</span>
+            <v-icon>mdi-text-box-search</v-icon>
+            </v-btn>
+            <v-btn link to="/wall">
+            <span>互助</span>
+            <v-icon>mdi-handshake</v-icon>
+            </v-btn>
+            <v-btn link to="/forum/recommend">
+            <span>知乎</span>
+            <v-icon>mdi-forum</v-icon>
+            </v-btn>
+            <v-btn link to="/mine">
+            <span>我的</span>
+            <v-icon>mdi-account-circle</v-icon>
+            </v-btn>
+        </v-bottom-navigation>
         </div>
     </div>
   </template>
@@ -119,13 +140,13 @@
 import QuestionCard from '../../components/forum/QuestionCard.vue';
 import ReturnHeader from '../../components/nav/ReturnHeader.vue';
 import ContentCard from '../../components/forum/ContentCard.vue';
-import Mock from 'mockjs'
+import AnswerCard from '@/components/forum/AnswerCard.vue'
 
 export default {
-    components: { QuestionCard, ReturnHeader, ContentCard },
+    components: { QuestionCard, ReturnHeader, ContentCard, AnswerCard },
     data() {
         return {
-            navigation: 3,
+            navigation: 2,
             qid: 0,
             qtitle: '',
             hotPoint: 0,
@@ -140,9 +161,13 @@ export default {
             noMore: false,
             currentPageNum: 0,
             itemsPerPage: 4,
-            totalItem: 0,
             allData: [],
-            navigation : 2,
+
+            showDialogAnswer: false,
+            toupdate_answerId: 0,
+            toupdate_answerContent: "",
+            toupdate_answer_questionId: 0,
+            toupdate_answer_questionTitle: "",
         }
     },
     computed: {
@@ -188,10 +213,30 @@ export default {
                 console.error('请求失败:', error)
             })
         },
-        writeAnswerButton() {
-            localStorage.setItem('qid', this.qid)
-            this.$router.push('./answerWrite')
+        handleAnswerUpdate() {
+            // localStorage.setItem('qid', this.qid)
+            // this.$router.push('./answerWrite')
+            this.showDialogAnswer = true;
+            // this.toupdate_answerId = answer.id;
+            // this.toupdate_answerContent = answer.content;
+
+            // console.log(this.toupdate_answerContent)
+
+            this.toupdate_answer_questionId = this.qid;
+            this.toupdate_answer_questionTitle = this.qtitle;
         },
+        
+        handleAnswerClose({ shouldRefreshAnswer }) {
+            this.showDialogAnswer = false;
+            this.toupdate_answerId = 0;
+            this.toupdate_answerContent = "";
+            this.toupdate_answer_questionId = 0;
+            this.toupdate_answer_questionTitle = "";
+            if (shouldRefreshAnswer) {
+                this.fetchData(); // 重新加载回答列表
+            }
+        },
+
         async goodQuestion() {
             let isCancel = 0
             if (this.qliked) {
@@ -242,3 +287,13 @@ export default {
     },
 }
 </script>
+<style scoped lang="less">
+.forum__bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* 让内容不被导航栏遮挡，要给父级 content 区留出相同高度的底部 padding */
+  /* 比如导航栏高度约为 56px，就在上层容器加 padding-bottom: 56px; */
+}
+</style>

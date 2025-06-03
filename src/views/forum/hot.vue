@@ -1,13 +1,13 @@
 <template>
     <div class="forum">
-        <v-app-bar app fixed color="white" elevation="1" height="64">
-        </v-app-bar>
+        <!-- <v-app-bar app fixed color="white" elevation="1" height="64">
+        </v-app-bar> -->
         <AppHeader/>
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: calc(100vh - 150px - 50px); margin-top: 150px;"
+            style="height: calc(100vh - 150px - 50px);"
             @touchstart.passive="handleTouchStart"
             @touchmove.passive="handleTouchMove"
             @touchend.passive="handleTouchEnd"
@@ -68,13 +68,13 @@
                 <span>互助</span>
                 <v-icon>mdi-handshake</v-icon>
             </v-btn>
-            <v-btn value="mine" to="/mine">
-                <span>我的</span>
-                <v-icon>mdi-account-circle</v-icon>
-            </v-btn>
             <v-btn value="forum" to="/forum/hot">
                 <span>知乎</span>
                 <v-icon>mdi-forum</v-icon>
+            </v-btn>
+            <v-btn value="mine" to="/mine">
+                <span>我的</span>
+                <v-icon>mdi-account-circle</v-icon>
             </v-btn>
         </v-bottom-navigation>
     </div>
@@ -183,13 +183,13 @@ export default {
         },
     },
     created() {
-        let refresh = localStorage.getItem('refresh')
-        if (refresh == 'true') {
-            localStorage.setItem('refresh', 'false')
-            this.$router.go(0)
-        } else {
-            localStorage.setItem('refresh', 'true')
-        }
+        // let refresh = localStorage.getItem('refresh')
+        // if (refresh == 'true') {
+        //     localStorage.setItem('refresh', 'false')
+        //     this.$router.go(0)
+        // } else {
+        //     localStorage.setItem('refresh', 'true')
+        // }
         this.fetchData()
     }
 }

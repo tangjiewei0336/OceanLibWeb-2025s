@@ -576,7 +576,7 @@ export default {
       this.showDialogAnswer = true;
       this.toupdate_answerId = answer.id;
       this.toupdate_answerContent = answer.content;
-      console.log(this.toupdate_answerContent)
+      // console.log(this.toupdate_answerContent)
       this.toupdate_answer_questionId = answer.questionId;
       this.toupdate_answer_questionTitle = answer.question.title;
     },

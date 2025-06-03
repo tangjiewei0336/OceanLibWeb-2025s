@@ -55,6 +55,7 @@
 
 <script>
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+import { baseURL } from '../../config.js';
 
 export default {
   name: 'AskCard',

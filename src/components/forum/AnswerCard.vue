@@ -53,6 +53,7 @@
 
 <script>
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+import { baseURL } from '../../config.js';
 
 export default {
   name: 'AnswerCard',
@@ -220,19 +221,19 @@ export default {
         });
       }
       else {
+        const formData = new FormData();
+        formData.append('answer', this.html);
         this.$Axios({
           method: 'POST',
           url: '/qaService/answer/submit',
           params: {
             questionId: this.questionId,
           },
-          data: {
-            answer: this.html,
-          }
+          data: formData,
         })
         .then(response => {
           const data = response.data;
-          if (data.code === 0) {
+          if (data.state === "SUCCESS") {
             this.$toast.success('发布成功！');
             this.$emit('close', { shouldRefreshAnswer: true });
           } else {
