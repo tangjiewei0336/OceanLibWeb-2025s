@@ -1,45 +1,45 @@
 <template>
-    <div class="forum">
-        <v-app-bar app fixed color="white" elevation="1" height="64">
-            <AppHeader />
-        </v-app-bar>
-
-
+    <div>
+        <ReturnHeader
+            interface="answer"
+        />
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 1100px; margin-top: 220px;"
+            style="height: calc(100vh - 100px);"
             @scroll.passive="handleScroll"
         >
             <QuestionCard
-                :id="this.qid"
-                :title="this.qtitle"
-                :content="this.qcontent"
-                :answer-count="this.qanswerCount"
-                :reward="this.qreward"
-                :isAnswer="true"
+                :qid="this.qid"
+                interface="answer"
+                :qtitle="qtitle"
+                :hotPoint="hotPoint"
+                :qcontent="qcontent"
+                :commentNum="commentNum"
+                :browse="browse"
             />
+            <v-sheet 
+				color="grey lighten-2" 
+				height="3px" 
+				width="95%"
+                class="mx-auto"
+                rounded="0"
+			/>
+
             <ContentCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
+                :qid="qid"
+                :aid="item.id"
+                interface="answer"
                 :uid="item.userId"
                 :content="item.content"
-                :paraList="[item.likeCount, 0, item.commentCount, 0, 0]"
-                :noTitle="true"
+                :commentCount="item.commentCount"
+                :likeCount="item.likeCount"
+                :createTime="item.createTime"
+                :avatar="item.avatar"
             />
-            <v-progress-circular
-                v-if="isLoading"
-                indeterminate
-                color="primary"
-            />
-            <v-card-text
-                v-if="noMore"
-                class="text-center text-caption pa-2"
-            >
-                没有更多了...
-            </v-card-text>
-
         </v-container>
 
         <v-bottom-navigation 
@@ -50,53 +50,56 @@
             v-model="navigation"
         >
             <v-btn value="library" to="/index">
-            <span>文库</span>
-            <v-icon>mdi-text-box-search</v-icon>
+                <span>文库</span>
+                <v-icon>mdi-text-box-search</v-icon>
             </v-btn>
             <v-btn value="help" to="/wall">
-            <span>互助</span>
-            <v-icon>mdi-handshake</v-icon>
+                <span>互助</span>
+                <v-icon>mdi-handshake</v-icon>
             </v-btn>
             <v-btn value="mine" to="/mine">
-            <span>我的</span>
-            <v-icon>mdi-account-circle</v-icon>
+                <span>我的</span>
+                <v-icon>mdi-account-circle</v-icon>
             </v-btn>
-            <v-btn value="forum" to="/forum/recommend">
-            <span>知乎</span>
-            <v-icon>mdi-forum</v-icon>
+            <v-btn value="forum" to="/forum/hot">
+                <span>知乎</span>
+                <v-icon>mdi-forum</v-icon>
             </v-btn>
         </v-bottom-navigation>
     </div>
   </template>
-  
+
 <script>
-import AppHeader from '../../components/nav/ForumHeadBar.vue'
+import QuestionCard from '../../components/forum/QuestionCard.vue';
+import ReturnHeader from '../../components/nav/ReturnHeader.vue';
 import ContentCard from '../../components/forum/ContentCard.vue';
-import QuestionCard from '../../components/forum/QuestionCard.vue'
 import Mock from 'mockjs'
 
 export default {
-    components: { AppHeader, ContentCard, QuestionCard },
+    components: { QuestionCard, ReturnHeader, ContentCard },
     data() {
         return {
+            navigation: '',
+            qid: 0,
+            qtitle: '',
+            hotPoint: 0,
+            qcontent: '',
+            commentNum: 0,
+            browse: 0,
+
+            qlikeCount: 0,
+			qliked: false,
+
             isLoading: false,
             noMore: false,
             currentPageNum: 0,
             itemsPerPage: 4,
-            totalItem: 0,
             allData: [],
-            
-            qid: "",
-            qanswerCount: 0,
-            qreward: 0,
-            qtitle: "",
-            qcontent: "",
         }
     },
     computed: {
         paginatedData() {
-            const end = this.currentPageNum * this.itemsPerPage
-            return this.allData.slice(0, end)
+            return this.allData
         }
     },
     methods: {
@@ -106,55 +109,57 @@ export default {
                 this.fetchData();
             }
         },
-        initQuestion() {
-            this.qid = localStorage.getItem('forum_qid')
-            this.qanswerCount = localStorage.getItem('forum_answerCount')
-            this.qreward = localStorage.getItem('forum_reward')
-            this.qtitle = localStorage.getItem('forum_title')
-            this.qcontent = localStorage.getItem('forum_content')
-        },
         async fetchData() {
             if (this.noMore) {
                 return
             }
-            try {
-                // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
-                this.isLoading = true
-                const response = [200, {
-                    state: "SUCCESS",
-                    code: "1",
-                    msg: Mock.mock({
-                    [`list|${this.itemsPerPage}`]: [{
-                        'id|+1': this.currentPageNum * this.itemsPerPage + 1,
-                        questionId: '@guid()',
-                        userId: '@ctitle(3,6)',
-                        content: '@cparagraph(1,3)',
-                        createTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
-                        updateTime: '@datetime("yyyy-MM-dd HH:mm:ss")',
-                        'isDeleted|1': [true, false],
-                        'likeCount|0-1000': 1,
-                        'commentCount|0-50': 1
-                    }]
-                    }).list
-                }];
-                let data = response[1].msg
-
-                if (data.length < this.itemsPerPage) {
-                    this.noMore = true
-                }
-
+            this.isLoading = true
+            this.$Axios({
+                method: 'get',
+                url: '/qaService/answer/list',
+                params: {
+                    questionId: this.qid,
+                    page: this.currentPageNum + 1,
+                    pageSize: this.itemsPerPage,
+                },
+            }).then(response => {
+                let data = response.data.msg.content
                 this.allData = [...this.allData, ...data]
-
-                this.currentPageNum += 1
-                this.isLoading = false
-            } catch (error) {
+                if (this.allData.length >= this.commentNum) {
+                    this.noMore = true
+                } else {
+                    this.currentPageNum += 1
+                }
+            }).catch(error => {
                 console.error('请求失败:', error)
+            })
+            this.isLoading = false
+        },
+        parseData(resData) {
+            try {
+                this.allData = JSON.parse(resData);
+            } catch (e) {
+                console.error('解析失败:', e);
+                this.allDat = [];
             }
         }
     },
     created() {
-        this.initQuestion()
+        this.qid = Number(localStorage.getItem('qid'))
+        this.qtitle = String(localStorage.getItem('qtitle'))
+        this.hotPoint = Number(localStorage.getItem('hotPoint'))
+        this.qcontent = String(localStorage.getItem('qcontent'))
+        this.commentNum = Number(localStorage.getItem('commentNum'))
+        this.browse = Number(localStorage.getItem('browse'))
+
+        let resData = localStorage.getItem('resData')
+        this.parseData(resData)
+
+        this.currentPageNum = Number(localStorage.getItem('aPage'))
+        this.itemsPerPage = Number(localStorage.getItem('aPageNum'))
+        this.noMore = Boolean(localStorage.getItem('aNoMore'))
+
         this.fetchData()
-    }
+    },
 }
 </script>

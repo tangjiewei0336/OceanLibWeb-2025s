@@ -15,17 +15,17 @@ const asyncRouterMap = [{
         component: (resolve) => require(['../views/mine/mine.vue'], resolve)
     },
     {
-        path: '/forum/recommend',
+        path: '/forum/hot',
         meta: {
-            title: '知乎最新',
-            permission: ["USER", "ADMIN"]
+            title: '知乎热榜',
+            permission: ["USER", "ADMIN"],
         },
-        component: (resolve) => require(['../views/forum/forum.vue'], resolve)
+        component: (resolve) => require(['../views/forum/hot.vue'], resolve)
     },
     {
         path: '/forum/question',
         meta: {
-            title: '知乎直答',
+            title: '知乎问题',
             permission: ["USER", "ADMIN"]
         },
         component: (resolve) => require(['../views/forum/question.vue'], resolve)
@@ -33,7 +33,7 @@ const asyncRouterMap = [{
     {
         path: '/forum/answer',
         meta: {
-            title: '知乎直答',
+            title: '知乎回答',
             permission: ["USER", "ADMIN"]
         },
         component: (resolve) => require(['../views/forum/answer.vue'], resolve)
@@ -41,7 +41,7 @@ const asyncRouterMap = [{
     {
         path: '/forum/answerWrite',
         meta: {
-            title: '知乎直答',
+            title: '知乎写回答',
             permission: ["USER", "ADMIN"]
         },
         component: (resolve) => require(['../views/forum/answerWrite.vue'], resolve)

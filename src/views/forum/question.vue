@@ -7,30 +7,89 @@
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 1100px; "
+            style="height: calc(100vh - 120px);"
             @scroll.passive="handleScroll"
         >
-            <QuestionCard 
+            <QuestionCard
+                :qid="this.qid"
+                :interface="'question'"
+                :qtitle="qtitle"
+                :hotPoint="hotPoint"
+                :qcontent="qcontent"
+                :commentNum="commentNum"
+                :browse="browse"
+                :likeCount="qlikeCount"
+            />
+            <v-sheet 
+				color="grey lighten-2" 
+				height="3px" 
+				width="95%"
+                class="mx-auto"
+                rounded="0"
+			/>
+
+            <ContentCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
-                :id="item.id"
-                :title="item.title"
+                :qid="qid"
+                :aid="item.id"
+                interface="question"
+                :uid="item.userId"
                 :content="item.content"
-                :answer-count="item.answerCount"
-                :reward="item.rewardPoints"
+                :commentCount="item.commentCount"
+                :likeCount="item.likeCount"
+                :createTime="item.createTime"
+                :avatar="item.avatar"
+                @toAnswer="toAnswer"
             />
-            <v-progress-circular
-                v-if="isLoading"
-                indeterminate
-                color="primary"
-            />
-            <v-card-text
-                v-if="noMore"
-                class="text-center text-caption pa-2"
-            >
-                没有更多了...
-            </v-card-text>
 
+            <v-row
+                justify="center"
+                align="center"
+                style="margin-top: 20px;"
+            >
+                <v-col cols="auto">
+                    <v-progress-circular
+                        v-if="isLoading"
+                        indeterminate
+                        color="primary"
+                    />
+                </v-col>
+            </v-row>
+
+            <v-sheet
+                class="d-flex justify-center"
+                color="transparent"
+                style="position: fixed; bottom: 70px; left: 0; right: 0; z-index: 1000;"
+            >
+                <v-btn
+                    rounded
+                    small
+                    color="primary"
+                    class="mx-2"
+                    @click="writeAnswerButton"
+                    :width="120"
+                    :height="30"
+                >
+                    <v-icon left>mdi-pencil</v-icon>
+                    写回答
+                </v-btn>
+                <v-btn
+                    small
+                    rounded
+                    color="white"
+                    class="mx-2 primary--text"
+                    @click="goodQuestion"
+                    :width="120"
+                    :height="30"
+                >
+                    <v-icon left>
+                        {{ qliked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
+                    </v-icon>
+                    好问题 
+                    {{ qlikeCount }}
+                </v-btn>
+            </v-sheet>
         </v-container>
 
         <div style="position: fixed;bottom: 0;left: 0;right: 0;">
@@ -57,14 +116,26 @@
   </template>
 
 <script>
-import AppHeader from '../../components/nav/ForumHeadBar.vue'
 import QuestionCard from '../../components/forum/QuestionCard.vue';
+import ReturnHeader from '../../components/nav/ReturnHeader.vue';
+import ContentCard from '../../components/forum/ContentCard.vue';
 import Mock from 'mockjs'
 
 export default {
-    components: { AppHeader, QuestionCard },
+    components: { QuestionCard, ReturnHeader, ContentCard },
     data() {
         return {
+            navigation: 3,
+            qid: 0,
+            qtitle: '',
+            hotPoint: 0,
+            qcontent: '',
+            commentNum: 0,
+            browse: 0,
+
+            qlikeCount: 0,
+			qliked: false,
+
             isLoading: false,
             noMore: false,
             currentPageNum: 0,
@@ -76,7 +147,7 @@ export default {
     },
     computed: {
         paginatedData() {
-            const end = this.currentPageNum * this.itemsPerPage
+            const end = this.allData.length
             return this.allData.slice(0, end)
         }
     },
@@ -88,50 +159,86 @@ export default {
             }
         },
         async fetchData() {
-            if (this.noMore) {
+            if (this.noMore || this.isLoading) {
                 return
             }
-            try {
-                // const response = await axios.get(`/api/questions?page=${this.currentPage}&limit=${this.itemsPerPage}`)
-                
-                const response = [200, {
-                    state: "SUCCESS",
-                    code: "1",
-                    msg: {
-                        pageNum: this.currentPageNum,
-                        pageSize: this.itemsPerPage,
-                        total: 100,
-                        isLastPage: false,
-                        list: Mock.mock({
-                            [`list|${this.itemsPerPage}`]: [{
-                            'id|+1': (this.currentPageNum - 1) * this.itemsPerPage + 1,
-                            title: '@ctitle(10,20)',
-                            content: '@ctitle(50,100)',
-                            'answerCount|0-100': 1,
-                            'rewardPoints|0-50': 1,
-                            createTime: '@datetime'
-                            }]
-                        }).list
-                    }
-                }]
-                
-                let data = response[1].msg
-                this.allData = [...this.allData, ...data.list]
-                if (data.isLastPage) {
-                    this.totalItem = data.total
+            this.isLoading = true
+            this.$Axios({
+                method: 'get',
+                url: '/qaService/answer/list',
+                params: {
+                    questionId: this.qid,
+                    page: this.currentPageNum + 1,
+                    pageSize: this.itemsPerPage,
+                },
+            }).then(response => {
+                let data = response.data.msg.content
+                // console.log("answers: ", data)
+                this.allData = [...this.allData, ...data]
+                if (this.allData.length >= this.commentNum ||
+                    this.allData.length < this.itemsPerPage
+                ) {
                     this.noMore = true
                 } else {
-                    this.totalItem += this.itemsPerPage
+                    this.currentPageNum += 1
                 }
-                this.currentPageNum += 1
                 this.isLoading = false
-            } catch (error) {
+            }).catch(error => {
+                this.isLoading = false
                 console.error('请求失败:', error)
+            })
+        },
+        writeAnswerButton() {
+            localStorage.setItem('qid', this.qid)
+            this.$router.push('./answerWrite')
+        },
+        async goodQuestion() {
+            let isCancel = 0
+            if (this.qliked) {
+                this.qliked = false;
+                isCancel = 1
+            } else {
+                this.qliked = true;
             }
+            this.$Axios({
+                method: 'post',
+                url: '/qaService/like/evaluateQuestion',
+                params: {
+                    questionId: this.qid,
+                    isCancel: isCancel,
+                    isLike: 1
+                },
+            }).then(response => {
+                this.qlikeCount = response.data.msg.likeCount
+            }).catch(error => {
+                console.error('点赞失败:', error)
+            })
+        },
+        toAnswer(aid) {
+            let id = 0
+            for (; id < this.allData.length; id++) {
+                if (this.allData[id].id == aid) break;
+            }
+            let resData = this.allData.slice(id, this.allData.length)
+            // console.log("store, ", resData)
+            localStorage.setItem('resData', JSON.stringify(resData))
+            localStorage.setItem('aPage', this.currentPageNum)
+            localStorage.setItem('aPageNum', this.itemsPerPage)
+            localStorage.setItem('aNoMore', this.noMore)
+            this.$router.push('./answer')
         }
     },
     created() {
+        this.qid = Number(localStorage.getItem('qid'))
+        this.qtitle = String(localStorage.getItem('qtitle'))
+        this.hotPoint = Number(localStorage.getItem('hotPoint'))
+        this.qcontent = String(localStorage.getItem('qcontent'))
+        this.commentNum = Number(localStorage.getItem('commentNum'))
+        this.browse = Number(localStorage.getItem('browse'))
+        this.qlikeCount = Number(localStorage.getItem('likeCount'))
+        this.qliked = Boolean(localStorage.getItem('qliked') == 'true')
+
         this.fetchData()
-    }
+    },
 }
 </script>
