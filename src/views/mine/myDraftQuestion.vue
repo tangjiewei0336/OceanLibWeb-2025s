@@ -134,14 +134,14 @@
       <van-tab title="提问" name="1" class="full">
         <van-pull-refresh class="pullRefresh full" v-model="content.questionList.refreshing" @refresh="getMyQuestionList(true)">
           <van-list v-model="content.questionList.loading" :finished="content.questionList.finished" @load="getMyQuestionList()" class="full">
-            <div v-for="question in myQuestionList" :key="question.id">
+            <div v-for="question in myQuestionList" :key="question.bindId">
               <v-card class="myAsk" outlined>
                 <v-questionBox
-                  :key="question.id"
+                  :key="question.bindId"
                   v-bind="question"
                   class="myAsk__questionBox"
                 />
-                <div class="question-box__tags">
+                <div class="question-box__tags" v-if="question.tagIds">
                   <van-tag
                     v-for="tag in question.tagIds"
                     :key="tag"
@@ -153,14 +153,14 @@
                 </div>
                 <!-- 操作按钮 -->
                 <v-card-actions>
-                  <!-- <v-btn fab dark x-small color="primary" @click="changeQuestionInfo(question.id)"> -->
-                  <v-btn fab dark x-small color="primary" @click="toupdate_questionId = question.id, showDialog = true">
+                  <!-- <v-btn fab dark x-small color="primary" @click="changeQuestionInfo(question.bindId)"> -->
+                  <v-btn fab dark x-small color="primary" @click="toupdate_questionId = question.bindId, showDialog = true">
                     <v-icon>mdi-note-edit</v-icon>
                   </v-btn>
                   <!-- <v-btn fab dark x-small color="primary">
                     <v-icon>mdi-share-variant</v-icon>
                   </v-btn> -->
-                  <v-btn fab dark x-small color="error"  @click="confirmDeleteQuestion(question.id)">
+                  <v-btn fab dark x-small color="error"  @click="confirmDeleteQuestion(question.bindId)">
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                   <v-spacer></v-spacer>
@@ -217,11 +217,11 @@
       </van-tab>
     </van-tabs>
     <v-dialog
-    v-model="showDialog"
-    fullscreen
-    hide-overlay
-    transition="dialog-bottom-transition"
-    persistent
+      v-model="showDialog"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+      persistent
     >
         <AskCard 
         @close="handleAskCardClose"
@@ -245,6 +245,7 @@ export default {
   },
   data() {
     return {
+      toupdate_questionId: 0,
       tabsOffset: 0,
       showDialog: false,
       activeTab: '0', // 文档栏默认选中
@@ -293,46 +294,47 @@ export default {
           "fileCheckEntity": null
         }
       ],
-      myQuestionList: [
-      {
-          id: 'q12345',
-          title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
-          content: `
-            <p>我正在开发一个类似知乎的前端页面，使用 Vue 2 和 Quill 作为富文本编辑器。</p>
-            <p>想知道如何实现知乎那种浮动提问卡片、全屏输入界面、标签选择和悬赏设置功能。</p>
-            <p>有经验的朋友可以分享一下做法或思路吗？</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          isDeleted: false,
-          isPosted: true,
-          isHidden: false,
-          rewardPoints: 50,
-          answerCount: 3,
-          viewCount: 128,
-          tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
-          attachmentIds: ['att001', 'att002'],
-        },
-        {
-          id: 'q12346',
-          title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
-          content: `
-            <p>这是描述</p><img src="xxx"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          isDeleted: false,
-          isPosted: true,
-          isHidden: false,
-          rewardPoints: 50,
-          answerCount: 3,
-          viewCount: 128,
-          tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
-          attachmentIds: ['att001', 'att002'],
-        },
-      ],
+      myQuestionList:[],
+      // myQuestionList: [
+      // {
+      //     id: 'q12345',
+      //     title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
+      //     content: `
+      //       <p>我正在开发一个类似知乎的前端页面，使用 Vue 2 和 Quill 作为富文本编辑器。</p>
+      //       <p>想知道如何实现知乎那种浮动提问卡片、全屏输入界面、标签选择和悬赏设置功能。</p>
+      //       <p>有经验的朋友可以分享一下做法或思路吗？</p>
+      //     `,
+      //     userId: 'user_001',
+      //     createTime: '2025-05-21T10:30:00.000Z',
+      //     updateTime: '2025-05-21T10:45:00.000Z',
+      //     isDeleted: false,
+      //     isPosted: true,
+      //     isHidden: false,
+      //     rewardPoints: 50,
+      //     answerCount: 3,
+      //     viewCount: 128,
+      //     tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
+      //     attachmentIds: ['att001', 'att002'],
+      //   },
+      //   {
+      //     id: 'q12346',
+      //     title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
+      //     content: `
+      //       <p>这是描述</p><img src="xxx"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
+      //     `,
+      //     userId: 'user_001',
+      //     createTime: '2025-05-21T10:30:00.000Z',
+      //     updateTime: '2025-05-21T10:45:00.000Z',
+      //     isDeleted: false,
+      //     isPosted: true,
+      //     isHidden: false,
+      //     rewardPoints: 50,
+      //     answerCount: 3,
+      //     viewCount: 128,
+      //     tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
+      //     attachmentIds: ['att001', 'att002'],
+      //   },
+      // ],
       content: {
         fileList: {
           loading: false,
@@ -377,9 +379,12 @@ export default {
     }
 },
   methods: {
-    handleAskCardClose() {
-        this.showDialog = false;
-        this.toupdate_questionId = null;
+    handleAskCardClose({ shouldRefresh }) {
+      this.showDialog = false;
+      this.toupdate_questionId = null;
+      if (shouldRefresh) {
+        this.getMyQuestionList(true); // 重新加载问题列表
+      }
     },
     back() {
       this.$router.go(-1); //返回上一层
@@ -434,35 +439,35 @@ export default {
         this.content.questionList.pageNum = 1;
         this.content.questionList.finished = false;
       }
-      // this.$Axios({
-      //   method: 'get',
-      //   url: '/qaService/question/list',
-      //   params: {
-      //     page: this.content.questionList.pageNum,
-      //     pageSize: 4,
-      //     username: localStorage.getItem('username'),
-      //     sort: 0
-      //   },
-      // }).then((response) => {
-      //   if (!isRefreshing) {
-      //     this.questionList.push(...response.data.msg.list);
-      //   } else {
-      //     this.questionList = response.data.msg.list;
-      //   }
-      //   this.questionList.map((data) => {
-      //     data.show = false;
-      //   });
-      //   if (response.data.msg.isLastPage) {
-      //     this.content.questionList.finished = true;
-      //   } else {
-      //     this.content.questionList.pageNum += 1;
-      //   }
-      //   this.content.questionList.loading = false;
-      //   this.content.questionList.refreshing = false;
-      // });
-      this.content.questionList.finished = true;
-      this.content.questionList.loading = false;
-      this.content.questionList.refreshing = false;
+      this.$Axios({
+        method: 'get',
+        url: '/qaService/question/myDrafts',
+        params: {
+          page: this.content.questionList.pageNum,
+          pageSize: 4,
+          // username: localStorage.getItem('username'),
+          // sort: 0
+        },
+      }).then((response) => {
+        if (!isRefreshing) {
+          this.myQuestionList.push(...response.data.msg.content);
+        } else {
+          this.myQuestionList = response.data.msg.content;
+        }
+        this.myQuestionList.map((data) => {
+          data.show = false;
+        });
+        if (response.data.msg.last) {
+          this.content.questionList.finished = true;
+        } else {
+          this.content.questionList.pageNum += 1;
+        }
+        this.content.questionList.loading = false;
+        this.content.questionList.refreshing = false;
+      });
+      // this.content.questionList.finished = true;
+      // this.content.questionList.loading = false;
+      // this.content.questionList.refreshing = false;
     },
     // changeQuestionInfo(questionId) {
     //   this.$router.push({
@@ -492,7 +497,7 @@ export default {
       .then(response => {
         if (response.data.code === 0) {
           // 从列表移除
-          this.myQuestionList = this.myQuestionList.filter(q => q.id !== questionId);
+          this.myQuestionList = this.myQuestionList.filter(q => q.bindId !== questionId);
           this.$toast.success('已成功删除该问题草稿');
         } else {
           this.$toast.fail(response.data.msg || '删除失败');
