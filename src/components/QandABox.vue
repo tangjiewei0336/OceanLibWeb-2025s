@@ -70,6 +70,7 @@ export default {
   methods: {
     goToQuestionDetail() {
       if (this.question && this.question.id) {
+        // 以后需要改到回答的详细页面
         this.$router.push({ path: `/question/${this.question.id}` });
       }
     },
@@ -80,28 +81,16 @@ export default {
       return tempDiv.textContent || tempDiv.innerText || "";
     },
     async fetchUserInfo() {
-      console.log(this.answer)
-      if (!this.answer?.userId) return;
-      console.log(this.answer)
-      this.$Axios({
-        method: 'GET',
-        url: '/userInfoService/getUserLimitedInfo',
-        params: {
-          username: this.answer.userId
-        },
-      })
-      .then((response) => {
-        console.log(response)
-        this.userInfo.avatar = response.data.msg.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
-        this.userInfo.username = response.data.msg.username || "";
-      })
-      .catch(() => {
-        console.error("获取用户信息失败:", error);
-      });
+      this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
+      this.userInfo.username = this.answer.userId;
     },
   },
   mounted() {
     this.fetchUserInfo();
+    // this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
+    // this.userInfo.username = this.answer.userId;
+    // console.log(this.userInfo.avatar)
+    // console.log(this.userInfo.username)
   },
 };
 </script>
