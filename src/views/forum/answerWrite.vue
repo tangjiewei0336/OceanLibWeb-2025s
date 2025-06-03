@@ -91,7 +91,7 @@ export default {
         }
     },
     created() {
-        this.qid = Number(localStorage.getItem('qid'))
+        // this.qid = Number(localStorage.getItem('qid'))
     }
 }
 </script>

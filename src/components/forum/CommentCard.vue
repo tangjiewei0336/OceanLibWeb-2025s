@@ -149,6 +149,7 @@ export default {
     },
     computed: {
         SubData() {
+            console.log('subData', this.subComments)
             const end = Math.min(this.subComments.length, 2);
             return this.subComments.slice(0, end)
         },

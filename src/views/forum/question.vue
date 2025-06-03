@@ -191,7 +191,6 @@ export default {
             })
         },
         writeAnswerButton() {
-            localStorage.setItem('qid', this.qid)
             this.$router.push('./answerWrite')
         },
         async goodQuestion() {
@@ -222,7 +221,6 @@ export default {
                 if (this.allData[id].id == aid) break;
             }
             let resData = this.allData.slice(id, this.allData.length)
-            // console.log("store, ", resData)
             localStorage.setItem('resData', JSON.stringify(resData))
             localStorage.setItem('aPage', this.currentPageNum)
             localStorage.setItem('aPageNum', this.itemsPerPage)
