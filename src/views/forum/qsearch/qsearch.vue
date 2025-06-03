@@ -173,12 +173,13 @@ export default {
       this.showSuggest = true;
       this.$Axios({
         method: 'get',
-        url: '/qaService/question/suggest',
+        url: '/qaService/question/suggestTitle',
         params: {
           keyword: item,
           rows: 10,
         },
       }).then((response) => {
+        // console.log(response)
         this.suggestList = response.data.msg;
       });
     },
