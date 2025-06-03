@@ -159,15 +159,15 @@
       </van-tab> -->
       <van-tab title="提问" name="1" class="full">
         <van-pull-refresh class="pullRefresh full" v-model="content.questionList.refreshing" @refresh="getMyQuestionList(true)">
-          <van-list v-model="content.questionList.loading" :finished="content.questionList.finished" @load="getMyQuestionList()" class="full">
-            <div v-for="question in myQuestionList" :key="question.id">
+          <van-list v-model="content.questionList.loading" :finished="content.questionList.finished" @load="getMyQuestionList" class="full">
+            <div v-for="question in myQuestionList.filter(q => !q.isDeleted)" :key="question.bindId">
               <v-card class="myAsk" outlined>
                 <v-questionBox
-                  :key="question.id"
+                  :key="question.bindId"
                   v-bind="question"
                   class="myAsk__questionBox"
                 />
-                <div class="question-box__tags">
+                <div class="question-box__tags" v-if="question.tagIds">
                   <van-tag
                     v-for="tag in question.tagIds"
                     :key="tag"
@@ -179,17 +179,17 @@
                 </div>
                 <!-- 操作按钮 -->
                 <v-card-actions>
-                  <!-- <v-btn fab dark x-small color="primary" @click="changeQuestionInfo(question.id)"> -->
-                  <v-btn fab dark x-small color="primary" @click="toupdate_questionId = question.id, showDialog = true">
+                  <!-- <v-btn fab dark x-small color="primary" @click="changeQuestionInfo(question.bindId)"> -->
+                  <v-btn fab dark x-small color="primary" @click= "OpenAskCard(question.bindId)">
                     <v-icon>mdi-note-edit</v-icon>
                   </v-btn>
                   <!-- <v-btn fab dark x-small color="primary">
                     <v-icon>mdi-share-variant</v-icon>
                   </v-btn> -->
-                  <v-btn fab dark x-small color="primary"  @click="hideQuestion(question.id)">
+                  <v-btn fab dark x-small color="primary"  @click="hideQuestion(question.bindId)">
                     <v-icon>mdi-eye-off</v-icon>
                   </v-btn>
-                  <v-btn fab dark x-small color="error"  @click="confirmDeleteQuestion(question.id)">
+                  <v-btn fab dark x-small color="error"  @click="confirmDeleteQuestion(question.bindId)">
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                   <v-spacer></v-spacer>
@@ -264,7 +264,7 @@
           />
       </v-dialog>
         
-        <v-dialog
+      <v-dialog
 				v-model="showDialogAnswer"
 				fullscreen
 				hide-overlay
@@ -274,6 +274,7 @@
 				<AnswerCard 
           @close="handleAnswerClose"
           :answerId="this.toupdate_answerId"
+          :answerContent="this.toupdate_answerContent"
           :questionId="this.toupdate_answer_questionId"
           :questionTitle="this.toupdate_answer_questionTitle"
         />
@@ -301,7 +302,7 @@
                 </div> -->
                 <!-- 操作按钮 -->
                 <v-card-actions>
-                  <!-- <v-btn fab dark x-small color="primary" @click="changeQuestionInfo(question.id)"> -->
+                  <!-- <v-btn fab dark x-small color="primary" @click="changeQuestionInfo(question.bindId)"> -->
                   <v-btn fab dark x-small color="primary" @click="handleAnswerUpdate(answer)">
                     <v-icon>mdi-note-edit</v-icon>
                   </v-btn>
@@ -402,9 +403,10 @@ export default {
   },
   data() {
     return {
-      toupdate_questionId: null,
-      toupdate_answerId: null,
-      toupdate_answer_questionId: null,
+      toupdate_questionId: 0,
+      toupdate_answerId: 0,
+      toupdate_answerContent: "",
+      toupdate_answer_questionId: 0,
       toupdate_answer_questionTitle: "",
 
       tabsOffset: 0,
@@ -455,59 +457,60 @@ export default {
           "fileCheckEntity": null
         }
       ],
-      myQuestionList: [
-      {
-          id: 'q12345',
-          title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
-          content: `
-            <p>我正在开发一个类似知乎的前端页面，使用 Vue 2 和 Quill 作为富文本编辑器。</p>
-            <p>想知道如何实现知乎那种浮动提问卡片、全屏输入界面、标签选择和悬赏设置功能。</p>
-            <p>有经验的朋友可以分享一下做法或思路吗？</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          isDeleted: false,
-          isPosted: true,
-          isHidden: false,
-          rewardPoints: 50,
-          answerCount: 3,
-          viewCount: 128,
-          tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
-          attachmentIds: ['att001', 'att002'],
-        },
-        {
-          id: 'q12346',
-          title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
-          content: `
-            <p>这是描述</p><img src="xxx"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          isDeleted: false,
-          isPosted: true,
-          isHidden: false,
-          rewardPoints: 50,
-          answerCount: 3,
-          viewCount: 128,
-          tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
-          attachmentIds: ['att001', 'att002'],
-        },
-      ],
+      myQuestionList:[],
+      // myQuestionList: [
+      //   {
+      //     id: 'q12345',
+      //     title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
+      //     content: `
+      //       <p>我正在开发一个类似知乎的前端页面，使用 Vue 2 和 Quill 作为富文本编辑器。</p>
+      //       <p>想知道如何实现知乎那种浮动提问卡片、全屏输入界面、标签选择和悬赏设置功能。</p>
+      //       <p>有经验的朋友可以分享一下做法或思路吗？</p>
+      //     `,
+      //     userId: 'user_001',
+      //     createTime: '2025-05-21T10:30:00.000Z',
+      //     updateTime: '2025-05-21T10:45:00.000Z',
+      //     isDeleted: false,
+      //     isPosted: true,
+      //     isHidden: false,
+      //     rewardPoints: 50,
+      //     answerCount: 3,
+      //     viewCount: 128,
+      //     tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
+      //     attachmentIds: ['att001', 'att002'],
+      //   },
+      //   {
+      //     id: 'q12346',
+      //     title: '如何使用 Vue 和 Quill 构建知乎风格的提问界面？',
+      //     content: `
+      //       <p>这是描述</p><img src="xxx"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
+      //     `,
+      //     userId: 'user_001',
+      //     createTime: '2025-05-21T10:30:00.000Z',
+      //     updateTime: '2025-05-21T10:45:00.000Z',
+      //     isDeleted: false,
+      //     isPosted: true,
+      //     isHidden: false,
+      //     rewardPoints: 50,
+      //     answerCount: 3,
+      //     viewCount: 128,
+      //     tagIds: ['Vue', '前端开发', '富文本编辑器', '知乎风格'],
+      //     attachmentIds: ['att001', 'att002'],
+      //   },
+      // ],
       myAnswerList: [
-        {
-          id: 111,
-          content: `
-            <p>这是描述</p><img src="https://pic3.zhimg.com/80/v2-8eddcbe0f97aa68d7aeed10775187ddc_r.jpg"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
-          `,
-          userId: 'user_001',
-          createTime: '2025-05-21T10:30:00.000Z',
-          updateTime: '2025-05-21T10:45:00.000Z',
-          likeCount: 50,
-          commentCount: 3,
-          question: { id: 1, title: 'Vue 与 React 的主要区别？',content: 'dwdoai' }
-        },
+        // {
+        //   id: 111,
+        //   content: `
+        //     <p>这是描述</p><img src="https://pic3.zhimg.com/80/v2-8eddcbe0f97aa68d7aeed10775187ddc_r.jpg"/><p>这是描述</p><img src="xxx"/><img src="yyy"/><p>结束</p>
+        //   `,
+        //   userId: 'user_001',
+        //   createTime: '2025-05-21T10:30:00.000Z',
+        //   updateTime: '2025-05-21T10:45:00.000Z',
+        //   likeCount: 50,
+        //   commentCount: 3,
+        //   question: { id: 1, title: 'Vue 与 React 的主要区别？',content: 'dwdoai' }
+        // },
       ],
       content: {
         fileList: {
@@ -547,19 +550,33 @@ export default {
     this.tabsOffset = this.$refs['toolbar'].height;
   },
   methods: {
-    handleAskCardClose() {
-      this.showDialog = false;
-      this.toupdate_questionId = null;
+    OpenAskCard(bindId) {
+      this.showDialog = true;
+      this.toupdate_questionId = bindId;
+      console.log(this.toupdate_questionId)
     },
-    handleAnswerClose() {
+    handleAskCardClose({ shouldRefresh }) {
+      this.showDialog = false;
+      this.toupdate_questionId = 0;
+      if (shouldRefresh) {
+        this.getMyQuestionList(true); // 重新加载问题列表
+      }
+    },
+    handleAnswerClose({ shouldRefresh }) {
       this.showDialogAnswer = false;
-      this.toupdate_answerId = null;
-      this.toupdate_answer_questionId = null;
+      this.toupdate_answerId = 0;
+      this.toupdate_answerContent = "";
+      this.toupdate_answer_questionId = 0;
       this.toupdate_answer_questionTitle = "";
+      if (shouldRefresh) {
+        this.getMyAnswerList(true); // 重新加载回答列表
+      }
     },
     handleAnswerUpdate(answer) {
       this.showDialogAnswer = true;
       this.toupdate_answerId = answer.id;
+      this.toupdate_answerContent = answer.content;
+      console.log(this.toupdate_answerContent)
       this.toupdate_answer_questionId = answer.questionId;
       this.toupdate_answer_questionTitle = answer.question.title;
     },
@@ -621,35 +638,41 @@ export default {
         this.content.questionList.pageNum = 1;
         this.content.questionList.finished = false;
       }
-      // this.$Axios({
-      //   method: 'get',
-      //   url: '/qaService/question/list',
-      //   params: {
-      //     page: this.content.questionList.pageNum,
-      //     pageSize: 4,
-      //     username: localStorage.getItem('username'),
-      //     sort: 0
-      //   },
-      // }).then((response) => {
-      //   if (!isRefreshing) {
-      //     this.questionList.push(...response.data.msg.list);
-      //   } else {
-      //     this.questionList = response.data.msg.list;
-      //   }
-      //   this.questionList.map((data) => {
-      //     data.show = false;
-      //   });
-      //   if (response.data.msg.isLastPage) {
-      //     this.content.questionList.finished = true;
-      //   } else {
-      //     this.content.questionList.pageNum += 1;
-      //   }
-      //   this.content.questionList.loading = false;
-      //   this.content.questionList.refreshing = false;
-      // });
-      this.content.questionList.finished = true;
-      this.content.questionList.loading = false;
-      this.content.questionList.refreshing = false;
+      this.$Axios({
+        method: 'get',
+        url: '/qaService/question/list',
+        params: {
+          page: this.content.questionList.pageNum,
+          pageSize: 6,
+          username: localStorage.getItem('username'),
+          sort: 0,
+          includeDeleted: 0,
+        },
+      }).then((response) => {
+        // console.log(response.data.msg.content)
+        if (!isRefreshing) {
+          this.myQuestionList.push(...response.data.msg.content);
+        } else {
+          this.myQuestionList = response.data.msg.content;
+        }
+        this.myQuestionList.map((data) => {
+          data.show = false;
+        });
+        if (response.data.msg.last) {
+          this.content.questionList.finished = true;
+        } else {
+          this.content.questionList.pageNum += 1;
+        }
+        this.content.questionList.loading = false;
+        this.content.questionList.refreshing = false;
+      }).catch(() => {
+        // 失败时也要关闭状态
+        this.content.questionList.loading = false;
+        this.content.questionList.refreshing = false;
+      });
+      // this.content.questionList.finished = true;
+      // this.content.questionList.loading = false;
+      // this.content.questionList.refreshing = false;
     },
     // changeQuestionInfo(questionId) {
     //   this.$router.push({
@@ -677,15 +700,15 @@ export default {
         method: 'PUT',
         url: '/qaService/question/update',
         params: {
-          page: this.content.questionList.pageNum,
+          questionId: questionId,
           isPost: 0,
-          isHide: 1,
         },
       })
       .then((response) => {
         const data = response.data;
-        if (data.code === 0) {
-          this.myQuestionList = this.myQuestionList.filter(q => q.id !== questionId);
+        // console.log(data)
+        if (data.state === "SUCCESS") {
+          this.myQuestionList = this.myQuestionList.filter(q => q.bindId !== questionId);
           this.$toast.success('已成功隐藏该问题');
         } else {
           this.$toast.fail(data.msg || '隐藏失败');
@@ -696,8 +719,6 @@ export default {
         this.$toast.fail('网络错误，隐藏失败');
         this.$set(this.myQuestionList[idx], 'hiding', false);
       });
-      // this.myQuestionList = this.myQuestionList.filter(q => q.id !== questionId);
-      // this.$toast.success('已成功隐藏该问题');
     },
     confirmDeleteQuestion(questionId) {
       Dialog.confirm({
@@ -717,10 +738,11 @@ export default {
         params: { questionId },
       })
       .then(response => {
-        if (response.data.code === 0) {
+        if (response.data.state === "SUCCESS") {
           // 从列表移除
-          this.myQuestionList = this.myQuestionList.filter(q => q.id !== questionId);
+          this.myQuestionList = this.myQuestionList.filter(q => q.bindId !== questionId);
           this.$toast.success('已成功删除该问题');
+          // this.getMyQuestionList(true);
         } else {
           this.$toast.fail(response.data.msg || '删除失败');
         }
@@ -734,35 +756,32 @@ export default {
         this.content.answerList.pageNum = 1;
         this.content.answerList.finished = false;
       }
-      // this.$Axios({
-      //   method: 'get',
-      //   url: '/qaService/answer/list',
-      //   params: {
-      //     page: this.content.answerList.pageNum,
-      //     pageSize: 4,
-      //     username: localStorage.getItem('username'),
-      //     sort: 0
-      //   },
-      // }).then((response) => {
-      //   if (!isRefreshing) {
-      //     this.answerList.push(...response.data.msg.list);
-      //   } else {
-      //     this.answerList = response.data.msg.list;
-      //   }
-      //   this.answerList.map((data) => {
-      //     data.show = false;
-      //   });
-      //   if (response.data.msg.isLastPage) {
-      //     this.content.answerList.finished = true;
-      //   } else {
-      //     this.content.answerList.pageNum += 1;
-      //   }
-      //   this.content.answerList.loading = false;
-      //   this.content.answerList.refreshing = false;
-      // });
-      this.content.answerList.finished = true;
-      this.content.answerList.loading = false;
-      this.content.answerList.refreshing = false;
+      this.$Axios({
+        method: 'get',
+        url: '/qaService/answer/myAnswers',
+        params: {
+          page: this.content.answerList.pageNum,
+          pageSize: 6,
+          // username: localStorage.getItem('username'),
+        },
+      }).then((response) => {
+        console.log(response.data.msg.content)
+        if (!isRefreshing) {
+          this.myAnswerList.push(...response.data.msg.content);
+        } else {
+          this.myAnswerList = response.data.msg.content;
+        }
+        this.myAnswerList.map((data) => {
+          data.show = false;
+        });
+        if (response.data.msg.last) {
+          this.content.answerList.finished = true;
+        } else {
+          this.content.answerList.pageNum += 1;
+        }
+        this.content.answerList.loading = false;
+        this.content.answerList.refreshing = false;
+      });
     },
     confirmDeleteAnswer(answerId) {
       Dialog.confirm({
@@ -782,7 +801,7 @@ export default {
         params: { answerId },
       })
       .then(response => {
-        if (response.data.code === 0) {
+        if (response.data.state === "SUCCESS") {
           // 从列表移除
           this.myAnswerList = this.myAnswerList.filter(q => q.id !== answerId);
           this.$toast.success('已成功删除该回答');
