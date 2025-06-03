@@ -146,7 +146,7 @@ export default {
             }
         },
         async fetchData() {
-            if (this.noMore) {
+            if (this.noMore || this.isLoading) {
                 return
             }
             this.isLoading = true

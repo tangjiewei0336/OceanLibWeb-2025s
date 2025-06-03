@@ -1,44 +1,48 @@
 <template>
 	<v-card
-		class="pa-4"
+		class="pa-2"
 		flat
 		:ripple="false"
 		@click="toQuestion"
 	>
-		<div 
-			class="d-flex align-center"
-			v-if="this.interface === 'hot'"
-			style="gap: 12px;"
-			>
-			<v-chip
-				:color="getColor(seqId + 1)"
-				small
-				style="flex-shrink: 0;"
-			>
-				{{ seqId + 1 }}
-			</v-chip>
+		<div v-if="this.interface === 'hot'">
+			<div class="d-flex align-start" style="gap: 12px;">
+				<div class="d-flex align-center" style="margin-top: 5px;">
+					<div 
+						class="bubble-chip"
+						:style="{
+						backgroundColor: getColor(seqId),
+						color: getTextColor(seqId)
+						}"
+					>
+						{{ seqId + 1 }}
+						<div class="bubble-tail"></div>
+					</div>
+				</div>
 
-			<div 
-				class="text-h7 font-weight-bold"
-				style="width: 200px;"
-			>
-				{{ qtitle }}
-				<div class="d-flex mt-3">
-				<div class="text-caption grey--text">
-					<span>{{ hotFormat(hotPoint) }} 热度</span>
+				<div 
+					class="custom-title font-weight-bold"
+					style="width: calc(100vw - 100px); "
+				>
+					{{ qtitle }}
+					<div class="d-flex mt-3">
+						<div class="text-caption grey--text">
+							<span>{{ hotFormat(hotPoint) }} 热度</span>
+						</div>
+					</div>
 				</div>
-				</div>
+
+				<v-img
+					v-if="urls.length > 0"
+					:src="urls[0]"
+					:width="80"
+					:height="80"
+					aspect-ratio="1"
+					cover
+					style="border-radius: 4px; margin-bottom: 10px;"
+				></v-img>
 			</div>
-
-			<v-img
-				v-if="urls.length > 0"
-				:src="urls[0]"
-				:width="60"
-				:height="60"
-				aspect-ratio="1"
-				cover
-				style="border-radius: 4px;"
-			></v-img>
+			<v-divider/>
 		</div>
 
 		<div v-if="this.interface === 'question' || this.interface === 'answer'">
@@ -46,29 +50,35 @@
 
 			<v-card-text v-if="this.interface === 'question'">
 				<div class="d-flex align-center">
-					<div v-if="!expanded" @click="expanded = true" >
+					<div 
+					class="text-container" 
+					:style="{ width: expanded ? '100%' : 'calc(100% - 130px)' }"
+					>
+					<div v-if="!expanded" @click="expanded = true">
 						{{ truncateContent(qcontent) }}
 						<span 
-							v-if="qcontent.length >= 35"
-							class="grey--text text--lighten-1 text-caption"
+						v-if="qcontent.length >= 35"
+						class="grey--text text--lighten-1 text-caption"
 						>展开...</span>
 					</div>
+
 					<div v-if="expanded && qcontent.length >= 35">
-						<div v-html="qcontent"></div>
+						<div class="html-container">
+							<div v-html="qcontent" class="html-content"></div>
+						</div>
 						<div>
 							<v-btn 
 								@click="expanded = false" 
-								text
-								small
+								text small
 								color="grey"
 							>
 								收起
-								<v-icon right small>
-									{{ 'mdi-chevron-up' }}
-								</v-icon>
+								<v-icon right small>mdi-chevron-up</v-icon>
 							</v-btn>
+							</div>
 						</div>
 					</div>
+
 					<v-img
 						v-if="!expanded && urls.length > 0"
 						:src="urls[0]"
@@ -76,7 +86,7 @@
 						:height="80"
 						aspect-ratio="1"
 						cover
-						style="border-radius: 4px;"
+						style="border-radius: 4px; margin-left: 10px;"
 					></v-img>
 				</div>
 			</v-card-text>
@@ -174,11 +184,15 @@ export default {
 		},
 		getColor(num) {
 			const colorMap = {
-				1: 'red',
-				2: 'orange',
-				3: 'yellow'
+				0: '#FC5D57',
+				1: '#FF8E0C',
+				2: '#EDB56B'
 			}
 			return colorMap[num] || 'transparent'
+		},
+		getTextColor(num) {
+			if (num < 3) return 'white';
+			else return '#F58231';
 		},
 		toQuestion() {
 			if (this.interface == 'hot' || this.interface == 'answer') {
@@ -194,16 +208,15 @@ export default {
 			}
 		},
 		truncateContent(text, length = 34) {
-			const regex = /<p[^>]*>(.*?)<\/p>/g;
-			let match;
-			if ((match = regex.exec(text)) !== null) {
-				text = match[1]
-			} else {
-				text = ""
-			}
-			return text.length > length 
-			? text.substring(0, length)
-			: text
+			let pure_text = this.extractText(text)
+			return pure_text.length > length 
+			? pure_text.substring(0, length)
+			: pure_text
+		},
+		extractText(htmlString) {
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(htmlString, 'text/html');
+			return doc.body.textContent || '';
 		},
 	},
 	created() {
@@ -211,3 +224,48 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+
+.html-container {
+  width: 500px; /* 固定宽度 */
+  max-width: 100%; /* 响应式：不超过父容器 */
+  overflow: hidden; /* 防止内容溢出 */
+}
+
+.html-content img {
+  max-width: 100%; /* 图片不超出容器 */
+  height: auto;
+}
+
+.bubble-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 20px;
+  /* padding: 0 8px; */
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.bubble-tail {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  background: inherit;
+  transform: translateX(-50%) rotate(45deg);
+  clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
+}
+
+.custom-title {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+</style>

@@ -39,7 +39,9 @@
 		</v-card-text>
 
 		<v-card-text v-if="this.interface === 'answer'">
-			<div v-html="content"></div>
+			<div class="html-container">
+				<div v-html="content" class="html-content"></div>
+			</div>
 			<v-divider></v-divider>
 			<div class="d-flex align-center">
 				<v-avatar size="30" color="primary" class="mr-1">
@@ -65,7 +67,7 @@
 				<template v-if="!refuse">
 					<v-badge
 						color="transparent"
-						:content="likeCount"
+						:content="String(likeCount + agree)"
 						offset-x="25"
 						offset-y="15"
 						class="custom-black-badge"
@@ -84,7 +86,7 @@
 				
 				<v-badge
 					color="transparent"
-					:content="collectedCount"
+					:content="String(collectedCount)"
 					offset-x="25"
 					offset-y="15"
 					class="custom-black-badge"
@@ -96,7 +98,7 @@
 				
 				<v-badge
 					color="transparent"
-					:content="commentCount"
+					:content="String(commentCount)"
 					offset-x="25"
 					offset-y="15"
 					class="custom-black-badge"
@@ -261,38 +263,63 @@ export default {
 			}
 		},
 		truncateContent(text, length = 34) {
-			const regex = /<p[^>]*>(.*?)<\/p>/g;
-			let match;
-			if ((match = regex.exec(text)) !== null) {
-				text = match[1]
-			} else {
-				text = ""
-			}
-			return text.length > length 
-			? text.substring(0, length) + '...'
-			: text
+			let pure_text = this.extractText(text)
+			return pure_text.length > length 
+			? pure_text.substring(0, length)
+			: pure_text
 		},
+		extractText(htmlString) {
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(htmlString, 'text/html');
+			return doc.body.textContent || '';
+		},
+
 		agreeFunc() {
 			this.snackbar = true
+			this.$Axios({
+                method: 'post',
+                url: '/qaService/like/evaluateAnswer',
+                params: {
+					answerId: this.aid,
+					isCancel: this.agree,
+					isLike: '0'
+				},
+            }).then(response => {
+				console.log(response)
+            }).catch(error => {
+                console.error('评论失败:', error)
+            })
+
 			if (this.agree) {
 				this.snackerText = "已取消"
 			} else {
 				this.snackerText = "已赞同"
 			}
 			this.agree = !this.agree
-			this.likeCount += this.agree ? 1 : -1
-
-			// TODO: api
 		},
 		refuseFunc() {
 			this.snackbar = true
+
+			this.$Axios({
+                method: 'post',
+                url: '/qaService/like/evaluateAnswer',
+                params: {
+					answerId: this.aid,
+					isCancel: this.refuse,
+					isLike: '1'
+				},
+            }).then(response => {
+				console.log(response)
+            }).catch(error => {
+                console.error('评论失败:', error)
+            })
+
 			if (this.refuse) {
 				this.snackerText = "已取消"
 			} else {
 				this.snackerText = "已反对"
 			}
 			this.refuse = !this.refuse
-			// TODO: api
 		},
 		collectedFunc() {
 			this.snackbar = true
@@ -376,4 +403,16 @@ export default {
   color: rgba(0, 0, 0, 1) !important; /* 强制黑色 */
   mix-blend-mode: normal !important; /* 避免透明背景下的颜色混合异常 */
 }
+
+.html-container {
+  width: 500px; /* 固定宽度 */
+  max-width: 100%; /* 响应式：不超过父容器 */
+  overflow: hidden; /* 防止内容溢出 */
+}
+
+.html-content img {
+  max-width: 100%; /* 图片不超出容器 */
+  height: auto;
+}
+
 </style>

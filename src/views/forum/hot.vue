@@ -2,15 +2,32 @@
     <div class="forum">
         <v-app-bar app fixed color="white" elevation="1" height="64">
         </v-app-bar>
-            <AppHeader />
-
+        <AppHeader/>
         <v-container 
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: 500px; margin-top: 150px;"
+            style="height: calc(100vh - 150px - 50px); margin-top: 150px;"
+            @touchstart.passive="handleTouchStart"
+            @touchmove.passive="handleTouchMove"
+            @touchend.passive="handleTouchEnd"
             @scroll.passive="handleScroll"
         >
+            <div 
+                v-show="pullDownState"
+                class="pull-refresh-hint"
+                :style="{ height: `${pullDownHeight}px` }"
+            >
+                <div class="d-flex align-center justify-center">
+                    <template v-if="pullDownState === 'pulling'">
+                        <p class="blue--text">下拉刷新↓</p>
+                    </template>
+                    
+                    <template v-else-if="pullDownState === 'ready'">
+                        <p class="blue--text">松开刷新↑</p>
+                    </template>
+                </div>
+            </div>
             <QuestionCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
@@ -84,8 +101,12 @@ export default {
             isLoading: false,
             noMore: false,
             currentPageNum: 0,
-            itemsPerPage: 6,
-            allData: []
+            itemsPerPage: 10,
+            allData: [],
+
+            startY: 0,          // 触摸起始位置
+            pullDownState: '',  // '' | 'pulling' | 'ready' | 'loading'
+            pullDownHeight: 0   // 下拉距离
         }
     },
     computed: {
@@ -112,7 +133,8 @@ export default {
                 params: {
                     page: this.currentPageNum + 1,
                     pageSize: this.itemsPerPage,
-                    sort: 1
+                    sort: 1,
+                    includeDeleted: 0
                 },
             }).then(response => {
                 let data = response.data.msg.content
@@ -129,6 +151,43 @@ export default {
                 console.error('请求失败:', error)
                 this.isLoading = false
             })
+        },
+
+        handleTouchStart(e) {
+            if (this.$refs.scrollContainer.scrollTop === 0) {
+                this.startY = e.touches[0].clientY
+            }
+        },
+        handleTouchMove(e) {
+            if (this.startY === 0) return
+            const y = e.touches[0].clientY
+            const diff = y - this.startY
+            if (diff > 0 && this.$refs.scrollContainer.scrollTop <= 0) {
+                this.pullDownHeight = Math.min(diff, 100)
+                this.pullDownState = diff > 60 ? 'ready' : 'pulling'
+            }
+        },
+        handleTouchEnd() {
+            if (this.pullDownState === 'ready') {
+                this.pullDownState = 'loading'
+                this.onRefresh()
+            } else {
+                this.resetPull()
+            }
+        },
+        resetPull() {
+            this.pullDownHeight = 0
+            this.pullDownState = ''
+            this.startY = 0
+        },
+        async onRefresh() {
+            this.currentPageNum = 0,
+            this.itemsPerPage = 10,
+            this.allData = []
+            this.noMore = false
+            this.isLoading = false
+            this.fetchData()
+            this.pullDownState = ''
         }
     },
     created() {
@@ -143,3 +202,13 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+/* .pull-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: height 0.3s ease;
+  background: rgba(0, 0, 0, 0.02);
+} */
+</style>

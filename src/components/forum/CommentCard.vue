@@ -27,11 +27,11 @@
                 <v-spacer></v-spacer>
                 <div>
                     <v-btn :ripple="false" x-small text @click="likeComment">
-                        <v-icon left small>{{ inner_liked ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
+                        <v-icon left small>{{ liked ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
                         {{ inner_likeCount }}
                     </v-btn>
                     <v-btn :ripple="false" x-small text @click="dislikeComment">
-                        <v-icon left small>{{ inner_disliked ? 'mdi-heart-off' : 'mdi-heart-off-outline' }}</v-icon>
+                        <v-icon left small>{{ disliked ? 'mdi-heart-off' : 'mdi-heart-off-outline' }}</v-icon>
                     </v-btn>
                 </div>
             </div>
@@ -88,8 +88,8 @@ export default {
     data() {
         return {
             inner_likeCount: 0,
-            inner_liked: false,
-            inner_disliked: false,
+            liked: false,
+            disliked: false,
 
             commentWriteOpen: false
         }
@@ -126,14 +126,6 @@ export default {
         likeCount: {
             type: Number,
             default: 0
-        },
-        liked: {
-            type: Boolean,
-            default: false
-        },
-        disliked: {
-            type: Boolean,
-            default: false
         },
         subComments: {
             type: Array,
@@ -196,23 +188,54 @@ export default {
 			// })
 		},
         likeComment() {
-            if (this.inner_liked) {
+            this.$Axios({
+                method: 'post',
+                url: '/comment/evaluateComment',
+                params: {
+                    bindID: this.aid,
+                    mainType: "ANSWER",
+                    commentID: this.cid,
+                    isCancel: this.liked,
+                    isLike: true
+				},
+            }).then(response => {
+				console.log(response)
+            }).catch(error => {
+                console.error('评论失败:', error)
+            })
+            if (this.liked) {
                 this.inner_likeCount -= 1
-                this.inner_liked = false
+                this.liked = false
             } else {
                 this.inner_likeCount += 1
-                this.inner_liked = true
-                this.inner_disliked = false
+                this.liked = true
+                this.disliked = false
             }
         },
         dislikeComment() {
-            if (this.inner_disliked) {
-                this.inner_disliked = false
+            this.$Axios({
+                method: 'post',
+                url: '/comment/evaluateComment',
+                params: {
+                    bindID: this.aid,
+                    mainType: "ANSWER",
+                    commentID: this.cid,
+                    isCancel: this.disliked,
+                    isLike: false
+				},
+            }).then(response => {
+				console.log(response)
+            }).catch(error => {
+                console.error('评论失败:', error)
+            })
+            
+            if (this.disliked) {
+                this.disliked = false
             } else {
-                this.inner_disliked = true
-                if (this.inner_liked) {
+                this.disliked = true
+                if (this.liked) {
                     this.inner_likeCount -= 1
-                    this.inner_liked = false
+                    this.liked = false
                 }
             }
         },
@@ -233,8 +256,6 @@ export default {
     },
     created() {
         this.inner_likeCount = this.likeCount
-        this.inner_liked = this.liked
-        this.inner_disliked = this.disliked
     }
 }
 </script>
