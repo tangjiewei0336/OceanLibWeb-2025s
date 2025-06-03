@@ -69,6 +69,10 @@ export default {
       type: [String, Number],
       default: null,
     },
+    answerContent: {
+      type: String,
+      default: null,
+    },
   },
   emits: ['close'],
   components: { Editor, Toolbar },
@@ -78,50 +82,29 @@ export default {
       imageDialog: false,
       imageFile: null,
 
-      html: "",
+      html: this.answerContent || '',
       editor: null,
       toolbarConfig: {
-        // toolbarKeys: [ /* 显示哪些菜单，如何排序、分组 */ ],
-        // excludeKeys: [ /* 隐藏哪些菜单 */ ],
+        excludeKeys: [
+          "insertVideo", "group-video", "uploadVideo", "video"
+        ]
       },
       editorConfig: {
         placeholder: "输入图文回答内容",
         MENU_CONF: {
           uploadImage: {
-            // 不指定 server，走 customUpload
-            // server: '',
-            maxNumberOfFiles: 1,
-            maxFileSize: 5 * 1024 * 1024, // 5MB
-            // 自定义上传：把 file 读成 DataURL，再插入
-            // customUpload(file, insertImgFn) {
-            //   const reader = new FileReader();
-            //   reader.onload = e => {
-            //     const dataUrl = e.target.result;
-            //     // 用编辑器提供的回调插入图片
-            //     insertImgFn(dataUrl);
-            //   };
-            //   reader.readAsDataURL(file);
-            // },
-            async customUpload(file, insertImgFn) {
-              // 1. 构造表单
-              const form = new FormData();
-              form.append('file', file);
-
-              // 这里的 this 就是组件实例
-              vm.$Axios({
-                method: 'post',
-                url: '/api/upload/image',
-                data: form,
-              })
-              .then(resp => {
-                insertImgFn(resp.data.data.url);
-                vm.$toast.success('上传成功');
-              })
-              .catch(err => {
-                console.error(err);
-                vm.$toast.fail('上传失败');
-              });
+            // 用 function 而不是箭头，这样 this 指向组件实例
+            async customUpload(file, insertFn) {
+              // 这里的 this 就是当前组件实例
+              console.log("customUpload 里 this:", vm);
+              const url = await vm.uploadImageAPI(file);
+              if (url) {
+                insertFn(url, '', '');
+              } else {
+                console.error('图片上传失败');
+              }
             },
+            allowedFileTypes: ['image/*']
           }
         },
       },
@@ -142,7 +125,53 @@ export default {
     if (editor == null) return;
     editor.destroy(); // 组件销毁时，及时销毁 editor ，重要！！！
   },
+  watch: {
+    // 如果 answerContent 是异步传入的，要等它变更后再塞给编辑器
+    answerContent(newVal) {
+      // 如果编辑器已经创建，直接 setHtml；否则先保存到 html，后续 onCreated 里会渲染
+      if (this.editor) {
+        this.editor.setHtml(newVal || '');
+      } else {
+        this.html = newVal || '';
+      }
+    }
+  },
   methods: {
+    async uploadImageAPI(file) {
+      if (!file) {
+        this.$toast.fail('请选择要上传的图片');
+        return null;
+      }
+      const maxSize = 10 * 1024 * 1024; // 1MB
+      if (file.size > maxSize) {
+        this.$toast.fail('图片不能超过10MB');
+        return null;
+      }
+      if (!file.type.startsWith('image/')) {
+        this.$toast.fail('只允许上传图片');
+        return null;
+      }
+      const formData = new FormData();
+      formData.append('uploadFile', file);
+      try {
+        const response = await this.$Axios.post('/qaService/qaFile/uploadFile',
+          formData,
+        );
+        if (response.data.state === 'SUCCESS') {
+          const { fileName, fileSuffix } = response.data.msg;
+          const url = baseURL + `/qaService/qaFile/downloadFile/${fileName}${fileSuffix}`;
+          this.$toast.success('图片上传成功');
+          return url;
+        } else {
+          this.$toast.fail(response.data.msg || '图片上传失败');
+          return null;
+        }
+      } catch (err) {
+        console.error(err);
+        this.$toast.fail('上传图片失败');
+        return null;
+      }
+    },
     onCreated(editor) {
       this.editor = Object.seal(editor); // 【注意】一定要用 Object.seal() 否则会报错
     },
@@ -167,8 +196,6 @@ export default {
         this.$toast.fail("请填写回答内容");
         return;
       }
-      console.log(this.title)
-      console.log(content)
       if (this.answerId) {
         this.$Axios({
           method: 'PUT',
@@ -180,9 +207,9 @@ export default {
         })
         .then(response => {
           const data = response.data;
-          if (data.code === 0) {
+          if (data.state === "SUCCESS") {
             this.$toast.success('更新成功！');
-            this.$emit('close');
+            this.$emit('close', { shouldRefresh: true });
           } else {
             this.$toast.fail(data.msg || '更新失败');
           }
@@ -207,7 +234,7 @@ export default {
           const data = response.data;
           if (data.code === 0) {
             this.$toast.success('发布成功！');
-            this.$emit('close');
+            this.$emit('close', { shouldRefresh: true });
           } else {
             this.$toast.fail(data.msg || '发布失败');
           }
