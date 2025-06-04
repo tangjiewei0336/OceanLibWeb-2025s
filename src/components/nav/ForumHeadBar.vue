@@ -94,7 +94,7 @@
 						</v-btn> -->
 						<v-btn
 						text
-						ripple="false"
+						:ripple="false"
 						class="ForumHeadBar__nav-item"
 						to="/forum/recommend"
 						exact
@@ -106,7 +106,7 @@
 
 						<v-btn
 						text
-						ripple="false"
+						:ripple="false"
 						class="ForumHeadBar__nav-item"
 						to="/forum/hot"
 						exact

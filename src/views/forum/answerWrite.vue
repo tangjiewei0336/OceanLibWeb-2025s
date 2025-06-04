@@ -25,7 +25,7 @@
         >
     
             <QuestionCard
-                :qid="qid"
+                :id="qid"
                 interface="answerWrite"
             />
 

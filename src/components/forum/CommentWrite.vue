@@ -95,11 +95,13 @@ export default {
             }).then(response => {
                 console.log("comment: ", response)
 				this.myComment = ""
-            }).catch(error => {
+				this.$emit('close', true);
+			}).catch(error => {
                 console.error('评论失败:', error)
 				this.myComment = ""
+				this.$emit('close', false);
             })
-			this.$emit('close')
+			
 		},
 	}
 }

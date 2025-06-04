@@ -32,15 +32,8 @@
                 v-for="(item, index) in paginatedData" 
                 :key="index"
                 :seqId="index"
-                :qid="item.bindId"
+                :id="item.bindId"
                 interface="hot"
-                :qtitle="item.title"
-                :hotPoint="item.viewCount"
-                :qcontent="item.content"
-                :commentNum="item.answerCount"
-                :browse="item.viewCount"
-                :likeCount="item.likeCount"
-                :qliked="item.isLiked"
             />
             <v-row justify="center" align="center">
                 <v-col cols="auto">

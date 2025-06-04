@@ -82,7 +82,7 @@ export default {
             commentCount: 0,
             isLoading: false,
             noMore: false,
-            currentPageNum: 0,
+            currentPageNum: 1,
             itemsPerPage: 6,
             allData: [],
 
@@ -97,9 +97,9 @@ export default {
             required: true
         },
         aid: {
-            aid: Number,
+            type: Number,
 			required: true
-        }
+        },
 	},
     computed: {
         paginatedData() {
@@ -165,7 +165,7 @@ export default {
         }
     },
     created() {
-        this.fetchData();
+        this.allData = JSON.parse(localStorage.getItem('comments'))
     }
 }
 </script>

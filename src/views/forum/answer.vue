@@ -11,13 +11,8 @@
             @scroll.passive="handleScroll"
         >
             <QuestionCard
-                :qid="this.qid"
+                :id="this.qid"
                 interface="answer"
-                :qtitle="qtitle"
-                :hotPoint="hotPoint"
-                :qcontent="qcontent"
-                :commentNum="commentNum"
-                :browse="browse"
             />
             <v-sheet 
 				color="grey lighten-2" 
@@ -35,7 +30,6 @@
                 interface="answer"
                 :uid="item.userId"
                 :content="item.content"
-                :commentCount="item.commentCount"
                 :likeCount="item.likeCount"
                 :createTime="item.createTime"
                 :avatar="item.avatar"
@@ -92,9 +86,13 @@ export default {
 
             isLoading: false,
             noMore: false,
-            currentPageNum: 0,
+            currentPageNum: 1,
+            leastNum: 6,
             itemsPerPage: 4,
             allData: [],
+
+            topAid: 0,
+            findTop: false,
         }
     },
     computed: {
@@ -110,30 +108,50 @@ export default {
             }
         },
         async fetchData() {
-            if (this.noMore) {
+            if (this.noMore || this.isLoading) {
                 return
             }
             this.isLoading = true
-            this.$Axios({
-                method: 'get',
-                url: '/qaService/answer/list',
-                params: {
-                    questionId: this.qid,
-                    page: this.currentPageNum + 1,
-                    pageSize: this.itemsPerPage,
-                },
-            }).then(response => {
-                let data = response.data.msg.content
-                this.allData = [...this.allData, ...data]
-                if (this.allData.length >= this.commentNum) {
-                    this.noMore = true
-                } else {
-                    this.currentPageNum += 1
+            while (!this.findTop || this.allData.length < this.leastNum) {
+                try {
+                    const response = await this.$Axios({
+                        method: 'get',
+                        url: '/qaService/answer/list',
+                        params: {
+                            questionId: this.qid,
+                            page: this.currentPageNum,
+                            pageSize: this.itemsPerPage,
+                        },
+                    });
+                    
+                    let data = response.data.msg.content
+                    // console.log("answers: ", data)
+                    if (!this.findTop) {
+                        let id = 0;
+                        for (; id < data.length; id++) {
+                            if (data[id].id == this.topAid) {
+                                this.findTop = true;
+                                break;
+                            }
+                        }
+                        data = data.slice(id, data.length)
+                    }
+                    this.allData = [...this.allData, ...data]
+                    if ((this.currentPageNum * this.itemsPerPage) >= this.commentNum) {
+                        this.noMore = true;
+                        break;
+                    } else {
+                        this.currentPageNum += 1;
+                    }
+                } catch(error) {
+                    console.error('请求失败:', error)
+                } finally {
+                    if (this.findTop && this.allData.length < this.leastNum) {
+                        this.isLoading = false;
+                    }
                 }
-            }).catch(error => {
-                console.error('请求失败:', error)
-            })
-            this.isLoading = false
+            }
+            
         },
         parseData(resData) {
             try {
@@ -152,13 +170,8 @@ export default {
         this.commentNum = Number(localStorage.getItem('commentNum'))
         this.browse = Number(localStorage.getItem('browse'))
 
-        let resData = localStorage.getItem('resData')
-        this.parseData(resData)
-
-        this.currentPageNum = Number(localStorage.getItem('aPage'))
-        this.itemsPerPage = Number(localStorage.getItem('aPageNum'))
-        this.noMore = Boolean(localStorage.getItem('aNoMore'))
-
+        this.topAid = Number(localStorage.getItem('topAid'))
+        this.findTop = false;
         this.fetchData()
     },
 }

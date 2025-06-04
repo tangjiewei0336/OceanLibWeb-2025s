@@ -133,17 +133,17 @@
 						</v-btn>
 					</v-badge>
 					
-					<!-- <v-badge
+					<v-badge
 						color="transparent"
 						:content="String(commentCount)"
 						offset-x="35"
 						offset-y="20"
 						class="custom-black-badge"
-					> -->
-						<v-btn :ripple="false" small text @click="commentOpen = true" class="px-0">
+					>
+						<v-btn :ripple="false" small text @click="showComments" class="px-0">
 							<v-icon left small>mdi-chat-outline</v-icon>
 						</v-btn>
-					<!-- </v-badge> -->
+					</v-badge>
 				</div>
 			</div>
 
@@ -231,7 +231,10 @@ export default {
 			avatarSrc: null,
 			myComment: "",
 			userAvatar: "",
-			followed: false
+			followed: false,
+
+			commentCount: 0,
+			comments: [],
 		}
     },
 	computed: {
@@ -259,10 +262,6 @@ export default {
 		content: {
 			type: String,
 			default: ''
-		},
-		commentCount: {
-			type: Number,
-			default: 0
 		},
 		likeCount: {
 			type: Number,
@@ -304,7 +303,6 @@ export default {
 			const doc = parser.parseFromString(htmlString, 'text/html');
 			return doc.body.textContent || '';
 		},
-
 		agreeFunc() {
 			this.snackbar = true
 			// this.$Axios({
@@ -414,7 +412,6 @@ export default {
 				this.commentCount += 1
 			}
 			this.commentWriteOpen = false
-			this.commentOpen = false
 		},
 		async getUserAvatar() {
             this.$Axios({
@@ -430,9 +427,37 @@ export default {
 			if (this.followed) return;
 			this.followed = true
 			// TODO
+		},
+		fetchComment() {
+			this.$Axios({
+                method: 'get',
+                url: '/comment/getComment',
+                params: {
+                    bindID: this.aid,
+                    mainType: "ANSWER",
+                    pageNum: 1,
+                    commentCount: 6,	// 需要与CommentPopup中的itemsPerPage一致
+                    replyCount: 2
+                },
+            }).then(response => {
+                let data = response.data.msg.comments
+                this.commentCount = response.data.msg.commentCount
+				this.comments = [...this.comments, ...data]
+            }).catch(error => {
+                this.isLoading = false
+                console.error('请求失败:', error)
+            })
+		},
+		showComments() {
+			this.commentOpen = true
+			localStorage.setItem('comments', JSON.stringify(this.comments))
+		},
+		reloadComment() {
+
 		}
     },
 	created() {
+		this.fetchComment()
 		this.extractImageUrls(this.content)
 		if (this.avatar.length > 0) {
 			this.cacheAvatar = true

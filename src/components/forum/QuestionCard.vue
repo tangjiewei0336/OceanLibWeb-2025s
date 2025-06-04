@@ -24,10 +24,10 @@
 					class="custom-title font-weight-bold"
 					style="width: calc(100vw - 100px); "
 				>
-					{{ qtitle }}
+					{{ title }}
 					<div class="d-flex mt-3">
 						<div class="text-caption grey--text">
-							<span>{{ hotFormat(hotPoint) }} 热度</span>
+							<span>{{ numCompress(viewCount) }} 热度</span>
 						</div>
 					</div>
 				</div>
@@ -46,7 +46,7 @@
 		</div>
 
 		<div v-if="this.interface === 'question' || this.interface === 'answer'">
-			<v-card-title class="pt-0 font-weight-bold">{{ qtitle }}</v-card-title>
+			<v-card-title class="pt-0 font-weight-bold">{{ title }}</v-card-title>
 
 			<v-card-text v-if="this.interface === 'question'">
 				<div class="d-flex align-center">
@@ -55,16 +55,16 @@
 						:style="{ width: expanded ? '100%' : 'calc(100% - 130px)' }"
 					>
 					<div v-if="!expanded" @click="expanded = true">
-						{{ truncateContent(qcontent) }}
+						{{ truncateContent(content) }}
 						<span 
-							v-if="extractText(qcontent).length >= 35"
+							v-if="extractText(content).length >= 35"
 							class="grey--text text--lighten-1 text-caption"
 						>展开...</span>
 					</div>
 
-					<div v-if="expanded && qcontent.length >= 35">
+					<div v-if="expanded && content.length >= 35">
 						<div class="html-container">
-							<div v-html="qcontent" class="html-content"></div>
+							<div v-html="content" class="html-content"></div>
 						</div>
 						<div style="margin-top: -20px">
 							<v-btn 
@@ -93,31 +93,39 @@
 
 			<div style="margin-left: 20px;" class="text-caption ml-4">
 				<span v-if="this.interface === 'answer'">知乎 · </span>
-				<span class="font-weight-bold">{{ commentNum }}</span> 回答
+				<span class="font-weight-bold">{{ answerCount }}</span> 回答
 				<span v-if="this.interface === 'question'">
-					 · <span class="font-weight-bold">{{ hotFormat(browse) }}</span> 浏览
+					 · <span class="font-weight-bold">{{ numCompress(viewCount) }}</span> 浏览
 				</span>
 			</div>
 		</div>
 
 		<div v-if="this.interface === 'answerWrite'">
-			<v-card-title class="pt-0 font-weight-bold">{{ qtitle }}</v-card-title>
+			<v-card-title class="pt-0 font-weight-bold">{{ title }}</v-card-title>
 		</div>
 	</v-card>
 </template>
-  
+
 <script>
-import Mock from 'mockjs'
 export default {
 	name: 'QuestionCard',
 	data() {
         return {
-			expanded: false,
+			// data
+			title: "",
+			answerCount: 0,
+			content: "",
+			viewCount: 0,
+			likeCount: 0,
+			isLiked: false,
 			urls: [],
+
+			// control
+			expanded: false,
         }
     },
 	props: {
-		qid: {
+		id: {
 			type: Number,
 			required: true
 		},
@@ -129,41 +137,35 @@ export default {
 			type: Number,
 			default: 0
 		},
-		qtitle: {
-			type: String,
-			default: ''
-		},
-		hotPoint: {
-			type: Number,
-			default: 0
-		},
-		qcontent: {
-			type: String,
-			default: ''
-		},
-		commentNum: {
-			type: Number,
-			default: 0
-		},
-		browse: {
-			type: Number,
-			default: 0
-		},
-		likeCount: {
-			type: Number,
-			default: 0
-		},
-		qliked: {
-			type: Boolean,
-			default: false
-		}
 	},
 	methods: {
-		hotFormat() {
-			if (this.hotPoint < 10000) {
-				return this.hotPoint.toString()
+		async fetchData() {
+			try {
+				const response = await this.$Axios({
+					method: 'get',
+					url: '/qaService/question/details',
+					params: {
+						questionId: this.id,
+					},
+				});
+				let data = response.data.msg
+				this.title = data.title
+				this.answerCount = data.answerCount
+				this.content = data.content
+				this.viewCount = data.viewCount
+				this.likeCount = data.likeCount
+				this.isLiked = data.isLiked
+				this.extractImageUrls(this.content)
+				this.$emit('setLike', this.likeCount, this.isLiked, this.title, this.answerCount)
+			} catch(error) {
+				console.error('请求失败:', error)
+			}
+		},
+		numCompress(num) {
+			if (num < 10000) {
+				return num.toString()
 			} else {
-				return (this.hotPoint / 10000).toFixed(1) + '万'
+				return (num / 10000).toFixed(1) + '万'
 			}
 		},
 		extractImageUrls(html) {
@@ -173,14 +175,6 @@ export default {
 			while ((match = regex.exec(html)) !== null) {
 				this.urls.push(match[1]);
 			}
-		},
-		fetchData() {
-			try {
-				this.extractImageUrls(this.qcontent)
-				localStorage.setItem('qtitle', this.qtitle)
-            } catch (error) {
-                console.error('请求失败:', error)
-            }
 		},
 		getColor(num) {
 			const colorMap = {
@@ -196,12 +190,11 @@ export default {
 		},
 		toQuestion() {
 			if (this.interface == 'hot' || this.interface == 'answer') {
-				localStorage.setItem('qid', this.qid)
-				localStorage.setItem('qtitle', this.qtitle)
-				localStorage.setItem('hotPoint', this.hotPoint)
-				localStorage.setItem('qcontent', this.qcontent)
-				localStorage.setItem('commentNum', this.commentNum)
-				localStorage.setItem('browse', this.browse)
+				localStorage.setItem('id', this.id)
+				localStorage.setItem('title', this.title)
+				localStorage.setItem('content', this.content)
+				localStorage.setItem('answerCount', this.answerCount)
+				localStorage.setItem('viewCount', this.viewCount)
 				localStorage.setItem('likeCount', this.likeCount)
 				localStorage.setItem('qliked', this.qliked)
 				this.$router.push('./question')

@@ -11,14 +11,9 @@
             @scroll.passive="handleScroll"
         >
             <QuestionCard
-                :qid="this.qid"
+                :id="this.id"
                 :interface="'question'"
-                :qtitle="qtitle"
-                :hotPoint="hotPoint"
-                :qcontent="qcontent"
-                :commentNum="commentNum"
-                :browse="browse"
-                :likeCount="qlikeCount"
+                @setLike="setLike"
             />
             <v-sheet 
 				color="grey lighten-2" 
@@ -27,16 +22,14 @@
                 class="mx-auto"
                 rounded="0"
 			/>
-
             <ContentCard 
                 v-for="(item, index) in paginatedData" 
                 :key="index"
-                :qid="qid"
+                :qid="id"
                 :aid="item.id"
                 interface="question"
                 :uid="item.userId"
                 :content="item.content"
-                :commentCount="item.commentCount"
                 :likeCount="item.likeCount"
                 :createTime="item.createTime"
                 :avatar="item.avatar"
@@ -58,6 +51,7 @@
             </v-row>
 
             <v-sheet
+                v-if="!showDialogAnswer"
                 class="d-flex justify-center"
                 color="transparent"
                 style="position: fixed; bottom: 70px; left: 0; right: 0; z-index: 1000;"
@@ -84,10 +78,10 @@
                     :height="30"
                 >
                     <v-icon left>
-                        {{ qliked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
+                        {{ isLiked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
                     </v-icon>
                     好问题 
-                    {{ qlikeCount }}
+                    {{ likeCount }}
                 </v-btn>
             </v-sheet>
         </v-container>
@@ -147,22 +141,20 @@ export default {
     data() {
         return {
             navigation: 2,
-            qid: 0,
-            qtitle: '',
-            hotPoint: 0,
-            qcontent: '',
-            commentNum: 0,
-            browse: 0,
-
-            qlikeCount: 0,
-			qliked: false,
-
-            isLoading: false,
-            noMore: false,
-            currentPageNum: 0,
-            itemsPerPage: 4,
+            // data
+            id: 0,
+            title: '',
+            likeCount: 0,
+			isLiked: false,
+            answerCount: 0,
             allData: [],
 
+            // control
+            isLoading: false,
+            noMore: false,
+            currentPageNum: 1,
+            itemsPerPage: 4,
+            /// answerCard
             showDialogAnswer: false,
             toupdate_answerId: 0,
             toupdate_answerContent: "",
@@ -180,10 +172,10 @@ export default {
         handleScroll() {
             const container = this.$refs.scrollContainer;
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-                this.fetchData();
+                this.fetchAnswers();
             }
         },
-        async fetchData() {
+        async fetchAnswers() {
             if (this.noMore || this.isLoading) {
                 return
             }
@@ -193,18 +185,16 @@ export default {
                     method: 'get',
                     url: '/qaService/answer/list',
                     params: {
-                        questionId: this.qid,
-                        page: this.currentPageNum + 1,
+                        questionId: this.id,
+                        page: this.currentPageNum,
                         pageSize: this.itemsPerPage,
                     },
                 });
                 
                 let data = response.data.msg.content
-                // console.log("answers: ", data)
+                // console.log("question: ", data)
                 this.allData = [...this.allData, ...data]
-                if (this.allData.length >= this.commentNum ||
-                    this.allData.length < this.itemsPerPage
-                ) {
+                if (this.allData.length >= this.answerCount) {
                     this.noMore = true
                 } else {
                     this.currentPageNum += 1
@@ -216,7 +206,7 @@ export default {
             }
         },
         handleAnswerUpdate() {
-            // localStorage.setItem('qid', this.qid)
+            // localStorage.setItem('id', this.id)
             // this.$router.push('./answerWrite')
             this.showDialogAnswer = true;
             // this.toupdate_answerId = answer.id;
@@ -224,8 +214,8 @@ export default {
 
             // console.log(this.toupdate_answerContent)
 
-            this.toupdate_answer_questionId = this.qid;
-            this.toupdate_answer_questionTitle = this.qtitle;
+            this.toupdate_answer_questionId = this.id;
+            this.toupdate_answer_questionTitle = this.title;
         },
         
         handleAnswerClose({ shouldRefreshAnswer }) {
@@ -235,81 +225,47 @@ export default {
             this.toupdate_answer_questionId = 0;
             this.toupdate_answer_questionTitle = "";
             if (shouldRefreshAnswer) {
-                this.fetchData(); // 重新加载回答列表
+                this.$router.go(0)
             }
         },
-
         async goodQuestion() {
             let isCancel = 0
-            if (this.qliked) {
-                this.qliked = false;
+            if (this.isLiked) {
+                this.isLiked = false;
                 isCancel = 1
             } else {
-                this.qliked = true;
+                this.isLiked = true;
             }
             this.$Axios({
                 method: 'post',
-                url: '/qaService/like/evaluateQuestion',
+                url: '/qaService/isLiked/evaluateQuestion',
                 params: {
-                    questionId: this.qid,
+                    questionId: this.id,
                     isCancel: isCancel,
                     isLike: 1
                 },
             }).then(response => {
-                this.qlikeCount = response.data.msg.likeCount
+                this.likeCount = response.data.msg.likeCount
             }).catch(error => {
                 console.error('点赞失败:', error)
             })
         },
 
         toAnswer(aid) {
-            let id = 0
-            for (; id < this.allData.length; id++) {
-                if (this.allData[id].id == aid) break;
-            }
-            let resData = this.allData.slice(id, this.allData.length)
-            console.log("res length: ", resData.length)
-            // console.log("store, ", resData)
-            localStorage.setItem('resData', JSON.stringify(resData))
-            localStorage.setItem('aPage', this.currentPageNum)
-            localStorage.setItem('aPageNum', this.itemsPerPage)
-            localStorage.setItem('aNoMore', this.noMore)
+            localStorage.setItem('topAid', aid)
             this.$router.push({ name: 'forumAnswer' });
+        },
+        setLike(likeCount, isLiked, title, answerCount) {
+            this.isLiked = isLiked
+            this.likeCount = likeCount
+            this.title = title
+            this.answerCount = answerCount
         }
     },
     async created() {
-        this.qid = Number(localStorage.getItem('qid'))
-        this.qtitle = String(localStorage.getItem('qtitle'))
-        this.hotPoint = Number(localStorage.getItem('hotPoint'))
-        this.qcontent = String(localStorage.getItem('qcontent'))
-        this.commentNum = Number(localStorage.getItem('commentNum'))
-        this.browse = Number(localStorage.getItem('browse'))
-        this.qlikeCount = Number(localStorage.getItem('likeCount'))
-        this.qliked = Boolean(localStorage.getItem('qliked') == 'true')
-
-        if (localStorage.getItem('Jump2Answer') == null) {
-            this.fetchData()
-        } else {
-            let aid = Number(localStorage.getItem('Jump2Answer'));
-            if (aid == -1) {
-                this.fetchData()
-                return;
-            }
-            while (true) {
-                await this.fetchData()
-                let find = false;
-                let id = 0;
-                for (; id < this.allData.length; id++) {
-                    if (this.allData[id].id == aid) {
-                        find = true;
-                        break;
-                    }
-                }
-                if (find) break;
-            }
-            localStorage.setItem('Jump2Answer', -1)
-            this.toAnswer(aid)
-        }
+        this.id = Number(localStorage.getItem('id'))
+        this.title = String(localStorage.getItem('title'))
+        this.fetchAnswers()
     },
 }
 </script>
@@ -319,7 +275,5 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  /* 让内容不被导航栏遮挡，要给父级 content 区留出相同高度的底部 padding */
-  /* 比如导航栏高度约为 56px，就在上层容器加 padding-bottom: 56px; */
 }
 </style>
