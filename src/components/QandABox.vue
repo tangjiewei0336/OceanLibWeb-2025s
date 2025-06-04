@@ -58,39 +58,51 @@ export default {
   },
   computed: {
     formattedTime() {
-      const d = new Date(this.answer.updateTime || this.answer.createTime);
-      return d.toLocaleDateString() + " " + d.toLocaleTimeString().slice(0, 5);
+		const d = new Date(this.answer.updateTime || this.answer.createTime);
+		return d.toLocaleDateString() + " " + d.toLocaleTimeString().slice(0, 5);
     },
     allImages() {
-      if (!this.answer.content) return [];
-      const imgMatches = [...this.answer.content.matchAll(/<img[^>]+src="([^">]+)"/gi)];
-      return imgMatches.map((m) => m[1]);
+		if (!this.answer.content) return [];
+		const imgMatches = [...this.answer.content.matchAll(/<img[^>]+src="([^">]+)"/gi)];
+		return imgMatches.map((m) => m[1]);
     },
   },
   methods: {
     goToQuestionDetail() {
-      if (this.question && this.question.id) {
-        // 以后需要改到回答的详细页面
-        this.$router.push({ path: `/question/${this.question.id}` });
-      }
+		let question = this.answer.question
+		console.log(question)
+		if (question && question.bindId) {
+			// 以后需要改到回答的详细页面
+			localStorage.setItem('qid', question.bindId)
+			localStorage.setItem('qtitle', question.title)
+			localStorage.setItem('hotPoint', question.rewardPoints)
+			localStorage.setItem('qcontent', question.content)
+			localStorage.setItem('commentNum', question.answerCount)
+			localStorage.setItem('browse', question.rewardPoints)
+			localStorage.setItem('qlikeCount', question.likeCount)
+			localStorage.setItem('qliked', question.isLiked)
+			localStorage.setItem('Jump2Answer', this.answer.id)
+			
+			this.$router.push({ path: `./question/`});
+		}
     },
     getPlainTextWithImagePlaceholder(html) {
-      const replaced = html.replace(/<img[^>]*>/gi, " [图片] ");
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = replaced;
-      return tempDiv.textContent || tempDiv.innerText || "";
+		const replaced = html.replace(/<img[^>]*>/gi, " [图片] ");
+		const tempDiv = document.createElement("div");
+		tempDiv.innerHTML = replaced;
+		return tempDiv.textContent || tempDiv.innerText || "";
     },
     async fetchUserInfo() {
-      this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
-      this.userInfo.username = this.answer.userId;
+		this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
+		this.userInfo.username = this.answer.userId;
     },
   },
   mounted() {
-    this.fetchUserInfo();
-    // this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
-    // this.userInfo.username = this.answer.userId;
-    // console.log(this.userInfo.avatar)
-    // console.log(this.userInfo.username)
+		this.fetchUserInfo();
+		// this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
+		// this.userInfo.username = this.answer.userId;
+		// console.log(this.userInfo.avatar)
+		// console.log(this.userInfo.username)
   },
 };
 </script>

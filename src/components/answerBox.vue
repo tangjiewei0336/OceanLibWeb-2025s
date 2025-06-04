@@ -135,32 +135,41 @@ props: {
     default: 0,
     },
     commentCount: {
-    type: [String, Number],
-    default: 0,
+		type: [String, Number],
+		default: 0,
     },
     createTime: String,
     updateTime: String,
-    question: {
-    type: Object,
-    default: () => ({}),
+		question: {
+		type: Object,
+		default: () => ({}),
     },
 },
 computed: {
     formattedTime() {
-    const d = new Date(this.updateTime || this.createTime);
-    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString().slice(0, 5);
+		const d = new Date(this.updateTime || this.createTime);
+		return d.toLocaleDateString() + ' ' + d.toLocaleTimeString().slice(0, 5);
     },
     firstImage() {
-      const match = this.content?.match(/<img[^>]+src="([^">]+)"/i);
-      return match ? match[1] : null;
+		const match = this.content?.match(/<img[^>]+src="([^">]+)"/i);
+		return match ? match[1] : null;
     },
 },
 methods: {
     goToQuestionDetail() {
-    if (this.question && this.question.id) {
-      // 以后需要改到回答的详细页面
-        this.$router.push({ path: `/question/${this.question.id}` });
-    }
+		if (this.question && this.question.id) {
+			localStorage.setItem('qid', this.question.bindId)
+			localStorage.setItem('qtitle', this.question.title)
+			localStorage.setItem('hotPoint', this.question.rewardPoints)
+			localStorage.setItem('qcontent', this.question.content)
+			localStorage.setItem('commentNum', this.question.answerCount)
+			localStorage.setItem('browse', this.question.rewardPoints)
+			localStorage.setItem('qlikeCount', this.question.likeCount)
+			localStorage.setItem('qliked', this.question.isLiked)
+			localStorage.setItem('Jump2Answer', this.id)
+      
+			this.$router.push({ path: `./forum/question/`});
+		}
     },
     getPlainTextWithImagePlaceholder(html) {
         const replaced = html.replace(/<img[^>]*>/gi, ' [图片] ');

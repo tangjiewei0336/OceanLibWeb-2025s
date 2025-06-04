@@ -188,15 +188,17 @@ export default {
                 return
             }
             this.isLoading = true
-            this.$Axios({
-                method: 'get',
-                url: '/qaService/answer/list',
-                params: {
-                    questionId: this.qid,
-                    page: this.currentPageNum + 1,
-                    pageSize: this.itemsPerPage,
-                },
-            }).then(response => {
+            try {
+                const response = await this.$Axios({
+                    method: 'get',
+                    url: '/qaService/answer/list',
+                    params: {
+                        questionId: this.qid,
+                        page: this.currentPageNum + 1,
+                        pageSize: this.itemsPerPage,
+                    },
+                });
+                
                 let data = response.data.msg.content
                 // console.log("answers: ", data)
                 this.allData = [...this.allData, ...data]
@@ -208,10 +210,10 @@ export default {
                     this.currentPageNum += 1
                 }
                 this.isLoading = false
-            }).catch(error => {
+            } catch(error) {
                 this.isLoading = false
                 console.error('请求失败:', error)
-            })
+            }
         },
         handleAnswerUpdate() {
             // localStorage.setItem('qid', this.qid)
@@ -259,21 +261,23 @@ export default {
                 console.error('点赞失败:', error)
             })
         },
+
         toAnswer(aid) {
             let id = 0
             for (; id < this.allData.length; id++) {
                 if (this.allData[id].id == aid) break;
             }
             let resData = this.allData.slice(id, this.allData.length)
+            console.log("res length: ", resData.length)
             // console.log("store, ", resData)
             localStorage.setItem('resData', JSON.stringify(resData))
             localStorage.setItem('aPage', this.currentPageNum)
             localStorage.setItem('aPageNum', this.itemsPerPage)
             localStorage.setItem('aNoMore', this.noMore)
-            this.$router.push('./answer')
+            this.$router.push({ name: 'forumAnswer' });
         }
     },
-    created() {
+    async created() {
         this.qid = Number(localStorage.getItem('qid'))
         this.qtitle = String(localStorage.getItem('qtitle'))
         this.hotPoint = Number(localStorage.getItem('hotPoint'))
@@ -283,7 +287,29 @@ export default {
         this.qlikeCount = Number(localStorage.getItem('likeCount'))
         this.qliked = Boolean(localStorage.getItem('qliked') == 'true')
 
-        this.fetchData()
+        if (localStorage.getItem('Jump2Answer') == null) {
+            this.fetchData()
+        } else {
+            let aid = Number(localStorage.getItem('Jump2Answer'));
+            if (aid == -1) {
+                this.fetchData()
+                return;
+            }
+            while (true) {
+                await this.fetchData()
+                let find = false;
+                let id = 0;
+                for (; id < this.allData.length; id++) {
+                    if (this.allData[id].id == aid) {
+                        find = true;
+                        break;
+                    }
+                }
+                if (find) break;
+            }
+            localStorage.setItem('Jump2Answer', -1)
+            this.toAnswer(aid)
+        }
     },
 }
 </script>

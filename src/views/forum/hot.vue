@@ -7,7 +7,7 @@
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: calc(100vh - 150px - 50px);"
+            style="height: calc(100vh - 220px);"
             @touchstart.passive="handleTouchStart"
             @touchmove.passive="handleTouchMove"
             @touchend.passive="handleTouchEnd"
