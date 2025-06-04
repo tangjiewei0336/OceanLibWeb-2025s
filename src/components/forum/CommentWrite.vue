@@ -93,7 +93,6 @@ export default {
                 url: '/comment/addComment',
                 params: params,
             }).then(response => {
-                console.log("comment: ", response)
 				this.myComment = ""
 				this.$emit('close', true);
 			}).catch(error => {

@@ -158,17 +158,9 @@ computed: {
 methods: {
     goToQuestionDetail() {
 		if (this.question && this.question.id) {
-			localStorage.setItem('qid', this.question.bindId)
-			localStorage.setItem('qtitle', this.question.title)
-			localStorage.setItem('hotPoint', this.question.rewardPoints)
-			localStorage.setItem('qcontent', this.question.content)
-			localStorage.setItem('commentNum', this.question.answerCount)
-			localStorage.setItem('browse', this.question.rewardPoints)
-			localStorage.setItem('qlikeCount', this.question.likeCount)
-			localStorage.setItem('qliked', this.question.isLiked)
-			localStorage.setItem('Jump2Answer', this.id)
-      
-			this.$router.push({ path: `./forum/question/`});
+			localStorage.setItem('id', this.question.bindId)
+      localStorage.setItem('topAid', this.id)
+			this.$router.push({ name: 'forumAnswer' });
 		}
     },
     getPlainTextWithImagePlaceholder(html) {

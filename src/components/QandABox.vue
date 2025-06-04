@@ -73,17 +73,9 @@ export default {
 		console.log(question)
 		if (question && question.bindId) {
 			// 以后需要改到回答的详细页面
-			localStorage.setItem('qid', question.bindId)
-			localStorage.setItem('qtitle', question.title)
-			localStorage.setItem('hotPoint', question.rewardPoints)
-			localStorage.setItem('qcontent', question.content)
-			localStorage.setItem('commentNum', question.answerCount)
-			localStorage.setItem('browse', question.rewardPoints)
-			localStorage.setItem('qlikeCount', question.likeCount)
-			localStorage.setItem('qliked', question.isLiked)
-			localStorage.setItem('Jump2Answer', this.answer.id)
-			
-			this.$router.push({ path: `./question/`});
+			localStorage.setItem('id', question.bindId)
+			localStorage.setItem('topAid', this.answer.id)
+			this.$router.push({ name: 'forumAnswer' });
 		}
     },
     getPlainTextWithImagePlaceholder(html) {

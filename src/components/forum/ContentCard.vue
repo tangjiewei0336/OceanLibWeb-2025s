@@ -63,7 +63,7 @@
 					<v-icon right>mdi-emoticon-kiss-outline</v-icon>
 				</v-btn>
 			</div>
-			<div class="d-flex align-center justify-space-between flex-nowrap">
+			<div class="d-flex align-center">
 				<div class="d-flex align-center" style="position: relative; margin-left: -10px;">
 					<div 
 						class="grey lighten-3 rounded-pill"
@@ -100,7 +100,7 @@
 					</v-btn>
 				</div>
 
-				<div class="d-flex align-center" style="gap: 4px">
+				<div class="d-flex align-center ml-auto" style="gap: 4px">
 					<template v-if="!refuse">
 						<v-badge
 							color="transparent"
@@ -147,20 +147,6 @@
 				</div>
 			</div>
 
-			<v-snackbar
-                v-model="snackbar"
-                :timeout="1000"
-                color="white"
-                :style="{
-                    'position': 'fixed',
-                    'bottom': '60px',
-                }"
-                rounded="xl"
-                min-width="90"
-            >
-                <span style="color: black;">{{ snackerText }}</span>
-            </v-snackbar>
-
 			<v-bottom-sheet
 				v-model="commentOpen"
 				inset
@@ -168,6 +154,7 @@
 				<v-card>
 					<div>
 						<CommentPopup
+							v-if="commentOpen"
 							:uid="uid"
 							:aid="aid"
 							@close="commentOpen = false"
@@ -215,8 +202,7 @@ export default {
 	components: { CommentPopup, CommentWrite },
     data() {
 		return {
-			snackbar: false,
-            snackerText: "",
+			// data
 			replyText: "",
 			commentOpen: false,
 			commentWriteOpen: false,
@@ -304,7 +290,6 @@ export default {
 			return doc.body.textContent || '';
 		},
 		agreeFunc() {
-			this.snackbar = true
 			// this.$Axios({
             //     method: 'post',
             //     url: '/qaService/like/evaluateAnswer',
@@ -320,15 +305,13 @@ export default {
             // })
 
 			if (this.agree) {
-				this.snackerText = "已取消"
+				this.$toast.success('已取消');
 			} else {
-				this.snackerText = "已赞同"
+				this.$toast.success('已赞同');
 			}
 			this.agree = !this.agree
 		},
 		refuseFunc() {
-			this.snackbar = true
-
 			// this.$Axios({
             //     method: 'post',
             //     url: '/qaService/like/evaluateAnswer',
@@ -344,25 +327,24 @@ export default {
             // })
 
 			if (this.refuse) {
-				this.snackerText = "已取消"
+				this.$toast.success('已取消');
 			} else {
-				this.snackerText = "已反对"
+				this.$toast.success('已反对');
 			}
 			this.refuse = !this.refuse
 		},
 		collectedFunc() {
-			this.snackbar = true
 			if (this.collected) {
-				this.snackerText = "已取消"
+				this.$toast.success('已取消');
 			} else {
-				this.snackerText = "已收藏"
+				this.$toast.success('已收藏');
 			}
 			this.collected = !this.collected
 			this.collectedCount += this.collected ? 1 : -1
 			// TODO: api
 		},
 		toComment() {
-			this.commentOpen = true
+			// this.commentOpen = true
 			this.commentWriteOpen = true
 		},
 		extractImageUrls(html) {
@@ -374,7 +356,6 @@ export default {
 			}
 		},
 		getAvatar() {
-			console.log(this.avatar)
 			if (this.avatar.length > 0) {
 				return this.avatar
 			} else {
@@ -410,6 +391,7 @@ export default {
 		finishComment(success) {
 			if (success) {
 				this.commentCount += 1
+				this.$toast.success('评论成功');
 			}
 			this.commentWriteOpen = false
 		},
@@ -426,6 +408,7 @@ export default {
 		followUser() {
 			if (this.followed) return;
 			this.followed = true
+			this.$toast.success('已关注');
 			// TODO
 		},
 		fetchComment() {
@@ -450,7 +433,6 @@ export default {
 		},
 		showComments() {
 			this.commentOpen = true
-			localStorage.setItem('comments', JSON.stringify(this.comments))
 		},
 		reloadComment() {
 

@@ -13,7 +13,7 @@
             <QuestionCard
                 :id="this.id"
                 :interface="'question'"
-                @setLike="setLike"
+                @setInfo="setInfo"
             />
             <v-sheet 
 				color="grey lighten-2" 
@@ -255,7 +255,7 @@ export default {
             localStorage.setItem('topAid', aid)
             this.$router.push({ name: 'forumAnswer' });
         },
-        setLike(likeCount, isLiked, title, answerCount) {
+        setInfo(likeCount, isLiked, title, answerCount) {
             this.isLiked = isLiked
             this.likeCount = likeCount
             this.title = title
@@ -264,7 +264,6 @@ export default {
     },
     async created() {
         this.id = Number(localStorage.getItem('id'))
-        this.title = String(localStorage.getItem('title'))
         this.fetchAnswers()
     },
 }

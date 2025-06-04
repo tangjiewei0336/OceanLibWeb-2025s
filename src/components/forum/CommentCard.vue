@@ -1,11 +1,15 @@
 <template>
     <v-card class="d-flex align-start pa-4" flat>
-        <v-avatar v-if="this.interface==='outer'" size="30" color="primary" class="mr-3">
-            <span class="white--text">{{ uid.charAt(0) }}</span>
-        </v-avatar>
-        <v-avatar v-if="this.interface==='inner'" size="25" color="primary" class="mr-3">
-            <span class="white--text">{{ uid.charAt(0) }}</span>
-        </v-avatar>
+        <div>
+            <v-avatar v-if="this.interface==='outer'" size="30" color="primary" class="mr-3">
+                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
+                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
+            </v-avatar>
+            <v-avatar v-if="this.interface==='inner'" size="25" color="primary" class="mr-3">
+                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
+                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
+            </v-avatar>
+        </div>
         <div>
             <div>
                 <span>{{ uid }}</span>
@@ -18,14 +22,16 @@
                 <span class="text--lighten-1 text-caption" @click="reply">{{ content }}</span>
             </div>
             <div class="d-flex align-center">
-                <span class="grey--text text--lighten-1 text-caption">
-                    {{ formatDate(date) }}
-                </span>
-                <v-btn :ripple="false" small text class="pa-0" @click="reply">
-                    回复
-                </v-btn>
+                <div class="d-flex align-center">
+                    <span class="grey--text text--lighten-1 text-caption">
+                        {{ formatDate(date) }}
+                    </span>
+                    <v-btn :ripple="false" small text class="pa-0" @click="reply">
+                        回复
+                    </v-btn>
+                </div>
                 <v-spacer></v-spacer>
-                <div>
+                <div class="d-flex align-center">
                     <v-btn :ripple="false" x-small text @click="likeComment">
                         <v-icon left small>{{ liked ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
                         {{ inner_likeCount }}
@@ -50,6 +56,7 @@
                 :disliked="Boolean(item.dislikeNumber)"
                 :replyTo="item.replyToCommentReplier"
                 interface="inner"
+                @refresh="refresh"
             />
             <div v-if="replyCount > 2" class="d-flex align-center">
                 <v-btn
@@ -88,6 +95,9 @@ export default {
     components: { CommentWrite },
     data() {
         return {
+            // data
+            avatar: "",
+
             inner_likeCount: 0,
             inner_replyTo: '',
             liked: false,
@@ -244,12 +254,35 @@ export default {
             localStorage.setItem('replyUid', this.uid)
             this.$emit('allreply', this.cid);
         },
-        finishComment() {
+        finishComment(success) {
+            if (success) {
+				this.$toast.success('评论成功');
+            } else {
+				this.$toast.fail('评论失败');
+            }
             this.commentWriteOpen = false
             this.$emit('refresh');
-        }
+        },
+        refresh() {
+            this.$emit('refresh');
+        },
+        async getUserAvatar() {
+            try {
+                const response = await this.$Axios({
+                    method: 'get',
+                    url: '/userInfoService/getUserBaseInfo',
+                    params: {
+                        username: this.uid
+                    },
+                });
+                this.avatar = response.data.msg.avatar
+            } catch (error) {
+                console.error('请求失败:', error)
+            }
+        },
     },
     created() {
+        this.getUserAvatar()
         this.inner_likeCount = this.likeCount
         if (this.replyTo == null) {
             this.inner_replyTo = ""

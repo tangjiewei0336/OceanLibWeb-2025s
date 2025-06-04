@@ -174,16 +174,8 @@ export default {
   methods: {
     goToDetail() {
       // 以后需要改到问题的详细页面
-      localStorage.setItem('qid', this.bindId)
-      localStorage.setItem('qtitle', this.title)
-      localStorage.setItem('hotPoint', this.viewCount)
-      localStorage.setItem('qcontent', this.content)
-      localStorage.setItem('commentNum', this.answerCount)
-      localStorage.setItem('browse', this.viewCount)
-      localStorage.setItem('likeCount', this.likeCount)
-      localStorage.setItem('qliked', this.isLiked)
+      localStorage.setItem('id', this.bindId)
       this.$router.push('/forum/question')
-      // this.$router.push({ path: `/question/${this.bindId}` });
     },
     getPlainTextWithImagePlaceholder(html) {
       const replaced = html.replace(/<img[^>]*>/gi, ' [图片] ');

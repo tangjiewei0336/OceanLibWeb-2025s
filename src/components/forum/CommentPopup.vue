@@ -14,8 +14,10 @@
                 size="30"
                 color="primary"
                 class="mr-3"
-                style="margin-left: 15px; margin-bottom: 5px;">
-                <span class="white--text">{{ uid.charAt(0) }}</span>
+                style="margin-left: 15px; margin-bottom: 5px;"
+            >
+                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
+                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
             </v-avatar>
             <span>{{ uid }}</span>
             <v-sheet 
@@ -50,16 +52,25 @@
                     :replyCount="item.replyCount"
                     interface="outer"
                     @allreply="allReply"
+                    @refresh="refresh"
                 />
         
             </v-container>
         </div>
         <div v-if="detailed">
-            <div class="d-flex align-center">
+            <div class="d-flex align-center position-relative" style="height: 60px;">
                 <v-btn icon @click="goBack">
                     <v-icon>mdi-chevron-left</v-icon>
                 </v-btn>
-                <span class="text-h6 mx-auto pa-2">评论回复</span>
+                <span 
+                    class="text-h6" 
+                    style="
+                    position: absolute;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    ">
+                    评论回复
+                </span>
             </div>
             <ReplyCard
                 :aid="aid"
@@ -85,6 +96,7 @@ export default {
             currentPageNum: 1,
             itemsPerPage: 6,
             allData: [],
+            avatar: "",
 
             detailed: false,
             detail_cid: 0,
@@ -125,14 +137,13 @@ export default {
                 params: {
                     bindID: this.aid,
                     mainType: "ANSWER",
-                    pageNum: this.currentPageNum + 1,
+                    pageNum: this.currentPageNum,
                     commentCount: this.itemsPerPage,
                     replyCount: 2
                 },
             }).then(response => {
                 let data = response.data.msg.comments
                 this.commentCount = response.data.msg.commentCount
-                // console.log(response.data.msg)
                 this.allData = [...this.allData, ...data]
                 if (this.allData.length >= this.commentCount) {
                     this.noMore = true
@@ -161,11 +172,29 @@ export default {
             });
         },
         refresh() {
-            
-        }
+            this.currentPageNum = 1;
+            this.allData = [];
+            this.noMore = false;
+            this.fetchData()
+        },
+        async getUserAvatar() {
+            try {
+                const response = await this.$Axios({
+                    method: 'get',
+                    url: '/userInfoService/getUserBaseInfo',
+                    params: {
+                        username: this.uid
+                    },
+                });
+                this.avatar = response.data.msg.avatar
+            } catch (error) {
+                console.error('请求失败:', error)
+            }
+        },
     },
     created() {
-        this.allData = JSON.parse(localStorage.getItem('comments'))
+        this.fetchData();
+        this.getUserAvatar();
     }
 }
 </script>

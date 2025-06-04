@@ -156,7 +156,7 @@ export default {
 				this.likeCount = data.likeCount
 				this.isLiked = data.isLiked
 				this.extractImageUrls(this.content)
-				this.$emit('setLike', this.likeCount, this.isLiked, this.title, this.answerCount)
+				this.$emit('setInfo', this.likeCount, this.isLiked, this.title, this.answerCount)
 			} catch(error) {
 				console.error('请求失败:', error)
 			}

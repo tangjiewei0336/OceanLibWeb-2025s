@@ -13,6 +13,7 @@
             <QuestionCard
                 :id="this.qid"
                 interface="answer"
+                @setInfo="setInfo"
             />
             <v-sheet 
 				color="grey lighten-2" 
@@ -34,6 +35,20 @@
                 :createTime="item.createTime"
                 :avatar="item.avatar"
             />
+
+            <v-row
+                justify="center"
+                align="center"
+                style="margin-top: 20px;"
+            >
+                <v-col cols="auto">
+                    <v-progress-circular
+                        v-if="isLoading"
+                        indeterminate
+                        color="primary"
+                    />
+                </v-col>
+            </v-row>
         </v-container>
 
         <v-bottom-navigation 
@@ -51,13 +66,13 @@
                 <span>互助</span>
                 <v-icon>mdi-handshake</v-icon>
             </v-btn>
-            <v-btn value="mine" to="/mine">
-                <span>我的</span>
-                <v-icon>mdi-account-circle</v-icon>
-            </v-btn>
             <v-btn value="forum" to="/forum/hot">
                 <span>知乎</span>
                 <v-icon>mdi-forum</v-icon>
+            </v-btn>
+            <v-btn value="mine" to="/mine">
+                <span>我的</span>
+                <v-icon>mdi-account-circle</v-icon>
             </v-btn>
         </v-bottom-navigation>
     </div>
@@ -74,22 +89,18 @@ export default {
     data() {
         return {
             navigation: '',
+            // data
             qid: 0,
-            qtitle: '',
-            hotPoint: 0,
-            qcontent: '',
-            commentNum: 0,
-            browse: 0,
-
+            answerCount: 0,
             qlikeCount: 0,
 			qliked: false,
+            allData: [],
 
+            // control
             isLoading: false,
             noMore: false,
             currentPageNum: 1,
-            leastNum: 6,
             itemsPerPage: 4,
-            allData: [],
 
             topAid: 0,
             findTop: false,
@@ -104,54 +115,60 @@ export default {
         handleScroll() {
             const container = this.$refs.scrollContainer;
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-                this.fetchData();
+                this.formAnswers();
             }
         },
-        async fetchData() {
+        async fetchAnswers() {
+            try {
+                const response = await this.$Axios({
+                    method: 'get',
+                    url: '/qaService/answer/list',
+                    params: {
+                        questionId: this.qid,
+                        page: this.currentPageNum,
+                        pageSize: this.itemsPerPage,
+                    },
+                });
+                // console.log(response.data.msg.content)
+                return response.data.msg.content
+            } catch (error) {
+                console.error('请求失败:', error)
+            }
+        },
+        async formAnswers() {
             if (this.noMore || this.isLoading) {
                 return
             }
             this.isLoading = true
-            while (!this.findTop || this.allData.length < this.leastNum) {
-                try {
-                    const response = await this.$Axios({
-                        method: 'get',
-                        url: '/qaService/answer/list',
-                        params: {
-                            questionId: this.qid,
-                            page: this.currentPageNum,
-                            pageSize: this.itemsPerPage,
-                        },
-                    });
-                    
-                    let data = response.data.msg.content
-                    // console.log("answers: ", data)
-                    if (!this.findTop) {
-                        let id = 0;
-                        for (; id < data.length; id++) {
-                            if (data[id].id == this.topAid) {
-                                this.findTop = true;
-                                break;
-                            }
+            while (!this.findTop) {                
+                let data = await this.fetchAnswers()
+                if (!this.findTop) {
+                    let id = 0;
+                    for (; id < data.length; id++) {
+                        if (data[id].id == this.topAid) {
+                            this.findTop = true;
+                            break;
                         }
-                        data = data.slice(id, data.length)
                     }
-                    this.allData = [...this.allData, ...data]
-                    if ((this.currentPageNum * this.itemsPerPage) >= this.commentNum) {
-                        this.noMore = true;
-                        break;
-                    } else {
-                        this.currentPageNum += 1;
-                    }
-                } catch(error) {
-                    console.error('请求失败:', error)
-                } finally {
-                    if (this.findTop && this.allData.length < this.leastNum) {
-                        this.isLoading = false;
-                    }
+                    data = data.slice(id, data.length)
+                }
+                this.allData = [...this.allData, ...data]
+                if ((this.currentPageNum * this.itemsPerPage) >= this.answerCount) {
+                    this.noMore = true;
+                    this.isLoading = false;
+                    return;
+                } else {
+                    this.currentPageNum += 1;
                 }
             }
-            
+            let data = await this.fetchAnswers()
+            this.allData = [...this.allData, ...data]
+            if ((this.currentPageNum * this.itemsPerPage) >= this.answerCount) {
+                this.noMore = true;
+            } else {
+                this.currentPageNum += 1;
+            }
+            this.isLoading = false;
         },
         parseData(resData) {
             try {
@@ -160,19 +177,16 @@ export default {
                 console.error('解析失败:', e);
                 this.allDat = [];
             }
+        },
+        setInfo(likeCount, isLiked, title, answerCount) {
+            this.answerCount = answerCount
         }
     },
     created() {
-        this.qid = Number(localStorage.getItem('qid'))
-        this.qtitle = String(localStorage.getItem('qtitle'))
-        this.hotPoint = Number(localStorage.getItem('hotPoint'))
-        this.qcontent = String(localStorage.getItem('qcontent'))
-        this.commentNum = Number(localStorage.getItem('commentNum'))
-        this.browse = Number(localStorage.getItem('browse'))
-
+        this.qid = Number(localStorage.getItem('id'))
         this.topAid = Number(localStorage.getItem('topAid'))
         this.findTop = false;
-        this.fetchData()
+        this.formAnswers()
     },
 }
 </script>

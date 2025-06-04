@@ -39,6 +39,7 @@
                 :content="item.commentContent"
                 :date="item.buildDate"
                 :likeCount="item.likeNumber"
+                :replyTo="item.replyToCommentReplier"
                 interface="inner"
                 @refresh="refresh"
             />
@@ -57,7 +58,7 @@ export default {
         return {
             isLoading: false,
             noMore: false,
-            currentPageNum: 0,
+            currentPageNum: 1,
             itemsPerPage: 6,
             allData: [],
 
@@ -103,12 +104,12 @@ export default {
                     bindID: this.aid,
                     mainType: "ANSWER",
                     commentID: this.cid,
-                    pageNum: this.currentPageNum + 1,
+                    pageNum: this.currentPageNum,
                     replyCount: this.itemsPerPage,
                 },
             }).then(response => {
                 let data = response.data.msg.replyCommentList
-                console.log(data)
+                console.log(response.data.msg.replyCommentList)
                 this.allData = [...this.allData, ...data]
                 if (this.allData.length >= this.replyCount) {
                     this.noMore = true
@@ -144,7 +145,9 @@ export default {
             }
         },
         refresh() {
-            
+            this.currentPageNum = 1;
+            this.noMore = false;
+            this.allData = [];
         }
     },
     created() {
