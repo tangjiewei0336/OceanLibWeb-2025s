@@ -6,7 +6,7 @@
 
     <v-spacer></v-spacer>
 
-    <v-btn
+    <!-- <v-btn
 		v-if="this.interface === 'answer'"
 		text
 		color="primary"
@@ -15,7 +15,7 @@
     >
       <v-icon left>mdi-pencil</v-icon>
       写回答
-    </v-btn>
+    </v-btn> -->
 
     <v-menu offset-y>
       <template v-slot:activator="{ props }">

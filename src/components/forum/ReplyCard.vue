@@ -148,6 +148,7 @@ export default {
             this.currentPageNum = 1;
             this.noMore = false;
             this.allData = [];
+            this.fetchData();
         }
     },
     created() {

@@ -1,6 +1,6 @@
 <template>
     <v-card
-		class="pa-2"
+		class="pa-2 no-shadow-btn"
 		flat
 		:ripple="false"
 		@click="toAnswer"
@@ -91,7 +91,8 @@
 						text
 						depressed
 						color="primary"
-						class="z-1"
+						class="z-1 no-shadow-btn"
+						:ripple="false"
 						style="min-width: 60px; z-index: 2; margin-left: -10px;"
 						@click="followUser"
 					>
@@ -109,14 +110,14 @@
 							offset-y="20"
 							class="custom-black-badge"
 						>
-							<v-btn :ripple="false" small text @click="agreeFunc" class="px-0">
+							<v-btn :ripple="false" small text @click="agreeFunc" class="no-shadow-btn">
 								<v-icon left small>{{ agree ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}</v-icon>
 							</v-btn>
 						</v-badge>
 					</template>
 
 					<template v-if="!agree">
-						<v-btn :ripple="false" small text @click="refuseFunc" class="px-0">
+						<v-btn :ripple="false" small text @click="refuseFunc" class="no-shadow-btn">
 						<v-icon left small>{{ refuse ? 'mdi-thumb-down' : 'mdi-thumb-down-outline' }}</v-icon>
 						</v-btn>
 					</template>
@@ -128,7 +129,7 @@
 						offset-y="20"
 						class="custom-black-badge"
 					>
-						<v-btn :ripple="false" small text @click="collectedFunc" class="px-0">
+						<v-btn :ripple="false" small text @click="collectedFunc" class="no-shadow-btn">
 							<v-icon left small>{{ collected ? 'mdi-star' : 'mdi-star-outline' }}</v-icon>
 						</v-btn>
 					</v-badge>
@@ -140,7 +141,7 @@
 						offset-y="20"
 						class="custom-black-badge"
 					>
-						<v-btn :ripple="false" small text @click="showComments" class="px-0">
+						<v-btn :ripple="false" small text @click="showComments" class="no-shadow-btn">
 							<v-icon left small>mdi-chat-outline</v-icon>
 						</v-btn>
 					</v-badge>
@@ -305,9 +306,9 @@ export default {
             // })
 
 			if (this.agree) {
-				this.$toast.success('已取消');
+				this.$toast.success('已取消', {timeout: 1000,});
 			} else {
-				this.$toast.success('已赞同');
+				this.$toast.success('已赞同', {timeout: 1000,});
 			}
 			this.agree = !this.agree
 		},
@@ -327,17 +328,17 @@ export default {
             // })
 
 			if (this.refuse) {
-				this.$toast.success('已取消');
+				this.$toast.success('已取消', {timeout: 1000,});
 			} else {
-				this.$toast.success('已反对');
+				this.$toast.success('已反对', {timeout: 1000,});
 			}
 			this.refuse = !this.refuse
 		},
 		collectedFunc() {
 			if (this.collected) {
-				this.$toast.success('已取消');
+				this.$toast.success('已取消', {timeout: 1000,});
 			} else {
-				this.$toast.success('已收藏');
+				this.$toast.success('已收藏', {timeout: 1000,});
 			}
 			this.collected = !this.collected
 			this.collectedCount += this.collected ? 1 : -1
@@ -473,6 +474,15 @@ export default {
 .html-content img {
   max-width: 100%; /* 图片不超出容器 */
   height: auto;
+}
+
+.no-shadow-btn::before,  /* 移除点击时的背景层 */
+.no-shadow-btn::after {   /* 移除涟漪动画 */
+  display: none !important;
+}
+.no-shadow-btn:hover,
+.no-shadow-btn:focus {
+  box-shadow: none !important; /* 移除悬浮/聚焦阴影 */
 }
 
 </style>
