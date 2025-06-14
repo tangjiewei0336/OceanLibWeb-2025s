@@ -282,7 +282,7 @@
 
       <van-tab title="回答" name="2" class="full">
         <van-pull-refresh class="pullRefresh full" v-model="content.answerList.refreshing" @refresh="getMyAnswerList(true)">
-          <van-list v-model="content.answerList.loading" :finished="content.answerList.finished" @load="getMyAnswerList()" class="full">
+          <van-list v-model="content.answerList.loading" :finished="content.answerList.finished" @load="getMyAnswerList" class="full">
             <div v-for="answer in myAnswerList" :key="answer.id">
               <v-card class="myAsk" outlined>
                 <v-answerBox
@@ -634,6 +634,11 @@ export default {
     },
 
     getMyQuestionList(isRefreshing = false) {
+      // 如果正在刷新，并且这不是刷新调用，则跳过
+      if (this.content.questionList.refreshing && !isRefreshing) {
+        return;
+      }
+      
       if (isRefreshing) {
         this.content.questionList.pageNum = 1;
         this.content.questionList.finished = false;
@@ -751,7 +756,12 @@ export default {
         this.$toast.fail('网络错误，删除失败');
       });
     },
-    getMyAnswerList(isRefreshing) {
+    getMyAnswerList(isRefreshing = false) {
+      // 如果正在刷新，并且这不是刷新调用，则跳过
+      if (this.content.answerList.refreshing && !isRefreshing) {
+        return;
+      }
+      
       if (isRefreshing) {
         this.content.answerList.pageNum = 1;
         this.content.answerList.finished = false;
@@ -765,7 +775,7 @@ export default {
           // username: localStorage.getItem('username'),
         },
       }).then((response) => {
-        console.log(response.data.msg.content)
+        // console.log(response.data.msg.content)
         if (!isRefreshing) {
           this.myAnswerList.push(...response.data.msg.content);
         } else {
@@ -779,6 +789,10 @@ export default {
         } else {
           this.content.answerList.pageNum += 1;
         }
+        this.content.answerList.loading = false;
+        this.content.answerList.refreshing = false;
+      }).catch(() => {
+        // 失败时也要关闭状态
         this.content.answerList.loading = false;
         this.content.answerList.refreshing = false;
       });
