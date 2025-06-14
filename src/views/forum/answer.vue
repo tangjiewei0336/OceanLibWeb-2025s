@@ -2,6 +2,7 @@
     <div>
         <ReturnHeader
             interface="answer"
+            @writeAnswer="handleWriteAnswer"
         />
         <v-container 
             ref="scrollContainer"
@@ -51,6 +52,22 @@
             </v-row>
         </v-container>
 
+        <v-dialog
+            v-model="showDialogAnswer"
+            fullscreen
+            hide-overlay
+            transition="dialog-bottom-transition"
+            persistent
+        >
+            <AnswerCard 
+                @close="handleAnswerClose"
+                :answerId="this.toupdate_answerId"
+                :answerContent="this.toupdate_answerContent"
+                :questionId="this.toupdate_answer_questionId"
+                :questionTitle="this.toupdate_answer_questionTitle"
+            />
+        </v-dialog>
+
         <div class="forum__bottom-nav">
             <v-bottom-navigation 
                 shift 
@@ -83,10 +100,11 @@
 import QuestionCard from '../../components/forum/QuestionCard.vue';
 import ReturnHeader from '../../components/nav/ReturnHeader.vue';
 import ContentCard from '../../components/forum/ContentCard.vue';
+import AnswerCard from '@/components/forum/AnswerCard.vue';
 import Mock from 'mockjs'
 
 export default {
-    components: { QuestionCard, ReturnHeader, ContentCard },
+    components: { QuestionCard, ReturnHeader, ContentCard, AnswerCard },
     data() {
         return {
             navigation: 2,
@@ -105,6 +123,13 @@ export default {
 
             topAid: 0,
             findTop: false,
+
+            // AnswerCard 相关
+            showDialogAnswer: false,
+            toupdate_answerId: 0,
+            toupdate_answerContent: "",
+            toupdate_answer_questionId: 0,
+            toupdate_answer_questionTitle: "",
         }
     },
     computed: {
@@ -181,11 +206,37 @@ export default {
         },
         setInfo(likeCount, isLiked, title, answerCount) {
             this.answerCount = answerCount
+        },
+        
+        // 处理写回答按钮点击
+        handleWriteAnswer() {
+            this.showDialogAnswer = true;
+            this.toupdate_answer_questionId = this.qid;
+            // 问题标题已在 created 中从 localStorage 获取
+        },
+        
+        // 处理 AnswerCard 关闭
+        handleAnswerClose({ shouldRefreshAnswer, newAnswerId }) {
+            this.showDialogAnswer = false;
+            this.toupdate_answerId = 0;
+            this.toupdate_answerContent = "";
+            this.toupdate_answer_questionId = 0;
+            this.toupdate_answer_questionTitle = "";
+            if (shouldRefreshAnswer) {
+                // 如果创建了新回答，将其设为 topAid 并更新 localStorage
+                if (newAnswerId) {
+                    this.topAid = newAnswerId;
+                    localStorage.setItem('topAid', newAnswerId);
+                }
+                // 简单地刷新整个页面，确保数据正确加载
+                this.$router.go(0);
+            }
         }
     },
     created() {
         this.qid = Number(localStorage.getItem('id'))
         this.topAid = Number(localStorage.getItem('topAid'))
+        this.toupdate_answer_questionTitle = localStorage.getItem('questionTitle') || ''
         this.findTop = false;
         this.formAnswers()
     },

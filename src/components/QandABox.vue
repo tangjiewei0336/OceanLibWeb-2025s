@@ -75,6 +75,7 @@ export default {
 			// 以后需要改到回答的详细页面
 			localStorage.setItem('id', question.bindId)
 			localStorage.setItem('topAid', this.answer.id)
+      localStorage.setItem('questionTitle', question.title)
 			this.$router.push({ name: 'forumAnswer' });
 		}
     },

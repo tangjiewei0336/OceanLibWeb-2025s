@@ -253,6 +253,7 @@ export default {
 
         toAnswer(aid) {
             localStorage.setItem('topAid', aid)
+            localStorage.setItem('questionTitle', this.title)
             this.$router.push({ name: 'forumAnswer' });
         },
         setInfo(likeCount, isLiked, title, answerCount) {

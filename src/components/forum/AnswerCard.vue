@@ -235,7 +235,8 @@ export default {
           const data = response.data;
           if (data.state === "SUCCESS") {
             this.$toast.success('发布成功！');
-            this.$emit('close', { shouldRefreshAnswer: true });
+            // 传递新创建的回答ID
+            this.$emit('close', { shouldRefreshAnswer: true, newAnswerId: data.msg });
           } else {
             this.$toast.fail(data.msg || '发布失败');
           }

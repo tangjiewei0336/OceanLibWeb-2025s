@@ -160,6 +160,7 @@ methods: {
 		if (this.question && this.question.id) {
 			localStorage.setItem('id', this.question.bindId)
       localStorage.setItem('topAid', this.id)
+      localStorage.setItem('questionTitle', this.question.title)
 			this.$router.push({ name: 'forumAnswer' });
 		}
     },

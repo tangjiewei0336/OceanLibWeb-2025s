@@ -48,14 +48,6 @@ const asyncRouterMap = [{
         component: (resolve) => require(['../views/forum/answer.vue'], resolve)
     },
     {
-        path: '/forum/answerWrite',
-        meta: {
-            title: '知乎写回答',
-            permission: ["USER", "ADMIN", "SUPERADMIN"]
-        },
-        component: (resolve) => require(['../views/forum/answerWrite.vue'], resolve)
-    },
-    {
         path: '/forum/hot',
         meta: {
             title: '知乎热榜',
