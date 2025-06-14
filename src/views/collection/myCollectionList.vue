@@ -13,9 +13,9 @@
 <template>
   <div class="page">
     <van-nav-bar id="toolbar" title="我的收藏" left-text="返回" left-arrow @click-left="back" fixed placeholder 
-    @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType } })">
+    @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType, active: active } })">
       <template #right>
-        <a @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType } })">新增</a>
+        <a @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType, active: active } })">新增</a>
       </template>
     </van-nav-bar>
     <div class="collectionlist full">
@@ -53,7 +53,7 @@
                     <img src="@/images/empty-picture/no_data.svg" />
                   </template>
                   <template>
-                    <v-btn color="primary" small @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType } })">
+                    <v-btn color="primary" small @click="$router.push({ path: '/newCollection', query: { mainType: collections[active].mainType, active: active } })">
                       新增收藏夹
                       <v-icon right dark> mdi-star-plus </v-icon>
                     </v-btn>
@@ -90,19 +90,23 @@ export default {
   mounted() {},
   methods: {
     back() {
-      this.$router.go(-1); //返回上一层
+      // this.$router.go(-1); //返回上一层
+      this.$router.push({
+        path: '/mine',
+      });
     },
     onTabChange(newIndex) {
-      // this.active = newIndex;
+      this.active = newIndex;
       this.getCollection(); // 切换 Tab 时重新加载数据
-      // this.$router.replace({
-      //   path: this.$route.path,
-      //   query: {
-      //     // 保留其它可能存在的 query 字段，比如分页、筛选之类
-      //     ...this.$route.query,
-      //     active: newIndex
-      //   }
-      // });
+      // 同步更新 URL 参数，确保页面刷新时能正确显示当前标签
+      this.$router.replace({
+        path: this.$route.path,
+        query: {
+          // 保留其它可能存在的 query 字段，比如分页、筛选之类
+          ...this.$route.query,
+          active: newIndex
+        }
+      });
     },
     getCollection() {
       console.log(this.collections[this.active].mainType)

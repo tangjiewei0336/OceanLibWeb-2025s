@@ -65,6 +65,7 @@ export default {
       isPublic: this.$route.query.isChange ? this.$route.query.isPublic : true,
       mainType: this.$route.query.mainType ? this.$route.query.mainType : null,
       active: Number(this.$route.query.active || 0),
+      from: this.$route.query.from,
       titleRule: {
         required: (value) => value == null || (value != null && value != '') || '收藏夹名称不可为空',
       },
@@ -72,7 +73,22 @@ export default {
   },
   methods: {
     back() {
-      this.$router.go(-1); //返回上一层
+      if (this.from === 'myCollectionList') {
+        this.$router.replace({
+          path: "/myCollectionList",
+          query: { active: this.active }
+        });
+      } else if (this.from === 'myCollectionItem') {
+        this.$router.replace({
+          path: "/myCollectionItem",
+          query: { 
+            collectionID: this.collectionID,
+            mainType: this.mainType 
+          }
+        });
+      } else {
+        this.$router.go(-1);
+      }
     },
     addOrChangeCollection() {
       if (this.$route.query.isChange) {
