@@ -133,6 +133,12 @@ export default {
     'v-questionBox': questionBox,
     'v-qsearchHistory': qsearchHistory,
   },
+  beforeDestroy() {
+    // 组件销毁前清除定时器
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+  },
   data() {
     return {
       keywords: '',
@@ -144,6 +150,7 @@ export default {
       initLoading: true,
       loading: false,
       finished: false,
+      debounceTimer: null, // 防抖定时器
     };
   },
   methods: {
@@ -151,6 +158,12 @@ export default {
       this.$router.go(-1); //返回上一层
     },
     restartQSearch() {
+      // 清除防抖定时器
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = null;
+      }
+      
       this.startNum = 1;
       this.questionList = [];
       this.suggestList = [];
@@ -166,22 +179,32 @@ export default {
       }
     },
     suggest(item) {
+      // 清除之前的定时器
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+      }
+      
       if (item == null || item == '') {
         this.restartQSearch();
         return;
       }
+      
       this.showSuggest = true;
-      this.$Axios({
-        method: 'get',
-        url: '/qaService/question/suggestTitle',
-        params: {
-          keyword: item,
-          rows: 10,
-        },
-      }).then((response) => {
-        // console.log(response)
-        this.suggestList = response.data.msg;
-      });
+      
+      // 设置防抖延迟，300ms后执行搜索建议请求
+      this.debounceTimer = setTimeout(() => {
+        this.$Axios({
+          method: 'get',
+          url: '/qaService/question/suggestTitle',
+          params: {
+            keyword: item,
+            rows: 10,
+          },
+        }).then((response) => {
+          // console.log(response)
+          this.suggestList = response.data.msg;
+        });
+      }, 300);
     },
     qsearchKeywords(qsearchString) {
       this.keywords = qsearchString;
