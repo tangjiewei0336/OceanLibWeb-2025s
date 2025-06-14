@@ -7,11 +7,14 @@
     <div class="qa__content-wrapper">
       <div class="qa__content-main">
         <div class="qa__content-label user-info-label">
-          <img
+          <CachedImage
             v-if="userInfo.avatar"
             :src="userInfo.avatar"
             alt="头像"
             class="user-avatar"
+            :width="20"
+            :height="20"
+            border-radius="50%"
           />
           <span>{{ userInfo.username || '加载中...' }}</span>
         </div>
@@ -19,12 +22,15 @@
           {{ getPlainTextWithImagePlaceholder(answer.content).slice(0, 100) }}
         </div>
         <div class="qa__images">
-          <img
+          <CachedImage
             v-for="(img, index) in allImages"
             :key="index"
             :src="img"
             alt="回答图片"
             class="answer-image"
+            :width="80"
+            :height="80"
+            border-radius="4px"
           />
         </div>
       </div>
@@ -40,8 +46,14 @@
 </template>
 
 <script>
+import CachedImage from './CachedImage.vue';
+import imageCache from '@/utils/imageCache';
+
 export default {
   name: "QandABox",
+  components: {
+    CachedImage
+  },
   props: {
     answer: {
       type: Object,
@@ -89,9 +101,27 @@ export default {
 		this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
 		this.userInfo.username = this.answer.userId;
     },
+    
+    // 预加载图片
+    preloadImages() {
+      // 预加载头像
+      if (this.userInfo.avatar) {
+        imageCache.preloadImage(this.userInfo.avatar);
+      }
+      
+      // 预加载回答中的图片（限制数量避免过度预加载）
+      if (this.allImages.length > 0) {
+        // 只预加载前3张图片
+        const imagesToPreload = this.allImages.slice(0, 3);
+        setTimeout(() => {
+          imageCache.preloadImages(imagesToPreload);
+        }, 200);
+      }
+    },
   },
   mounted() {
 		this.fetchUserInfo();
+		this.preloadImages();
 		// this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
 		// this.userInfo.username = this.answer.userId;
 		// console.log(this.userInfo.avatar)
@@ -163,17 +193,10 @@ export default {
 
   .answer-image {
     flex: 0 0 auto;
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 4px;
   }
 
   .user-avatar {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    object-fit: cover;
+    /* CachedImage 组件会处理尺寸和样式 */
   }
 
   &__meta {

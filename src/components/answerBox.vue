@@ -61,11 +61,8 @@ transition: all 0.2s;
 }
 
 &__thumbnail {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 4px;
   flex-shrink: 0;
+  /* CachedImage 组件会处理尺寸和样式 */
 }
 
 .text-ellipsis-2 {
@@ -106,11 +103,14 @@ transition: all 0.2s;
         </div>
       </div>
 
-      <img
+      <CachedImage
         v-if="firstImage"
         :src="firstImage"
         class="answer-box__thumbnail"
         alt="回答配图"
+        :width="80"
+        :height="80"
+        border-radius="4px"
       />
     </div>
     <div class="answer-box__meta">
@@ -124,9 +124,15 @@ transition: all 0.2s;
 </div>
 </template>
   
-<script>
+  <script>
+import CachedImage from './CachedImage.vue';
+import imageCache from '@/utils/imageCache';
+
 export default {
 name: 'AnswerBox',
+components: {
+  CachedImage
+},
 props: {
     id: [String, Number],
     content: String,
@@ -144,6 +150,9 @@ props: {
 		type: Object,
 		default: () => ({}),
     },
+},
+mounted() {
+  this.preloadImages();
 },
 computed: {
     formattedTime() {
@@ -169,6 +178,16 @@ methods: {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = replaced;
         return tempDiv.textContent || tempDiv.innerText || '';
+    },
+    
+    // 预加载图片
+    preloadImages() {
+        if (this.firstImage) {
+            // 延迟预加载，避免影响初始渲染
+                         setTimeout(() => {
+                 imageCache.preloadImage(this.firstImage);
+             }, 100);
+        }
     }
 }
 };
