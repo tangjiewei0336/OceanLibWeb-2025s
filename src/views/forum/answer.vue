@@ -228,9 +228,22 @@ export default {
                     this.topAid = newAnswerId;
                     localStorage.setItem('topAid', newAnswerId);
                 }
-                // 简单地刷新整个页面，确保数据正确加载
-                this.$router.go(0);
+                // 重新获取数据而不是刷新整个页面
+                this.refreshAnswerData();
             }
+        },
+        
+        // 重新获取答案数据
+        async refreshAnswerData() {
+            // 重置状态
+            this.allData = [];
+            this.noMore = false;
+            this.currentPageNum = 1;
+            this.findTop = false;
+            this.isLoading = false;
+            
+            // 重新获取数据
+            await this.formAnswers();
         }
     },
     created() {
