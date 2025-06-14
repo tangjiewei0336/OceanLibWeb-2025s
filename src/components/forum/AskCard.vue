@@ -133,6 +133,24 @@ export default {
   },
 
   methods: {
+    // 检查编辑器内容是否真正为空（排除 wangEditor 的默认空白标签）
+    isEditorContentEmpty(html) {
+      if (!html || !html.trim()) {
+        return true;
+      }
+      
+      // 移除 wangEditor 默认的空白标签
+      const cleanHtml = html
+        .trim()
+        .replace(/<p><br><\/p>/g, '')
+        .replace(/<p><br\/><\/p>/g, '')
+        .replace(/<p>\s*<\/p>/g, '')
+        .replace(/&nbsp;/g, '')
+        .trim();
+      
+      return cleanHtml === '';
+    },
+
     async uploadImageAPI(file) {
       if (!file) {
         this.$toast.fail('请选择要上传的图片');
@@ -196,11 +214,16 @@ export default {
     },
 
     onCloseClick() {
+      // 检查编辑器内容是否为空（排除 wangEditor 默认的空白标签）
+      const isContentEmpty = this.isEditorContentEmpty(this.html);
+      
       // 如果标题和正文都为空，或者是编辑模式直接关闭，不弹草稿提示
-      if ((!this.title.trim() && !this.html.trim()) || this.questionId) {
+      if ((!this.title.trim() && isContentEmpty) || this.questionId) {
         this.$emit('close', { shouldRefresh: false });
         return;
       }
+      // console.log(this.title.trim())
+      // console.log(this.html.trim())
       // 否则弹出“保存草稿”确认框
       this.$dialog.confirm({
         title: '是否保存草稿？',
