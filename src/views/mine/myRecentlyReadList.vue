@@ -43,9 +43,9 @@
       <van-tab title="问题" name="1" class="full">
         <van-pull-refresh v-model="question_refreshing" @refresh="getRecentlyReadQuestionList()" class="full">
           <van-list v-model="question_loading" :finished="question_finished" @load="getRecentlyReadQuestionList()">
-            <div v-for="question in questionList" :key="question.fileID" class="questionBox">
+            <div v-for="question in questionList" :key="question.bindId" class="questionBox">
               <v-questionBox
-                :key="question.id"
+                :key="question.bindId"
                 v-bind="question"
               />
             </div>
