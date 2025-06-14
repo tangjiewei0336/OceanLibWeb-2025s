@@ -1,7 +1,19 @@
 <template>
   <span>
     <v-avatar color="primary" :size="avatarSize" v-if="type=='avater' && userInfo!=null">
-      <v-img :src="userInfo.avatar" alt="Avatar" v-if="userInfo.avatar != null && userInfo.avatar != ''" />
+      <CachedImage 
+        v-if="useCachedImage && userInfo.avatar != null && userInfo.avatar != ''"
+        :src="userInfo.avatar" 
+        alt="Avatar" 
+        :width="avatarSize"
+        :height="avatarSize"
+        border-radius="50%"
+      />
+      <v-img 
+        v-else-if="!useCachedImage && userInfo.avatar != null && userInfo.avatar != ''" 
+        :src="userInfo.avatar" 
+        alt="Avatar" 
+      />
       <span style="color:white" v-else-if="userInfo.nickname!=null">{{userInfo.nickname.substring(0, 1) }}</span>
     </v-avatar>
 
@@ -17,8 +29,13 @@
 
 <script>
 import { state, action } from './store.js';
+import CachedImage from '../../CachedImage.vue';
+
 export default {
   name: 'username',
+  components: {
+    CachedImage
+  },
   props: {
     username: String,
     user: {
@@ -32,6 +49,10 @@ export default {
     type: {
       default: 'username',
       type: String,
+    },
+    useCachedImage: {
+      default: false,
+      type: Boolean,
     },
   },
   data() {
@@ -66,6 +87,14 @@ export default {
         });
       }
     },
+    // 监听userInfo变化
+    userInfo: {
+      handler(newVal) {
+        if (newVal && this.type === 'avater') {
+        }
+      },
+      deep: true
+    }
   },
   methods: {
     getUserInfo(username) {

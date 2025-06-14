@@ -7,16 +7,17 @@
     <div class="qa__content-wrapper">
       <div class="qa__content-main">
         <div class="qa__content-label user-info-label">
-          <CachedImage
-            v-if="userInfo.avatar"
-            :src="userInfo.avatar"
-            alt="头像"
-            class="user-avatar"
-            :width="20"
-            :height="20"
-            border-radius="50%"
+          <username 
+            :username="answer.userId" 
+            :avatarSize="20" 
+            type="avater" 
+            :useCachedImage="true"
+            style="margin-right: 6px;"
           />
-          <span>{{ userInfo.username || '加载中...' }}</span>
+          <username 
+            :username="answer.userId" 
+            type="username" 
+          />
         </div>
         <div class="qa__content text-ellipsis-3">
           {{ getPlainTextWithImagePlaceholder(answer.content).slice(0, 100) }}
@@ -47,12 +48,14 @@
 
 <script>
 import CachedImage from './CachedImage.vue';
+import username from './common/username/username.vue';
 import imageCache from '@/utils/imageCache';
 
 export default {
   name: "QandABox",
   components: {
-    CachedImage
+    CachedImage,
+    username
   },
   props: {
     answer: {
@@ -122,10 +125,11 @@ export default {
   mounted() {
 		this.fetchUserInfo();
 		this.preloadImages();
-		// this.userInfo.avatar = this.answer.avatar || "https://th.bing.com/th/id/OIP.cCtgBVWW7Sm6RxLzXOZhIwAAAA?rs=1&pid=ImgDetMain";
-		// this.userInfo.username = this.answer.userId;
-		// console.log(this.userInfo.avatar)
-		// console.log(this.userInfo.username)
+  },
+  // 添加错误捕获
+  errorCaptured(err, vm, info) {
+    console.error('QandABox - 捕获到错误:', err, vm, info);
+    return false;
   },
 };
 </script>
