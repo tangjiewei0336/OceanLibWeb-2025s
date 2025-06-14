@@ -4,6 +4,7 @@
 .forum {
   display: flex;
   flex-direction: column;
+  height: 100vh; // 确保占满整个视口
   background-color: white;
 
   /* ========== 顶部留白部分 ========== */
@@ -37,6 +38,13 @@
     background-color: white !important; // 显式清除背景
   }
 
+  /* 可滚动的内容容器 */
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 56px; // 为底部导航栏留出空间
+  }
+
   /* 列表项外层容器，做一点上下 padding 让整体不紧贴顶端，但底部留白留给底部导航 */
   .van-pull-refresh,
   .van-list {
@@ -64,14 +72,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  /* 让内容不被导航栏遮挡，要给父级 content 区留出相同高度的底部 padding */
-  /* 比如导航栏高度约为 56px，就在上层容器加 padding-bottom: 56px; */
-}
-
-/* 如果你想让列表不被底部导航遮挡，需要给 .forum 的内容区加一个 padding-bottom */
-/* 这里假设底部导航高度 ~56px，具体按实际测量调整 */
-.forum {
-  padding-bottom: 56px; 
+  z-index: 999;
 }
 
 /* 下面是你原先的样式，保持不变 */
@@ -81,43 +82,46 @@
 </style>
 <template>
   <div class="forum">
-    <!-- 页头组件，保持不变 -->
+    <!-- 页头组件，固定在顶部 -->
     <AppHeader />
 
-    <!-- 下拉刷新 + 列表 -->
-    <van-pull-refresh
-      v-model="isRefreshing"
-      @refresh="onRefresh"
-      head-height="50"
-      :animation-duration="300"
-    >
-      <!-- 如果 answers 为空并且不是加载状态，显示占位 -->
-      <div v-if="!isLoading && answers.length === 0" class="forum__empty">
-        暂无回答
-      </div>
-
-      <!-- 用 van-list 实现分页加载 -->
-      <van-list
-        v-else
-        v-model="isLoading"
-        :finished="isFinished"
-        finished-text="没有更多了"
-        @load="onLoadMore"
+    <!-- 可滚动的内容区域 -->
+    <div class="forum__content">
+      <!-- 下拉刷新 + 列表 -->
+      <van-pull-refresh
+        v-model="isRefreshing"
+        @refresh="onRefresh"
+        head-height="50"
+        :animation-duration="300"
       >
-        <!-- 遍历 answers 并渲染 QandABox -->
-        <div
-          v-for="(item, index) in answers"
-          :key="item.id"
-          class="forum__article-item"
-        >
-          <QandABox :answer="item" />
-          <hr
-            v-if="index !== answers.length - 1"
-            class="forum__divider"
-          />
+        <!-- 如果 answers 为空并且不是加载状态，显示占位 -->
+        <div v-if="!isLoading && answers.length === 0" class="forum__empty">
+          暂无回答
         </div>
-      </van-list>
-    </van-pull-refresh>
+
+        <!-- 用 van-list 实现分页加载 -->
+        <van-list
+          v-else
+          v-model="isLoading"
+          :finished="isFinished"
+          finished-text="没有更多了"
+          @load="onLoadMore"
+        >
+          <!-- 遍历 answers 并渲染 QandABox -->
+          <div
+            v-for="(item, index) in answers"
+            :key="item.id"
+            class="forum__article-item"
+          >
+            <QandABox :answer="item" />
+            <hr
+              v-if="index !== answers.length - 1"
+              class="forum__divider"
+            />
+          </div>
+        </van-list>
+      </van-pull-refresh>
+    </div>
 
     <!-- 底部导航：固定在底部 -->
     <div class="forum__bottom-nav">
@@ -174,7 +178,7 @@ export default {
 
       answers: [],         // 回答列表，最终用于渲染
       page: 1,             // 当前页码，从 1 开始
-      pageSize: 10,        // 每页大小
+      pageSize: 6,        // 每页大小
     };
   },
   methods: {
