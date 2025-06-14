@@ -2,7 +2,7 @@ const asyncRouterMap = [{
         path: '/newCollection',
         meta: {
             title: '新建收藏夹',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/collection/newCollection.vue'], resolve)
     },
@@ -10,7 +10,7 @@ const asyncRouterMap = [{
         path: '/mine',
         meta: {
             title: '我的',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/mine/mine.vue'], resolve)
     },
@@ -18,7 +18,7 @@ const asyncRouterMap = [{
         path: '/forum/recommend',
         meta: {
             title: '知乎最新',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/forum/forum.vue'], resolve)
     },
@@ -26,7 +26,7 @@ const asyncRouterMap = [{
         path: '/forum/question',
         meta: {
             title: '知乎问题',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/forum/question.vue'], resolve)
     },
@@ -34,7 +34,7 @@ const asyncRouterMap = [{
         path: '/forum/hot',
         meta: {
             title: '知乎热榜',
-            permission: ["USER", "ADMIN"],
+            permission: ["USER", "ADMIN", "SUPERADMIN"],
         },
         component: (resolve) => require(['../views/forum/hot.vue'], resolve)
     },
@@ -43,7 +43,7 @@ const asyncRouterMap = [{
         name: 'forumAnswer',
         meta: {
             title: '知乎回答',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/forum/answer.vue'], resolve)
     },
@@ -51,7 +51,7 @@ const asyncRouterMap = [{
         path: '/forum/answerWrite',
         meta: {
             title: '知乎写回答',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/forum/answerWrite.vue'], resolve)
     },
@@ -59,7 +59,7 @@ const asyncRouterMap = [{
         path: '/forum/hot',
         meta: {
             title: '知乎热榜',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/forum/hot.vue'], resolve)
     },
@@ -68,7 +68,7 @@ const asyncRouterMap = [{
         path: '/forum/questionSearch',
         meta: {
             title: '知乎搜索问题',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/forum/qsearch/qsearch.vue'], resolve)
     },
@@ -76,7 +76,7 @@ const asyncRouterMap = [{
         path: '/myDraftQuestion',
         meta: {
             title: '我的问题草稿箱',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/mine/myDraftQuestion.vue'], resolve)
     },
@@ -84,7 +84,7 @@ const asyncRouterMap = [{
         path: '/uploadFile',
         meta: {
             title: '文件上传 - 选择文件',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/upload/uploadFile.vue'], resolve)
     },
@@ -92,7 +92,7 @@ const asyncRouterMap = [{
         path: '/uploadInfo',
         meta: {
             title: '文件上传 - 补全信息',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/upload/uploadInfo.vue'], resolve)
     },
@@ -100,7 +100,7 @@ const asyncRouterMap = [{
         path: '/myCollectionList',
         meta: {
             title: '我的收藏',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/collection/myCollectionList.vue'], resolve)
     },
@@ -108,7 +108,7 @@ const asyncRouterMap = [{
         path: '/myCollectionItem',
         meta: {
             title: '我的收藏',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/collection/myCollectionItem.vue'], resolve)
     },
@@ -116,7 +116,7 @@ const asyncRouterMap = [{
         path: '/myUpload',
         meta: {
             title: '我的贡献',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/mine/myContent.vue'], resolve)
     },
@@ -124,7 +124,7 @@ const asyncRouterMap = [{
         path: '/indexResult',
         meta: {
             title: '索引结果',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/index/search/indexResult.vue'], resolve)
     },
@@ -132,7 +132,7 @@ const asyncRouterMap = [{
         path: '/search',
         meta: {
             title: '搜索结果',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/index/search/search.vue'], resolve)
     },
@@ -140,7 +140,7 @@ const asyncRouterMap = [{
         path: '/myRecentlyReadList',
         meta: {
             title: '最近浏览',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/mine/myRecentlyReadList.vue'], resolve)
     },
@@ -148,7 +148,7 @@ const asyncRouterMap = [{
         path: '/myDownloadList',
         meta: {
             title: '最近下载',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/mine/myDownloadList.vue'], resolve)
     },
@@ -156,7 +156,7 @@ const asyncRouterMap = [{
         path: '/walletChangeRecordList',
         meta: {
             title: '钱包变动',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/mine/walletChangeRecordList.vue'], resolve)
     },
@@ -164,7 +164,7 @@ const asyncRouterMap = [{
         path: '/notify',
         meta: {
             title: '消息',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/notify/notify.vue'], resolve)
     },
@@ -172,7 +172,7 @@ const asyncRouterMap = [{
         path: '/notifyLikeList',
         meta: {
             title: '赞同',
-            permission: ["USER", "ADMIN"]
+            permission: ["USER", "ADMIN", "SUPERADMIN"]
         },
         component: (resolve) => require(['../views/notify/notifyLikeList.vue'], resolve)
     },
