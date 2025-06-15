@@ -182,7 +182,7 @@
 					</div>
 				</v-card>
 			</v-bottom-sheet>
-			<v-addCollectionModel ref="addCollectionModel" :fileInfo="{ fileID: aid}">
+			<v-addCollectionModel ref="addCollectionModel" :fileInfo="{ fileID: aid, mainType: 'ANSWER' }">
     		</v-addCollectionModel>
 		</v-card-text>
 

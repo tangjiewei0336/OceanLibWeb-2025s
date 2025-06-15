@@ -174,6 +174,9 @@ methods: {
 		}
     },
     getPlainTextWithImagePlaceholder(html) {
+        if (!html || typeof html !== 'string') {
+            return '';
+        }
         const replaced = html.replace(/<img[^>]*>/gi, ' [图片] ');
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = replaced;
