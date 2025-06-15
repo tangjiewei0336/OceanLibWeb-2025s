@@ -35,11 +35,11 @@
                 </div>
                 <v-spacer></v-spacer>
                 <div class="d-flex align-center">
-                    <v-btn :ripple="false" x-small text @click="likeComment">
+                    <v-btn :ripple="false" x-small text @click="likeComment" class="no-shadow-btn">
                         <v-icon left small>{{ liked ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
                         {{ inner_likeCount }}
                     </v-btn>
-                    <v-btn :ripple="false" x-small text @click="dislikeComment">
+                    <v-btn :ripple="false" x-small text @click="dislikeComment" class="no-shadow-btn">
                         <v-icon left small>{{ disliked ? 'mdi-heart-off' : 'mdi-heart-off-outline' }}</v-icon>
                     </v-btn>
                 </div>
@@ -295,3 +295,14 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.no-shadow-btn::before,  /* 移除点击时的背景层 */
+.no-shadow-btn::after {   /* 移除涟漪动画 */
+  display: none !important;
+}
+.no-shadow-btn:hover,
+.no-shadow-btn:focus {
+  box-shadow: none !important; /* 移除悬浮/聚焦阴影 */
+}
+</style>
