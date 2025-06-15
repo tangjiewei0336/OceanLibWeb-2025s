@@ -104,7 +104,7 @@
       <v-icon class="question-box__icon-bg">
         mdi-comment-question-outline
       </v-icon>
-      {{ title }}
+      {{ getPlainTextWithImagePlaceholder(title) }}
     </div>
     <!-- <div class="question-box__content text-ellipsis-3" v-html="replaceImagesWithPlaceholder(content)"></div> -->
     <div class="question-box__content-wrapper">
@@ -118,7 +118,7 @@
     <div class="question-box__meta">
       <!-- <span class="question-box__meta-item">{{ formattedTime }}</span> -->
       <span class="question-box__meta-item">{{ answerCount }} 回答</span>
-      <span class="question-box__meta-item">{{ viewCount }} 浏览</span>
+      <span class="question-box__meta-item">{{ numCompress(viewCount) }} 浏览</span>
       <span class="question-box__meta-item" v-if="rewardPoints > 0">
         <img src="../images/main-icon/coin.svg" class="coin-icon" />
         {{ rewardPoints }}
@@ -172,18 +172,25 @@ export default {
     },
   },
   methods: {
-    goToDetail() {
-      // 以后需要改到问题的详细页面
-      localStorage.setItem('id', this.bindId)
-      this.$router.push('/forum/question')
-    },
-    getPlainTextWithImagePlaceholder(html) {
-      const replaced = html.replace(/<img[^>]*>/gi, ' [图片] ');
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = replaced;
-      return tempDiv.textContent || tempDiv.innerText || '';
-    }
-  },
+		goToDetail() {
+			// 以后需要改到问题的详细页面
+			localStorage.setItem('id', this.bindId)
+			this.$router.push('/forum/question')
+		},
+		getPlainTextWithImagePlaceholder(html) {
+			const replaced = html.replace(/<img[^>]*>/gi, ' [图片] ');
+			const tempDiv = document.createElement('div');
+			tempDiv.innerHTML = replaced;
+			return tempDiv.textContent || tempDiv.innerText || '';
+		},
+		numCompress(num) {
+			if (num < 10000) {
+				return num.toString()
+			} else {
+				return (num / 10000).toFixed(1) + '万'
+			}
+		},
+	},
 };
 </script>
   
