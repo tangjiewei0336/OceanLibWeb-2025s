@@ -199,7 +199,7 @@ export default {
 		},
         likeComment() {
             this.$Axios({
-                method: 'post',
+                method: 'get',
                 url: '/comment/evaluateComment',
                 params: {
                     bindID: this.aid,
@@ -209,22 +209,21 @@ export default {
                     isLike: true
 				},
             }).then(response => {
-				console.log(response)
+                if (this.liked) {
+                    this.inner_likeCount -= 1
+                    this.liked = false
+                } else {
+                    this.inner_likeCount += 1
+                    this.liked = true
+                    this.disliked = false
+                }
             }).catch(error => {
-                console.error('评论失败:', error)
+                this.$toast.fail('不能重复点赞');
             })
-            if (this.liked) {
-                this.inner_likeCount -= 1
-                this.liked = false
-            } else {
-                this.inner_likeCount += 1
-                this.liked = true
-                this.disliked = false
-            }
         },
         dislikeComment() {
             this.$Axios({
-                method: 'post',
+                method: 'get',
                 url: '/comment/evaluateComment',
                 params: {
                     bindID: this.aid,
@@ -234,20 +233,18 @@ export default {
                     isLike: false
 				},
             }).then(response => {
-				console.log(response)
-            }).catch(error => {
-                console.error('评论失败:', error)
-            })
-            
-            if (this.disliked) {
-                this.disliked = false
-            } else {
-                this.disliked = true
-                if (this.liked) {
-                    this.inner_likeCount -= 1
-                    this.liked = false
+                if (this.disliked) {
+                    this.disliked = false
+                } else {
+                    this.disliked = true
+                    if (this.liked) {
+                        this.inner_likeCount -= 1
+                        this.liked = false
+                    }
                 }
-            }
+            }).catch(error => {
+                this.$toast.fail('不能重复点踩');
+            })
         },
         reply() {
             this.commentWriteOpen = true

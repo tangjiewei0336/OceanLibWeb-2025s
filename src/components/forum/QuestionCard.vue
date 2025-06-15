@@ -32,7 +32,15 @@
 					</div>
 				</div>
 
-				<v-img
+				<CachedImage
+					v-if="urls.length > 0"
+					:src="urls[0]"
+					:width="80"
+					:height="80"
+					cover
+					style="border-radius: 4px; margin-bottom: 10px;"
+				/>
+				<!-- <v-img
 					v-if="urls.length > 0"
 					:src="urls[0]"
 					:width="80"
@@ -40,7 +48,7 @@
 					aspect-ratio="1"
 					cover
 					style="border-radius: 4px; margin-bottom: 10px;"
-				></v-img>
+				></v-img> -->
 			</div>
 			<v-divider/>
 		</div>
@@ -107,8 +115,10 @@
 </template>
 
 <script>
+import CachedImage from '../CachedImage.vue';
 export default {
 	name: 'QuestionCard',
+	components: { CachedImage },
 	data() {
         return {
 			// data
