@@ -73,15 +73,10 @@
                 class="preview__folder__filebox"></v-questionBox>
               
               <!-- 回答类型 -->
-              <!-- <v-answerBox v-else-if="$route.query.mainType === 'ANSWER'" 
-                :id="fileInfo.id"
-                :content="fileInfo.content || ''"
-                :likeCount="fileInfo.likeCount || 0"
-                :commentCount="fileInfo.commentCount || 0"
-                :createTime="fileInfo.createTime"
-                :updateTime="fileInfo.updateTime"
-                :question="fileInfo.question || {}"
-                class="preview__folder__filebox"></v-answerBox> -->
+              <v-QandABox v-else-if="$route.query.mainType === 'ANSWER'" 
+                :answer=fileInfo
+                class="preview__folder__filebox">
+              </v-QandABox>
               
               <template #right>
                 <van-button square text="删除" type="danger" style="height: 100%" @click="deleteCollectionItem(index, fileInfo.fileID || fileInfo.bindId || fileInfo.id)" />
@@ -106,13 +101,13 @@
 <script>
 import fileBox from '../../components/fileBox';
 import questionBox from '../../components/questionBox';
-// import answerBox from '../../components/answerBox';
+import QandABox from '../../components/QandABox';
 
 export default {
   components: {
     'v-fileBox': fileBox,
     'v-questionBox': questionBox,
-    // 'v-answerBox': answerBox,
+    'v-QandABox': QandABox,
   },
   data() {
     return {
@@ -137,86 +132,65 @@ export default {
     async getCollectionFileList() {
       this.loading = true;
       try {
-        if (this.$route.query.mainType !== 'ANSWER') {
-          const response = await this.$Axios({
-            method: 'get',
-            url: '/collectionService/getCollectionItemList',
-            params: {
-              collectionID: this.$route.query.collectionID,
-              mainType: this.$route.query.mainType,
-            },
-          });
-          
-          console.log('原始收藏列表:', response.data.msg);
-          const itemList = response.data.msg || [];
-
-          // 根据 mainType 获取详细信息
-          if (this.$route.query.mainType === 'QUESTION') {
-            // 获取问题详情
-            const detailedQuestions = await Promise.all(
-              itemList.map(async (item) => {
-                try {
-                  const detailResponse = await this.$Axios({
-                    method: 'get',
-                    url: '/qaService/question/details',
-                    params: {
-                      questionId: item.fileID || item.bindId || item.id,
-                    },
-                  });
-                  return detailResponse.data.msg;
-                } catch (error) {
-                  console.error('获取问题详情失败:', error);
-                  return null;
-                }
-              })
-            );
-            this.fileList = detailedQuestions.filter(item => item !== null);
-        }
-        else if (this.$route.query.mainType === 'ANSWER') {
-          const response = await this.$Axios({
-            method: 'get',
-            url: '/qaService/answer/likedAnswers',
-            params: {
-              page: 1,
-              pageSize: 10,
-              collectionID: this.$route.query.collectionID,
-            },
-          });
-          console.log(response.data.msg)
-          this.fileList = response.data.msg;
-        }
-        // } 
-        // else if (this.$route.query.mainType === 'ANSWER') {
-        //   // 对于回答类型，尝试通过我的回答API获取详情
-        //   try {
-        //     const answersResponse = await this.$Axios({
-        //       method: 'get',
-        //       url: '/qaService/answer/myAnswers',
-        //       params: {
-        //         page: 1,
-        //         pageSize: 100, // 获取足够多的数据以便匹配
-        //       },
-        //     });
+        const response = await this.$Axios({
+          method: 'get',
+          url: '/collectionService/getCollectionItemList',
+          params: {
+            collectionID: this.$route.query.collectionID,
+            mainType: this.$route.query.mainType,
+          },
+        });
+        
+        console.log('原始收藏列表:', response.data.msg);
+        const itemList = response.data.msg || [];
+        
+        // 根据 mainType 获取详细信息
+        if (this.$route.query.mainType === 'QUESTION') {
+          // 获取问题详情
+          const detailedQuestions = await Promise.all(
+            itemList.map(async (item) => {
+              try {
+                const detailResponse = await this.$Axios({
+                  method: 'get',
+                  url: '/qaService/question/details',
+                  params: {
+                    questionId: item.fileID || item.bindId || item.id,
+                  },
+                });
+                return detailResponse.data.msg;
+              } catch (error) {
+                console.error('获取问题详情失败:', error);
+                return null;
+              }
+            })
+          );
+          this.fileList = detailedQuestions.filter(item => item !== null);
+        } else if (this.$route.query.mainType === 'ANSWER') {
+          // console.log("aaaaaa")
+          console.log(itemList)
+          // 使用 batch API 获取回答详情
+          try {
+            const answersResponse = await this.$Axios({
+              method: 'post',
+              url: '/qaService/answer/batch',
+              data: {
+                itemList: itemList, // 直接传递 itemList 给 batch API
+              },
+            });
             
-        //     const allMyAnswers = answersResponse.data.msg?.content || [];
-        //     // 根据收藏的ID匹配我的回答
-        //     const collectedAnswerIds = itemList.map(item => String(item.fileID || item.id));
-        //     const matchedAnswers = allMyAnswers.filter(answer => 
-        //       collectedAnswerIds.includes(String(answer.id))
-        //     );
-            
-        //     this.fileList = matchedAnswers;
-        //   } catch (error) {
-        //     console.error('获取我的回答列表失败:', error);
-        //     // 如果API调用失败，直接使用原始数据
-        //     this.fileList = itemList;
-        //   }
-        // } else {
-        //   // DOCUMENT 类型直接使用原数据
-        //   this.fileList = itemList;
+            console.log('batch API 返回结果:', answersResponse.data.msg);
+            this.fileList = answersResponse.data.msg.content || [];
+          } catch (error) {
+            console.error('batch API 调用失败:', error);
+            // 如果API调用失败，直接使用原始数据
+            this.fileList = itemList;
+          }
+        } else {
+          // DOCUMENT 类型直接使用原数据
+          this.fileList = itemList;
         }
         
-        console.log('处理后的详细列表:', this.fileList);
+        // console.log('处理后的详细列表:', this.fileList);
         
       } catch (error) {
         console.error('获取收藏列表失败:', error);
@@ -233,11 +207,11 @@ export default {
         url: '/collectionService/deleteCollectionItem',
         params: {
           collectionID: this.$route.query.collectionID,
-          fileID: itemID, // 这里保持fileID参数名，后端可能需要统一处理
+          itemID: itemID, // 这里保持fileID参数名，后端可能需要统一处理
           mainType: this.$route.query.mainType,
         },
       }).then((response) => {
-        if (response.data.state == 'SUCCESS') {
+        if (response.data.state == "SUCCESS") {
           this.fileList.splice(index, 1);
         }
       });
