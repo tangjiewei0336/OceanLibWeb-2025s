@@ -1,21 +1,24 @@
 <template>
     <v-card class="d-flex align-start pa-4" flat>
-        <div>
-            <v-avatar v-if="this.interface==='outer'" size="30" color="primary" class="mr-3">
-                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
-                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
-            </v-avatar>
-            <v-avatar v-if="this.interface==='inner'" size="25" color="primary" class="mr-3">
-                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
-                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
-            </v-avatar>
-        </div>
+        <username 
+            :username="uid" 
+            :avatarSize="this.interface==='outer' ? 30 : 25" 
+            type="avater" 
+            :useCachedImage="true"
+            style="margin-right: 6px;"
+        />
         <div>
             <div>
-                <span>{{ uid }}</span>
+                <username 
+                    :username="uid" 
+                    type="username" 
+                />
                 <span v-if="inner_replyTo.length > 0">
                     <v-icon>mdi-chevron-right</v-icon>
-                    {{ inner_replyTo }}
+                    <username 
+                        :username="inner_replyTo" 
+                        type="username" 
+                    />
                 </span>
             </div>
             <div>
@@ -89,10 +92,13 @@
 
 <script>
 import CommentWrite from './CommentWrite.vue'
+import CachedImage from '../CachedImage.vue';
+import username from '../common/username/username.vue';
+import imageCache from '@/utils/imageCache';
 
 export default {
     name: "CommentCard",
-    components: { CommentWrite },
+    components: { CommentWrite, username },
     data() {
         return {
             // data

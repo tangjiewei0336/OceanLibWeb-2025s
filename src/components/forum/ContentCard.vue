@@ -5,12 +5,17 @@
 		:ripple="false"
 		@click="toAnswer"
 	>
-		<v-avatar size="30" color="primary" class="mr-3" style="margin-left: 10px;">
-			<img v-if="cacheAvatar" :src="avatarSrc" alt="用户头像">
-			<span v-else class="white--text">{{ uid.charAt(0) }}</span>
-		</v-avatar>
-		<span v-if="this.interface === 'question'" class="grey--text">{{ uid }}</span>
-		<span v-if="this.interface === 'answer'">{{ uid }}</span>
+		<username 
+			:username="uid" 
+			:avatarSize="30" 
+			type="avater" 
+			:useCachedImage="true"
+			style="margin-right: 6px;"
+		/>
+		<username 
+			:username="uid" 
+			type="username" 
+		/>
 
 		<v-card-text v-if="this.interface === 'question'" class="pa-1">
 			<p class="grey--text text--darken-3 mb-1">{{ truncateContent(content) }}</p>
@@ -194,13 +199,15 @@
 </template>
   
 <script>
-import Mock from 'mockjs'
 import CommentPopup from './CommentPopup.vue'
 import CommentWrite from './CommentWrite.vue'
+import CachedImage from '../CachedImage.vue';
+import username from '../common/username/username.vue';
+import imageCache from '@/utils/imageCache';
 
 export default {
     name: 'ContentCard',
-	components: { CommentPopup, CommentWrite },
+	components: { CommentPopup, CommentWrite, username },
     data() {
 		return {
 			// data
@@ -291,48 +298,46 @@ export default {
 			return doc.body.textContent || '';
 		},
 		agreeFunc() {
-			// this.$Axios({
-            //     method: 'post',
-            //     url: '/qaService/like/evaluateAnswer',
-            //     params: {
-			// 		answerId: this.aid,
-			// 		isCancel: this.agree,
-			// 		isLike: '0'
-			// 	},
-            // }).then(response => {
-			// 	console.log(response)
-            // }).catch(error => {
-            //     console.error('评论失败:', error)
-            // })
-
-			if (this.agree) {
-				this.$toast.success('已取消', {timeout: 1000,});
-			} else {
-				this.$toast.success('已赞同', {timeout: 1000,});
-			}
-			this.agree = !this.agree
+			this.$Axios({
+                method: 'post',
+                url: '/qaService/like/evaluateAnswer',
+                params: {
+					answerId: this.aid,
+					isCancel: this.agree,
+					isLike: '0'
+				},
+            }).then(response => {
+				if (this.agree) {
+					this.$toast.success('已取消', {timeout: 1000,});
+				} else {
+					this.$toast.success('已赞同', {timeout: 1000,});
+				}
+				this.agree = !this.agree
+            }).catch(error => {
+                console.error('评论失败:', error)
+            })
 		},
 		refuseFunc() {
-			// this.$Axios({
-            //     method: 'post',
-            //     url: '/qaService/like/evaluateAnswer',
-            //     params: {
-			// 		answerId: this.aid,
-			// 		isCancel: this.refuse,
-			// 		isLike: '1'
-			// 	},
-            // }).then(response => {
-			// 	console.log(response)
-            // }).catch(error => {
-            //     console.error('评论失败:', error)
-            // })
-
-			if (this.refuse) {
-				this.$toast.success('已取消', {timeout: 1000,});
-			} else {
-				this.$toast.success('已反对', {timeout: 1000,});
-			}
-			this.refuse = !this.refuse
+			this.$Axios({
+                method: 'post',
+                url: '/qaService/like/evaluateAnswer',
+                params: {
+					answerId: this.aid,
+					isCancel: this.refuse,
+					isLike: '1'
+				},
+            }).then(response => {
+				// console.log(response)
+				if (this.refuse) {
+					this.$toast.success('已取消', {timeout: 1000,});
+				} else {
+					this.$toast.success('已反对', {timeout: 1000,});
+				}
+				this.refuse = !this.refuse
+            }).catch(error => {
+                console.error('点踩失败:', error)
+            })
+			
 		},
 		collectedFunc() {
 			if (this.collected) {

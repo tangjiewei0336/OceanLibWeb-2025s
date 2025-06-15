@@ -109,7 +109,7 @@ export default {
                 },
             }).then(response => {
                 let data = response.data.msg.replyCommentList
-                console.log(response.data.msg.replyCommentList)
+                // console.log(response.data.msg.replyCommentList)
                 this.allData = [...this.allData, ...data]
                 if (this.allData.length >= this.replyCount) {
                     this.noMore = true
@@ -121,9 +121,6 @@ export default {
                 this.isLoading = false
                 console.error('请求失败:', error)
             })
-        },
-        reply() {
-            console.log('reply')
         },
         formatDate(date) {
 			return new Date(date).toLocaleDateString('zh-CN', {

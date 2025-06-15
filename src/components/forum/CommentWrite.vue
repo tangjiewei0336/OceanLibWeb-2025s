@@ -1,5 +1,6 @@
 <template>
-	<v-card flat class="custom-radius">
+	<v-card flat class="custom-radius"
+		style="height: 160px">
 		<v-textarea
 			v-model="myComment"
 			auto-grow
@@ -17,7 +18,7 @@
 		>
 			<v-btn
 				text
-				class="primary--text"
+				class="primary--text no-shadow-btn"
 				:disabled="!myComment.trim()"
 				@click="toComment"
 			>
@@ -113,5 +114,14 @@ export default {
 .no-border {
   border: none !important;
   box-shadow: none !important;
+}
+
+.no-shadow-btn::before,  /* 移除点击时的背景层 */
+.no-shadow-btn::after {   /* 移除涟漪动画 */
+  display: none !important;
+}
+.no-shadow-btn:hover,
+.no-shadow-btn:focus {
+  box-shadow: none !important; /* 移除悬浮/聚焦阴影 */
 }
 </style>
