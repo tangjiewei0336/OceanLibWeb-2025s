@@ -5,28 +5,34 @@
 		:ripple="false"
 		@click="toAnswer"
 	>
-		<v-avatar size="30" color="primary" class="mr-3" style="margin-left: 10px;">
-			<img v-if="cacheAvatar" :src="avatarSrc" alt="用户头像">
-			<span v-else class="white--text">{{ uid.charAt(0) }}</span>
-		</v-avatar>
-		<span v-if="this.interface === 'question'" class="grey--text">{{ uid }}</span>
-		<span v-if="this.interface === 'answer'">{{ uid }}</span>
+		<username 
+			:username="uid" 
+			:avatarSize="30" 
+			type="avater" 
+			:useCachedImage="true"
+			style="margin-right: 6px;"
+		/>
+		<username 
+			:username="uid" 
+			type="username" 
+		/>
 
 		<v-card-text v-if="this.interface === 'question'" class="pa-1">
 			<p class="grey--text text--darken-3 mb-1">{{ truncateContent(content) }}</p>
 			<v-row class="mt-1" no-gutters v-if="urls.length > 2">
-				<v-col 
-					v-for="(url, i) in limitedUrls"
-					:key="i"
-					cols="4"
-				>
-					<v-img
-						:src="url"
-						style="width: calc((100vw - 80px) / 3); aspect-ratio: 8/5"
-						cover
-						class="rounded"
-					></v-img>
-				</v-col>
+				<CachedImage
+					v-for="(img, index) in limitedUrls"
+					:key="index"
+					:src="img"
+					alt="回答图片"
+					class="answer-image"
+					style="
+						width: calc((100vw - 80px) / 3);
+						aspect-ratio: 8/5;
+						margin: 4px;"
+					cover
+					border-radius="4px"
+				/>
 			</v-row>
 			<div class="d-flex justify-space-between align-center">
 				<p class="text-body-2 grey--text mb-1">
@@ -49,9 +55,13 @@
 				{{ formatDate(createTime) }}
 			</span>
 			<div class="d-flex align-center">
-				<v-avatar size="30" color="primary" class="mr-3">
-					<img :src="userAvatar" alt="我的头像">
-				</v-avatar>
+				<username 
+					:username="uid" 
+					:avatarSize="30" 
+					type="avater" 
+					:useCachedImage="true"
+					style="margin-right: 6px;"
+				/>
 				<v-btn
 					text
 					style="width: calc(100vw - 100px); justify-content: space-between"
@@ -77,10 +87,13 @@
 					></div>
 
 					<div class="d-flex align-center pl-2" style="z-index: 1">
-						<v-avatar size="30" color="primary" class="mr-1">
-						<img v-if="cacheAvatar" :src="avatarSrc">
-						<span v-else class="white--text">{{ uid.charAt(0) }}</span>
-						</v-avatar>
+						<username 
+							:username="uid" 
+							:avatarSize="30" 
+							type="avater" 
+							:useCachedImage="true"
+							style="margin-right: 6px;"
+						/>
 						<span class="grey--text text--darken-1 text-caption">
 						{{ truncateText(uid, 4) }}
 						</span>
@@ -121,19 +134,9 @@
 						<v-icon left small>{{ refuse ? 'mdi-thumb-down' : 'mdi-thumb-down-outline' }}</v-icon>
 						</v-btn>
 					</template>
-					
-					<v-badge
-						color="transparent"
-						:content="String(collectedCount)"
-						offset-x="35"
-						offset-y="20"
-						class="custom-black-badge"
-					>
-						<v-btn :ripple="false" small text @click="collectedFunc" class="no-shadow-btn">
-							<v-icon left small>{{ collected ? 'mdi-star' : 'mdi-star-outline' }}</v-icon>
-						</v-btn>
-					</v-badge>
-					
+					<v-btn :ripple="false" small text @click="$refs['addCollectionModel'].open()" class="no-shadow-btn">
+						<v-icon left small>mdi-star-outline</v-icon>
+					</v-btn>
 					<v-badge
 						color="transparent"
 						:content="String(commentCount)"
@@ -161,7 +164,6 @@
 							@close="commentOpen = false"
 						/>
 					</div>
-				
 				</v-card>
 			</v-bottom-sheet>
 
@@ -178,9 +180,10 @@
 							@close="finishComment"
 						/>
 					</div>
-				
 				</v-card>
 			</v-bottom-sheet>
+			<v-addCollectionModel ref="addCollectionModel" :fileInfo="{ fileID: aid}">
+    		</v-addCollectionModel>
 		</v-card-text>
 
 		<v-sheet 
@@ -194,13 +197,18 @@
 </template>
   
 <script>
-import Mock from 'mockjs'
 import CommentPopup from './CommentPopup.vue'
 import CommentWrite from './CommentWrite.vue'
+import CachedImage from '../CachedImage.vue';
+import username from '../common/username/username.vue';
+import imageCache from '@/utils/imageCache';
+import addCollectionModel from '@/views/index/preview/addCollectionModel.vue'
 
 export default {
     name: 'ContentCard',
-	components: { CommentPopup, CommentWrite },
+	components: { CommentPopup, CommentWrite, username, CachedImage,
+		'v-addCollectionModel': addCollectionModel,
+	},
     data() {
 		return {
 			// data
@@ -261,7 +269,15 @@ export default {
 		avatar: {
 			type: String,
 			default: ''
-		}
+		},
+		isLiked: {
+			type: Boolean,
+			default: false
+		},
+		isDisliked: {
+			type: Boolean,
+			default: false
+		},
 	},
     methods: {
 		truncateText(text, length = 30) {
@@ -291,48 +307,46 @@ export default {
 			return doc.body.textContent || '';
 		},
 		agreeFunc() {
-			// this.$Axios({
-            //     method: 'post',
-            //     url: '/qaService/like/evaluateAnswer',
-            //     params: {
-			// 		answerId: this.aid,
-			// 		isCancel: this.agree,
-			// 		isLike: '0'
-			// 	},
-            // }).then(response => {
-			// 	console.log(response)
-            // }).catch(error => {
-            //     console.error('评论失败:', error)
-            // })
-
-			if (this.agree) {
-				this.$toast.success('已取消', {timeout: 1000,});
-			} else {
-				this.$toast.success('已赞同', {timeout: 1000,});
-			}
-			this.agree = !this.agree
+			this.$Axios({
+                method: 'post',
+                url: '/qaService/like/evaluateAnswer',
+                params: {
+					answerId: this.aid,
+					isCancel: this.agree,
+					isLike: '1'
+				},
+            }).then(response => {
+				if (this.agree) {
+					this.$toast.success('已取消', {timeout: 1000,});
+				} else {
+					this.$toast.success('已赞同', {timeout: 1000,});
+				}
+				this.agree = !this.agree
+            }).catch(error => {
+                console.error('评论失败:', error)
+            })
 		},
 		refuseFunc() {
-			// this.$Axios({
-            //     method: 'post',
-            //     url: '/qaService/like/evaluateAnswer',
-            //     params: {
-			// 		answerId: this.aid,
-			// 		isCancel: this.refuse,
-			// 		isLike: '1'
-			// 	},
-            // }).then(response => {
-			// 	console.log(response)
-            // }).catch(error => {
-            //     console.error('评论失败:', error)
-            // })
-
-			if (this.refuse) {
-				this.$toast.success('已取消', {timeout: 1000,});
-			} else {
-				this.$toast.success('已反对', {timeout: 1000,});
-			}
-			this.refuse = !this.refuse
+			this.$Axios({
+                method: 'post',
+                url: '/qaService/like/evaluateAnswer',
+                params: {
+					answerId: this.aid,
+					isCancel: this.refuse,
+					isLike: '0'
+				},
+            }).then(response => {
+				// console.log(response)
+				if (this.refuse) {
+					this.$toast.success('已取消', {timeout: 1000,});
+				} else {
+					this.$toast.success('已反对', {timeout: 1000,});
+				}
+				this.refuse = !this.refuse
+            }).catch(error => {
+                console.error('点踩失败:', error)
+            })
+			
 		},
 		collectedFunc() {
 			if (this.collected) {
@@ -435,25 +449,31 @@ export default {
 		showComments() {
 			this.commentOpen = true
 		},
-		reloadComment() {
-
-		}
+		preloadImages() {
+			// 预加载头像
+			if (this.avatar) {
+				imageCache.preloadImage(this.avatar);
+			}
+			// 预加载回答中的图片（限制数量避免过度预加载）
+			if (this.limitedUrls.length > 0) {
+				const imagesToPreload = this.limitedUrls;
+				setTimeout(() => {
+				imageCache.preloadImages(imagesToPreload);
+				}, 200);
+			}
+		},
     },
 	created() {
 		this.fetchComment()
 		this.extractImageUrls(this.content)
-		if (this.avatar.length > 0) {
-			this.cacheAvatar = true
-			this.avatarSrc = this.avatar.match(/\.(jpg|jpeg|png|gif|webp)$/i) 
-				? this.avatar 
-				: `${this.avatar}.jpg`;
-		} else {
-			this.cacheAvatar = false;
+		this.preloadImages();
+		if (this.isLiked) {
+			this.agree = true;
+			this.refuse = false;
 		}
-		if (localStorage.getItem('userAvatar') == null) {
-			this.getUserAvatar()
-		} else {
-			this.userAvatar = String(localStorage.getItem('userAvatar'))
+		if (this.isDisliked) {
+			this.agree = false;
+			this.refuse = true;
 		}
     }
   }

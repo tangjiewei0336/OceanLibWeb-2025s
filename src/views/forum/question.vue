@@ -7,7 +7,7 @@
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: calc(100vh - 120px);"
+            style="height: calc(100vh - 60px);"
             @scroll.passive="handleScroll"
         >
             <QuestionCard
@@ -33,6 +33,8 @@
                 :likeCount="item.likeCount"
                 :createTime="item.createTime"
                 :avatar="item.avatar"
+                :isLiked="item.isLiked"
+                :isDisliked="item.isDisliked"
                 @toAnswer="toAnswer"
             />
 
@@ -238,7 +240,7 @@ export default {
             }
             this.$Axios({
                 method: 'post',
-                url: '/qaService/isLiked/evaluateQuestion',
+                url: '/qaService/like/evaluateQuestion',
                 params: {
                     questionId: this.id,
                     isCancel: isCancel,

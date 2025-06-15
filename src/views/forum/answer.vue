@@ -8,7 +8,7 @@
             ref="scrollContainer"
             class="overflow-y-auto"
             fluid
-            style="height: calc(100vh - 100px);"
+            style="height: calc(100vh - 60px);"
             @scroll.passive="handleScroll"
         >
             <QuestionCard
@@ -35,6 +35,8 @@
                 :likeCount="item.likeCount"
                 :createTime="item.createTime"
                 :avatar="item.avatar"
+                :isLiked="item.isLiked"
+                :isDisliked="item.isDisliked"
             />
 
             <v-row

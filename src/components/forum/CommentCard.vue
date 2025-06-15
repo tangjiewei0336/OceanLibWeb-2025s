@@ -1,21 +1,24 @@
 <template>
     <v-card class="d-flex align-start pa-4" flat>
-        <div>
-            <v-avatar v-if="this.interface==='outer'" size="30" color="primary" class="mr-3">
-                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
-                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
-            </v-avatar>
-            <v-avatar v-if="this.interface==='inner'" size="25" color="primary" class="mr-3">
-                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
-                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
-            </v-avatar>
-        </div>
+        <username 
+            :username="uid" 
+            :avatarSize="this.interface==='outer' ? 30 : 25" 
+            type="avater" 
+            :useCachedImage="true"
+            style="margin-right: 6px;"
+        />
         <div>
             <div>
-                <span>{{ uid }}</span>
+                <username 
+                    :username="uid" 
+                    type="username" 
+                />
                 <span v-if="inner_replyTo.length > 0">
                     <v-icon>mdi-chevron-right</v-icon>
-                    {{ inner_replyTo }}
+                    <username 
+                        :username="inner_replyTo" 
+                        type="username" 
+                    />
                 </span>
             </div>
             <div>
@@ -89,10 +92,13 @@
 
 <script>
 import CommentWrite from './CommentWrite.vue'
+import CachedImage from '../CachedImage.vue';
+import username from '../common/username/username.vue';
+import imageCache from '@/utils/imageCache';
 
 export default {
     name: "CommentCard",
-    components: { CommentWrite },
+    components: { CommentWrite, username },
     data() {
         return {
             // data
@@ -193,7 +199,7 @@ export default {
 		},
         likeComment() {
             this.$Axios({
-                method: 'post',
+                method: 'get',
                 url: '/comment/evaluateComment',
                 params: {
                     bindID: this.aid,
@@ -203,22 +209,21 @@ export default {
                     isLike: true
 				},
             }).then(response => {
-				console.log(response)
+                if (this.liked) {
+                    this.inner_likeCount -= 1
+                    this.liked = false
+                } else {
+                    this.inner_likeCount += 1
+                    this.liked = true
+                    this.disliked = false
+                }
             }).catch(error => {
-                console.error('评论失败:', error)
+                this.$toast.fail('不能重复点赞');
             })
-            if (this.liked) {
-                this.inner_likeCount -= 1
-                this.liked = false
-            } else {
-                this.inner_likeCount += 1
-                this.liked = true
-                this.disliked = false
-            }
         },
         dislikeComment() {
             this.$Axios({
-                method: 'post',
+                method: 'get',
                 url: '/comment/evaluateComment',
                 params: {
                     bindID: this.aid,
@@ -228,20 +233,18 @@ export default {
                     isLike: false
 				},
             }).then(response => {
-				console.log(response)
-            }).catch(error => {
-                console.error('评论失败:', error)
-            })
-            
-            if (this.disliked) {
-                this.disliked = false
-            } else {
-                this.disliked = true
-                if (this.liked) {
-                    this.inner_likeCount -= 1
-                    this.liked = false
+                if (this.disliked) {
+                    this.disliked = false
+                } else {
+                    this.disliked = true
+                    if (this.liked) {
+                        this.inner_likeCount -= 1
+                        this.liked = false
+                    }
                 }
-            }
+            }).catch(error => {
+                this.$toast.fail('不能重复点踩');
+            })
         },
         reply() {
             this.commentWriteOpen = true

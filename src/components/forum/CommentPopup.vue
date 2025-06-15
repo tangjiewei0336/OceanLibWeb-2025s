@@ -1,6 +1,6 @@
 <template>
     <v-card flat>
-        <div v-if="!detailed">
+        <div v-if="!detailed" style="height: 750px;">
             <div class="d-flex justify-end pa-0">
                 <v-btn
                     fab
@@ -10,16 +10,17 @@
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </div>
-            <v-avatar
-                size="30"
-                color="primary"
-                class="mr-3"
-                style="margin-left: 15px; margin-bottom: 5px;"
-            >
-                <img v-if="avatar.length > 0" :src="avatar" alt="用户头像">
-                <span v-else class="white--text">{{ uid.charAt(0) }}</span>
-            </v-avatar>
-            <span>{{ uid }}</span>
+            <username 
+                :username="uid" 
+                :avatarSize="30" 
+                type="avater" 
+                :useCachedImage="true"
+                style="margin-right: 6px; margin-left: 10px; margin-bottom: 4px;"
+            />
+            <username 
+                :username="uid" 
+                type="username" 
+            />
             <v-sheet 
                 color="grey lighten-2"
                 height="5px"
@@ -35,7 +36,7 @@
                 ref="scrollContainer"
                 class="overflow-y-auto pa-0"
                 fluid
-                style="height: 500px;"
+                style="height: 600px;"
                 @scroll.passive="handleScroll"
             >
                 <CommentCard
@@ -57,7 +58,7 @@
         
             </v-container>
         </div>
-        <div v-if="detailed">
+        <div v-if="detailed" style="height: 700px;">
             <div class="d-flex align-center position-relative" style="height: 60px;">
                 <v-btn icon @click="goBack">
                     <v-icon>mdi-chevron-left</v-icon>
@@ -65,10 +66,11 @@
                 <span 
                     class="text-h6" 
                     style="
-                    position: absolute;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    ">
+                        position: absolute;
+                        left: 50%;
+                        transform: translateX(-50%);
+                    "
+                >
                     评论回复
                 </span>
             </div>
@@ -81,13 +83,13 @@
 </template>
 
 <script>
-import Mock from 'mockjs'
 import CommentCard from './CommentCard.vue'
 import ReplyCard from './ReplyCard.vue'
+import username from '../common/username/username.vue';
 
 export default {
     name: 'CommentPopup',
-    components: { CommentCard, ReplyCard },
+    components: { CommentCard, ReplyCard, username },
     data() {
         return {
             commentCount: 0,
