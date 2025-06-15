@@ -19,7 +19,7 @@
 
     <v-menu offset-y>
       <template v-slot:activator="{ props }">
-        <v-btn icon v-bind="props" @click="performSearch">
+        <v-btn icon v-bind="props" @click="performSearch" class="no-shadow-btn">
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
       </template>
@@ -51,3 +51,14 @@ export default {
 	},
 }
 </script>
+
+<style scoped>
+.no-shadow-btn::before,  /* 移除点击时的背景层 */
+.no-shadow-btn::after {   /* 移除涟漪动画 */
+  display: none !important;
+}
+.no-shadow-btn:hover,
+.no-shadow-btn:focus {
+  box-shadow: none !important; /* 移除悬浮/聚焦阴影 */
+}
+</style>
