@@ -204,7 +204,7 @@ export default {
                 params: {
                     bindID: this.aid,
                     mainType: "ANSWER",
-                    commentID: this.cid,
+                    commentID: this.id,
                     isCancel: this.liked,
                     isLike: true
 				},
@@ -228,7 +228,7 @@ export default {
                 params: {
                     bindID: this.aid,
                     mainType: "ANSWER",
-                    commentID: this.cid,
+                    commentID: this.id,
                     isCancel: this.disliked,
                     isLike: false
 				},
