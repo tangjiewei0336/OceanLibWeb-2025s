@@ -134,7 +134,7 @@
 						<v-icon left small>{{ refuse ? 'mdi-thumb-down' : 'mdi-thumb-down-outline' }}</v-icon>
 						</v-btn>
 					</template>
-					<v-btn :ripple="false" small text @click="collectedFunc" class="no-shadow-btn">
+					<v-btn :ripple="false" small text @click="$refs['addCollectionModel'].open()" class="no-shadow-btn">
 						<v-icon left small>mdi-star-outline</v-icon>
 					</v-btn>
 					<v-badge
@@ -182,6 +182,8 @@
 					</div>
 				</v-card>
 			</v-bottom-sheet>
+			<v-addCollectionModel ref="addCollectionModel" :fileInfo="{ fileID: aid}">
+    		</v-addCollectionModel>
 		</v-card-text>
 
 		<v-sheet 
@@ -200,10 +202,13 @@ import CommentWrite from './CommentWrite.vue'
 import CachedImage from '../CachedImage.vue';
 import username from '../common/username/username.vue';
 import imageCache from '@/utils/imageCache';
+import addCollectionModel from '@/views/index/preview/addCollectionModel.vue'
 
 export default {
     name: 'ContentCard',
-	components: { CommentPopup, CommentWrite, username, CachedImage },
+	components: { CommentPopup, CommentWrite, username, CachedImage,
+		'v-addCollectionModel': addCollectionModel,
+	},
     data() {
 		return {
 			// data
