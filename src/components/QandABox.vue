@@ -199,10 +199,6 @@ export default {
     flex: 0 0 auto;
   }
 
-  .user-avatar {
-    /* CachedImage 组件会处理尺寸和样式 */
-  }
-
   &__meta {
     display: flex;
     font-size: 12px;

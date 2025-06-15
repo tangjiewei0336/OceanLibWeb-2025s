@@ -34,14 +34,57 @@
 
       <van-pull-refresh v-model="refreshing" @refresh="getCollectionFileList()" class="full">
         <van-list v-model="loading" :finished="finished" @load="getCollectionFileList()">
-          <div v-for="(fileInfo,index) in fileList" :key="fileInfo.fileID">
+          <div v-for="(fileInfo,index) in fileList" :key="fileInfo.fileID || fileInfo.bindId || fileInfo.id">
             <van-swipe-cell>
-              <v-fileBox :fileID="fileInfo.fileID" :abstractContent="fileInfo.abstractContent" :title="fileInfo.title" :fileType="fileInfo.fileType"
-                :previewPictureObjectName="fileInfo.previewPictureObjectName" :readNum="fileInfo.fileExtraEntity.readNum" :score="fileInfo.fileExtraEntity.score"
-                :ratersNum="fileInfo.fileExtraEntity.ratersNum" :paymentMethod="fileInfo.paymentMethod" :paymentAmount="fileInfo.paymentAmount"
-                :isVipIncome="fileInfo.fileExtraEntity.isVipIncome" :fileTagList="fileInfo.tagNames" class="preview__folder__filebox"></v-fileBox>
+              <!-- 文档类型 -->
+              <v-fileBox v-if="$route.query.mainType === 'DOCUMENT'" 
+                :fileID="fileInfo.fileID" 
+                :abstractContent="fileInfo.abstractContent" 
+                :title="fileInfo.title" 
+                :fileType="fileInfo.fileType"
+                :previewPictureObjectName="fileInfo.previewPictureObjectName" 
+                :readNum="fileInfo.fileExtraEntity?.readNum || 0" 
+                :score="fileInfo.fileExtraEntity?.score || 0"
+                :ratersNum="fileInfo.fileExtraEntity?.ratersNum || 0" 
+                :paymentMethod="fileInfo.paymentMethod" 
+                :paymentAmount="fileInfo.paymentAmount"
+                :isVipIncome="fileInfo.fileExtraEntity?.isVipIncome || 0" 
+                :fileTagList="fileInfo.tagNames || []" 
+                class="preview__folder__filebox"></v-fileBox>
+              
+              <!-- 问题类型 -->
+              <v-questionBox v-else-if="$route.query.mainType === 'QUESTION'" 
+                :bindId="fileInfo.bindId"
+                :title="fileInfo.title || ''"
+                :content="fileInfo.content || ''"
+                :userId="fileInfo.userId"
+                :createTime="fileInfo.createTime"
+                :updateTime="fileInfo.updateTime"
+                :isDeleted="fileInfo.isDeleted"
+                :isPosted="fileInfo.isPosted"
+                :isHidden="fileInfo.isHidden"
+                :rewardPoints="fileInfo.rewardPoints || 0"
+                :answerCount="fileInfo.answerCount || 0"
+                :viewCount="fileInfo.viewCount || 0"
+                :likeCount="fileInfo.likeCount || 0"
+                :isLiked="fileInfo.isLiked || false"
+                :tagIds="fileInfo.tagIds || []"
+                :attachmentIds="fileInfo.attachmentIds || []"
+                class="preview__folder__filebox"></v-questionBox>
+              
+              <!-- 回答类型 -->
+              <!-- <v-answerBox v-else-if="$route.query.mainType === 'ANSWER'" 
+                :id="fileInfo.id"
+                :content="fileInfo.content || ''"
+                :likeCount="fileInfo.likeCount || 0"
+                :commentCount="fileInfo.commentCount || 0"
+                :createTime="fileInfo.createTime"
+                :updateTime="fileInfo.updateTime"
+                :question="fileInfo.question || {}"
+                class="preview__folder__filebox"></v-answerBox> -->
+              
               <template #right>
-                <van-button square text="删除" type="danger" style="height: 100%" @click="deleteCollectionItem(index,fileInfo.fileID)" />
+                <van-button square text="删除" type="danger" style="height: 100%" @click="deleteCollectionItem(index, fileInfo.fileID || fileInfo.bindId || fileInfo.id)" />
               </template>
             </van-swipe-cell>
           </div>
@@ -62,10 +105,14 @@
 
 <script>
 import fileBox from '../../components/fileBox';
+import questionBox from '../../components/questionBox';
+// import answerBox from '../../components/answerBox';
 
 export default {
   components: {
     'v-fileBox': fileBox,
+    'v-questionBox': questionBox,
+    // 'v-answerBox': answerBox,
   },
   data() {
     return {
@@ -87,29 +134,106 @@ export default {
         query: { active: this.$route.query.active }
       });
     },
-    getCollectionFileList() {
+    async getCollectionFileList() {
       this.loading = true;
-      this.$Axios({
-        method: 'get',
-        url: '/collectionService/getCollectionItemList',
-        params: {
-          collectionID: this.$route.query.collectionID,
-          mainType: this.$route.query.mainType,
-        },
-      }).then((response) => {
-        this.fileList = response.data.msg;
+      try {
+        if (this.$route.query.mainType !== 'ANSWER') {
+          const response = await this.$Axios({
+            method: 'get',
+            url: '/collectionService/getCollectionItemList',
+            params: {
+              collectionID: this.$route.query.collectionID,
+              mainType: this.$route.query.mainType,
+            },
+          });
+          
+          console.log('原始收藏列表:', response.data.msg);
+          const itemList = response.data.msg || [];
+
+          // 根据 mainType 获取详细信息
+          if (this.$route.query.mainType === 'QUESTION') {
+            // 获取问题详情
+            const detailedQuestions = await Promise.all(
+              itemList.map(async (item) => {
+                try {
+                  const detailResponse = await this.$Axios({
+                    method: 'get',
+                    url: '/qaService/question/details',
+                    params: {
+                      questionId: item.fileID || item.bindId || item.id,
+                    },
+                  });
+                  return detailResponse.data.msg;
+                } catch (error) {
+                  console.error('获取问题详情失败:', error);
+                  return null;
+                }
+              })
+            );
+            this.fileList = detailedQuestions.filter(item => item !== null);
+        }
+        else if (this.$route.query.mainType === 'ANSWER') {
+          const response = await this.$Axios({
+            method: 'get',
+            url: '/qaService/answer/likedAnswers',
+            params: {
+              page: 1,
+              pageSize: 10,
+              collectionID: this.$route.query.collectionID,
+            },
+          });
+          console.log(response.data.msg)
+          this.fileList = response.data.msg;
+        }
+        // } 
+        // else if (this.$route.query.mainType === 'ANSWER') {
+        //   // 对于回答类型，尝试通过我的回答API获取详情
+        //   try {
+        //     const answersResponse = await this.$Axios({
+        //       method: 'get',
+        //       url: '/qaService/answer/myAnswers',
+        //       params: {
+        //         page: 1,
+        //         pageSize: 100, // 获取足够多的数据以便匹配
+        //       },
+        //     });
+            
+        //     const allMyAnswers = answersResponse.data.msg?.content || [];
+        //     // 根据收藏的ID匹配我的回答
+        //     const collectedAnswerIds = itemList.map(item => String(item.fileID || item.id));
+        //     const matchedAnswers = allMyAnswers.filter(answer => 
+        //       collectedAnswerIds.includes(String(answer.id))
+        //     );
+            
+        //     this.fileList = matchedAnswers;
+        //   } catch (error) {
+        //     console.error('获取我的回答列表失败:', error);
+        //     // 如果API调用失败，直接使用原始数据
+        //     this.fileList = itemList;
+        //   }
+        // } else {
+        //   // DOCUMENT 类型直接使用原数据
+        //   this.fileList = itemList;
+        }
+        
+        console.log('处理后的详细列表:', this.fileList);
+        
+      } catch (error) {
+        console.error('获取收藏列表失败:', error);
+        this.fileList = [];
+      } finally {
         this.loading = false;
         this.refreshing = false;
         this.finished = true; //一次性全部加载，直接完成
-      });
+      }
     },
-    deleteCollectionItem(index, fileID) {
+    deleteCollectionItem(index, itemID) {
       this.$Axios({
         method: 'get',
         url: '/collectionService/deleteCollectionItem',
         params: {
           collectionID: this.$route.query.collectionID,
-          fileID: fileID,
+          fileID: itemID, // 这里保持fileID参数名，后端可能需要统一处理
           mainType: this.$route.query.mainType,
         },
       }).then((response) => {

@@ -27,7 +27,7 @@
                 <van-swipe-cell>
                   <van-cell
                     class="collectionlist__box"
-                    :label="item.files.length + ' 个内容 · ' + (item.isPublic ? '公开收藏夹' : '私密收藏夹')"
+                    :label="item.items.length + ' 个内容 · ' + (item.isPublic ? '公开收藏夹' : '私密收藏夹')"
                     @click="showItem(item.collectionID, item.name, item.desc, item.isPublic)"
                   >
                     <template #title>
@@ -82,7 +82,7 @@ export default {
       // active: 0,
       collections: [
         { title: "文档", mainType: "DOCUMENT" },
-        { title: "问题", mainType: "QUESTION" },
+        // { title: "问题", mainType: "QUESTION" },
         { title: "回答", mainType: "ANSWER" }
       ],
     };
@@ -121,6 +121,7 @@ export default {
           ...item,
           files: item.files || []  // 如果 files 是 undefined，则赋值为空数组
         }));
+        // console.log(this.myCollection)
         this.loading = false;
         this.refreshing = false;
         this.finished = true; //一次性全部加载，直接完成

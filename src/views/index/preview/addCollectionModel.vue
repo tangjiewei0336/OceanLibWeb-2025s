@@ -35,14 +35,14 @@
       已加入 {{ collectedNum }} 个收藏夹
     </div>
     <div class="collection__list">
-      <van-cell to="/newCollection">
+      <van-cell @click="goToNewCollection">
         <template #title>
           <span class="collection__list--new-collection">
             <van-icon name="plus" color="#1989fa" /> 新建收藏夹
           </span>
         </template>
       </van-cell>
-      <van-cell :label="item.files.length +' 个内容 · ' +(item.isPublic ? '公开收藏夹' : '私密收藏夹')" v-for="(item, index) in myCollection" :key="index">
+      <van-cell :label="item.items.length +' 个内容 · ' +(item.isPublic ? '公开收藏夹' : '私密收藏夹')" v-for="(item, index) in myCollection" :key="index">
         <!-- 使用 title 插槽来自定义标题 -->
         <template #title>
           <span class="collection__list--item-title">{{ item.name }}</span>
@@ -84,20 +84,36 @@ export default {
       this.collectionModel = true;
       this.getCollection();
     },
+    //跳转到新建收藏夹页面
+    goToNewCollection() {
+      this.$router.push({
+        path: '/newCollection',
+        query: {
+          mainType: this.fileInfo.mainType
+        }
+      });
+    },
     //收藏相关
     //收藏-获取收藏夹信息
     getCollection() {
       this.$Axios({
         method: 'get',
         url: '/collectionService/getCollection',
+        params: {
+          mainType: this.fileInfo.mainType
+        }
       }).then((response) => {
+        // console.log(response.data.msg);
         this.collectedNum = 0;
         this.myCollection = response.data.msg.collection;
 
+        console.log(this.myCollection)
+        console.log(this.fileInfo.fileID)
+
         for (let index in this.myCollection) {
           let isExist = false;
-          for (let j = 0; j < this.myCollection[index].files.length; j++) {
-            if (this.myCollection[index].files[j] == this.fileInfo.fileID) {
+          for (let j = 0; j < this.myCollection[index].items.length; j++) {
+            if (this.myCollection[index].items[j] == this.fileInfo.fileID) {
               isExist = true;
             }
           }
@@ -120,15 +136,21 @@ export default {
       this.$Axios({
         method: 'post',
         url: '/collectionService/changeCollectionItem',
-        data: qs.stringify({
+        params: {
+          mainType: this.fileInfo.mainType,
           changedList: JSON.stringify(changedCollection),
-          fileID: this.fileInfo.fileID,
-        }),
+          itemID: this.fileInfo.fileID,
+        },
+        // data: qs.stringify({
+        //   changedList: JSON.stringify(changedCollection),
+        //   fileID: this.fileInfo.fileID,
+        // }),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       }).then((response) => {
-        if (response.data.code == 1) {
+        console.log(response.data.msg);
+        if (response.data.state == "SUCCESS") {
           this.collectionModel = false;
         }
       });
