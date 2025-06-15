@@ -1,6 +1,6 @@
 <template>
 	<v-card
-		class="pa-2"
+		class="pa-2 no-shadow-btn"
 		flat
 		:ripple="false"
 		@click="toQuestion"
@@ -79,6 +79,8 @@
 								@click="expanded = false" 
 								text small
 								color="grey"
+								class="no-shadow-btn"
+								:ripple="false"
 							>
 								收起
 								<v-icon right small>mdi-chevron-up</v-icon>
@@ -271,4 +273,12 @@ export default {
   line-height: 1.2;
 }
 
+.no-shadow-btn::before,  /* 移除点击时的背景层 */
+.no-shadow-btn::after {   /* 移除涟漪动画 */
+  display: none !important;
+}
+.no-shadow-btn:hover,
+.no-shadow-btn:focus {
+  box-shadow: none !important; /* 移除悬浮/聚焦阴影 */
+}
 </style>
