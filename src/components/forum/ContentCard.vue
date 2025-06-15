@@ -268,7 +268,15 @@ export default {
 		avatar: {
 			type: String,
 			default: ''
-		}
+		},
+		isLiked: {
+			type: Boolean,
+			default: false
+		},
+		isDisliked: {
+			type: Boolean,
+			default: false
+		},
 	},
     methods: {
 		truncateText(text, length = 30) {
@@ -304,7 +312,7 @@ export default {
                 params: {
 					answerId: this.aid,
 					isCancel: this.agree,
-					isLike: '0'
+					isLike: '1'
 				},
             }).then(response => {
 				if (this.agree) {
@@ -324,7 +332,7 @@ export default {
                 params: {
 					answerId: this.aid,
 					isCancel: this.refuse,
-					isLike: '1'
+					isLike: '0'
 				},
             }).then(response => {
 				// console.log(response)
@@ -459,6 +467,14 @@ export default {
 			this.getUserAvatar()
 		} else {
 			this.userAvatar = String(localStorage.getItem('userAvatar'))
+		}
+		if (this.isLiked) {
+			this.agree = true;
+			this.refuse = false;
+		}
+		if (this.isDisliked) {
+			this.agree = false;
+			this.refuse = true;
 		}
     }
   }
